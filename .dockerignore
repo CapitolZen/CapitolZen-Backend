@@ -1,0 +1,8 @@
+.*
+.git
+.env
+!.coveragerc
+!.pylintrc
+!config/settings/.env
+.celerybeat-schedule
+celerybeat.pid
