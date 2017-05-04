@@ -10,12 +10,8 @@ from rest_framework.permissions import AllowAny
 from dry_rest_permissions.generics import (DRYPermissions,
                                            DRYPermissionFiltersBase)
 
-from .models import (Organization, OrganizationInvite,
-                     OrganizationConsumerKey)
-from .serializers import (OrganizationSerializer,
-                          OrganizationCustomerSerializer,
-                          OrganizationInviteSerializer,
-                          OrganizationConsumerKeySerializer)
+from .models import (Organization, OrganizationInvite)
+from .serializers import (OrganizationSerializer, OrganizationInviteSerializer)
 from downdraft.users.serializers import UserSerializer
 
 
