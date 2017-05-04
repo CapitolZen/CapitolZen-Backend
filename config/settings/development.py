@@ -61,18 +61,6 @@ DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TEMPLATE_CONTEXT': True,
 }
 
-# django-extensions
-# ------------------------------------------------------------------------------
-INSTALLED_APPS += ['django_extensions', ]
-
 # TESTING
 # ------------------------------------------------------------------------------
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-
-########## CELERY
-# In development, all tasks will be executed locally by blocking until the task returns
-CELERY_ALWAYS_EAGER = True
-########## END CELERY
-
-# Your local stuff: Below this line define 3rd party library settings
-# ------------------------------------------------------------------------------
