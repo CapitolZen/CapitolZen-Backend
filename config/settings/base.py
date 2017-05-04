@@ -29,17 +29,16 @@ if READ_DOT_ENV_FILE:
 
 # APP CONFIGURATION
 # ------------------------------------------------------------------------------
-DJANGO_APPS = (
+DJANGO_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+]
 
-)
-
-THIRD_PARTY_APPS = (
+THIRD_PARTY_APPS = [
     'django_extensions',
     'localflavor',
     'rest_framework',
@@ -51,19 +50,19 @@ THIRD_PARTY_APPS = (
     'health_check',
     'health_check.db',
     'health_check.cache',
-)
+]
 
-ADMIN_APPS = (
+ADMIN_APPS = [
     'material',
     'material.admin',
     'django.contrib.admin',
-)
+]
 
-LOCAL_APPS = (
+LOCAL_APPS = [
     'downdraft.meta.apps.MetaConfig',
     'downdraft.users.apps.UsersConfig',
     'downdraft.organizations.apps.OrganizationsConfig',
-)
+]
 
 INSTALLED_APPS = DJANGO_APPS + ADMIN_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
