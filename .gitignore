@@ -76,3 +76,5 @@ staticfiles/
 
 .cache/
 
+celerybeat-schedule
+celerybeat.pid
