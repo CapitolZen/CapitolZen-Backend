@@ -4,9 +4,9 @@ from crum import get_current_user
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from config.fields import ChoiceArrayField
 from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser
+from django.contrib.postgres.fields import ArrayField
 
 from organizations.abstract import (AbstractOrganization,
                                     AbstractOrganizationUser,
@@ -17,16 +17,34 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     """
     Default Organization model.
     """
+    LIGHT = 'lite'
+    BASIC = 'basic'
+    PREMIUM = 'premium'
 
-    FEATURES_CHOICES = (
-        ('feat_a', 'A'),
-        ('feat_b', 'B'),
-        ('feat_c', 'C'),
+    PLAN_CHOICES = (
+        (LIGHT, 'Lite'),
+        (BASIC, 'Basic'),
     )
 
-    features = ChoiceArrayField(
-        base_field=models.CharField(max_length=256, choices=FEATURES_CHOICES),
-        default=list)
+    plan_type = models.CharField(max_length=256, choices=PLAN_CHOICES, default=BASIC),
+
+    stripe_customer_id = models.CharField(max_length=256, blank=True)
+    stripe_subscription_id = models.CharField(max_length=256, blank=True)
+    stripe_payment_methods = ArrayField(
+        base_field=models.CharField(max_length=256, blank=True),
+        default=list
+    )
+
+    billing_email = models.EmailField(max_length=256, blank=True, null=True)
+    billing_phone = models.CharField(max_length=256, blank=True, null=True)
+    billing_address_one = models.CharField(max_length=254, null=True)
+    billing_address_two = models.CharField(max_length=254, blank=True,
+                                           null=True)
+    billing_city = models.CharField(max_length=254, null=True)
+    billing_state = models.CharField(max_length=100, null=True)
+    billing_zip_code = models.CharField(max_length=10, null=True)
+
+    logo = models.URLField(blank=True)
 
     @property
     def user_is_owner(self):
