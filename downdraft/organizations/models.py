@@ -6,11 +6,12 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, JSONField
 
 from organizations.abstract import (AbstractOrganization,
                                     AbstractOrganizationUser,
                                     AbstractOrganizationOwner)
+import stripe
 
 
 class Organization(AbstractOrganization, AbstractBaseModel):
@@ -44,7 +45,22 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     billing_state = models.CharField(max_length=100, null=True)
     billing_zip_code = models.CharField(max_length=10, null=True)
 
+    def create_subscription(self, plan=BASIC):
+        stripe.api_key = 'asdf'
+        sub = stripe.subscription.create(
+            customer=self.stripe_customer_id,
+            plan=plan,
+        )
+
+        self.stripe_subscription_id = sub.id
+        self.save()
+
+    def update_subscription(self, plan, **kwargs):
+        return True
+
     logo = models.URLField(blank=True)
+
+    contacts = JSONField()
 
     @property
     def user_is_owner(self):
