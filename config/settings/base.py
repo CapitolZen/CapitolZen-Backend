@@ -51,6 +51,8 @@ THIRD_PARTY_APPS = [
     'health_check',
     'health_check.db',
     'health_check.cache',
+    'asana',
+    'stripe'
 ]
 
 ADMIN_APPS = [
@@ -63,6 +65,8 @@ LOCAL_APPS = [
     'downdraft.meta.apps.MetaConfig',
     'downdraft.users.apps.UsersConfig',
     'downdraft.organizations.apps.OrganizationsConfig',
+    'downdraft.groups.apps.GroupsConfig',
+    'downdraft.proposals.apps.ProposalsConfig'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + ADMIN_APPS + THIRD_PARTY_APPS + LOCAL_APPS
