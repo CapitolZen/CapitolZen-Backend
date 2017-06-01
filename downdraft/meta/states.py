@@ -1,0 +1,3 @@
+AvailableStates = (
+    ('MI', 'Michigan')
+)

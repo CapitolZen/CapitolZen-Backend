@@ -3,10 +3,11 @@ from django.db import models
 from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser
 from django.contrib.postgres.fields import ArrayField, JSONField
+from downdraft.meta.states import AvailableStates
 
 
 class Bill(AbstractBaseModel):
-    state = models.TextField()
+    state = models.TextField(choices=AvailableStates)
     status = models.TextField()
     committee = models.TextField()
     sponsor = models.TextField()
@@ -34,17 +35,10 @@ class Wrapper(AbstractBaseModel):
         on_delete=models.CASCADE,
     )
 
-    group = models.ForeignKey(
-        'group',
-        on_delete=models.CASCADE,
-        limit_choices_to='list_org_groups'
-    )
+    # Includes group reference && position
+    groups = JSONField()
 
     notes = JSONField(blank=True)
-    comments = JSONField(blank=True)
-
-    def list_org_groups(self):
-        org = self.organization
 
     class Meta(self):
         abstract = False

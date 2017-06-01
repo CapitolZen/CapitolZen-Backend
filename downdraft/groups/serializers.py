@@ -9,6 +9,7 @@ class GroupSerializer(serializers.ModelSerializer):
         read_only=True,
         source='organizations_organization'
     )
+
     class Meta:
         model = Group
         fields = ('id',)
@@ -20,6 +21,7 @@ class CommentSerializer(serializers.ModelSerializer):
         many=False,
         read_only=True,
     )
+
     class Meta:
         model = Comment
         fields = ('id',)
