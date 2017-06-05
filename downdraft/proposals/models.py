@@ -12,6 +12,7 @@ class Bill(AbstractBaseModel):
     committee = models.TextField()
     sponsor = models.TextField()
     title = models.TextField()
+    state_id = models.CharField()
     categories = ArrayField()
 
     class Meta(self):
@@ -38,7 +39,32 @@ class Wrapper(AbstractBaseModel):
     # Includes group reference && position
     groups = JSONField()
 
+    def update_group(self, group_id, position=False, note=''):
+        if not group_id:
+            raise Exception
+
+        if not self.valid_position(position):
+            raise Exception
+
+        groups = self.groups
+        new_group = {
+            'id': group_id,
+            'position': position,
+            'note': note
+        }
+
+        groups.append(new_group)
+        self.groups = groups
+
     notes = JSONField(blank=True)
+
+    @staticmethod
+    def valid_position(position):
+        valid = ['support', 'oppose', 'neutral', False]
+        if position in valid:
+            return True
+        else:
+            return False
 
     class Meta(self):
         abstract = False

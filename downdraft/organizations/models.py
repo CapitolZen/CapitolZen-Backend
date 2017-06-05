@@ -11,6 +11,7 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from organizations.abstract import (AbstractOrganization,
                                     AbstractOrganizationUser,
                                     AbstractOrganizationOwner)
+from downdraft.meta.billing import BASIC, PlanChoices
 import stripe
 
 
@@ -18,16 +19,8 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     """
     Default Organization model.
     """
-    LIGHT = 'lite'
-    BASIC = 'basic'
-    PREMIUM = 'premium'
 
-    PLAN_CHOICES = (
-        (LIGHT, 'Lite'),
-        (BASIC, 'Basic'),
-    )
-
-    plan_type = models.CharField(max_length=256, choices=PLAN_CHOICES, default=BASIC),
+    plan_type = models.CharField(max_length=256, choices=PlanChoices, default=BASIC),
 
     stripe_customer_id = models.CharField(max_length=256, blank=True)
     stripe_subscription_id = models.CharField(max_length=256, blank=True)
@@ -45,6 +38,16 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     billing_state = models.CharField(max_length=100, null=True)
     billing_zip_code = models.CharField(max_length=10, null=True)
 
+    ORG_DEMO = (
+        ('association', 'Association'),
+        ('union', 'Labor Union'),
+        ('multi_client', 'Multi Client'),
+        ('corporate', 'Corporation'),
+        ('individual', 'Individual')
+    )
+
+    demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO)
+
     def create_subscription(self, plan=BASIC):
         stripe.api_key = 'asdf'
         sub = stripe.subscription.create(
@@ -56,6 +59,7 @@ class Organization(AbstractOrganization, AbstractBaseModel):
         self.save()
 
     def update_subscription(self, plan, **kwargs):
+        sub = self.stripe_subscription_id
         return True
 
     logo = models.URLField(blank=True)

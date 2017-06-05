@@ -1,10 +1,11 @@
 from rest_framework_json_api import serializers
+from rest_framework_json_api.relations import ResourceRelatedField
 
 from .models import Group, Comment
 
 
 class GroupSerializer(serializers.ModelSerializer):
-    organizations = ResourceRelatedField(
+    organization = ResourceRelatedField(
         many=False,
         read_only=True,
         source='organizations_organization'
