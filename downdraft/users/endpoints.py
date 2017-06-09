@@ -51,6 +51,12 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             return super(UserViewSet, self).list(self, request, *args, **kwargs)
 
+    """
+    Set username to be email address, which seems silly
+    """
+    def pre_save(self, obj):
+        obj.email = obj.username
+
     permission_classes = (DRYPermissions, )
     serializer_class = UserSerializer
     queryset = User.objects.all()
