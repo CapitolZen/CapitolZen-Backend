@@ -4,13 +4,15 @@ from crum import get_current_user
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from config.fields import ChoiceArrayField
 from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser
+from django.contrib.postgres.fields import ArrayField, JSONField
 
 from organizations.abstract import (AbstractOrganization,
                                     AbstractOrganizationUser,
                                     AbstractOrganizationOwner)
+from downdraft.meta.billing import BASIC, PlanChoices
+import stripe
 
 
 class Organization(AbstractOrganization, AbstractBaseModel):
@@ -18,15 +20,51 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     Default Organization model.
     """
 
-    FEATURES_CHOICES = (
-        ('feat_a', 'A'),
-        ('feat_b', 'B'),
-        ('feat_c', 'C'),
+    plan_type = models.CharField(max_length=256, choices=PlanChoices, default=BASIC),
+
+    stripe_customer_id = models.CharField(max_length=256, blank=True)
+    stripe_subscription_id = models.CharField(max_length=256, blank=True)
+    stripe_payment_methods = ArrayField(
+        base_field=models.CharField(max_length=256, blank=True),
+        default=list
     )
 
-    features = ChoiceArrayField(
-        base_field=models.CharField(max_length=256, choices=FEATURES_CHOICES),
-        default=list)
+    billing_email = models.EmailField(max_length=256, blank=True, null=True)
+    billing_phone = models.CharField(max_length=256, blank=True, null=True)
+    billing_address_one = models.CharField(max_length=254, null=True)
+    billing_address_two = models.CharField(max_length=254, blank=True,
+                                           null=True)
+    billing_city = models.CharField(max_length=254, null=True)
+    billing_state = models.CharField(max_length=100, null=True)
+    billing_zip_code = models.CharField(max_length=10, null=True)
+
+    ORG_DEMO = (
+        ('association', 'Association'),
+        ('union', 'Labor Union'),
+        ('multi_client', 'Multi Client'),
+        ('corporate', 'Corporation'),
+        ('individual', 'Individual')
+    )
+
+    demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO)
+
+    def create_subscription(self, plan=BASIC):
+        stripe.api_key = 'asdf'
+        sub = stripe.subscription.create(
+            customer=self.stripe_customer_id,
+            plan=plan,
+        )
+
+        self.stripe_subscription_id = sub.id
+        self.save()
+
+    def update_subscription(self, plan, **kwargs):
+        sub = self.stripe_subscription_id
+        return True
+
+    logo = models.URLField(blank=True)
+
+    contacts = JSONField(blank=True, default=dict)
 
     @property
     def user_is_owner(self):

@@ -13,6 +13,7 @@ from dry_rest_permissions.generics import (DRYPermissions,
 from .models import (Organization, OrganizationInvite)
 from .serializers import (OrganizationSerializer, OrganizationInviteSerializer)
 from downdraft.users.serializers import UserSerializer
+from downdraft.groups.models import Group
 
 
 class OrganizationFilterBackend(DRYPermissionFiltersBase):
@@ -54,7 +55,6 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
-
     def perform_create(self, serializer):
         """
         Override the perform_create to add the owner in automatically.
@@ -63,6 +63,13 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         user = get_current_user()
         organization = serializer.instance
         organization.add_user(user)
+        # Create default group here
+        g = Group(
+            title=organization.name,
+            organization=organization,
+            description="Default group for your organization"
+        )
+        g.save()
 
     permission_classes = (DRYPermissions, )
     queryset = Organization.objects.all()

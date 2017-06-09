@@ -14,20 +14,27 @@ services:
       - POSTGRES_USER=downdraft
 
   django:
+    restart: on-failure
     build:
       context: .
       dockerfile: ./compose/django/Dockerfile-dev
-    command: /start-dev.sh
+    env_file:
+      - .env
+    command: ["./utilities/wait-for-it.sh -t 90", "postgres:5432", "--", "/start-dev.sh"]
     depends_on:
       - postgres
       - mailhog
     environment:
       - POSTGRES_USER=downdraft
+      - POSTGRES_PASSWROD=downdraft
       - USE_DOCKER=yes
     volumes:
       - .:/app
     ports:
       - "8000:8000"
+    links:
+      - postgres
+      - redis
 
 
   pycharm:

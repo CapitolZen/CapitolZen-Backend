@@ -12,6 +12,8 @@ psycopg2==2.6.2
 celery[redis]==3.1.25
 boto3==1.4.0
 ipython
+asana==0.6.2
+stripe==1.56.0
 
 #
 # Django Contrib
