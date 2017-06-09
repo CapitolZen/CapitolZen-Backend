@@ -8,6 +8,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
 import environ
+import datetime
 
 ROOT_DIR = environ.Path(__file__) - 3  # (downdraft/config/settings/base.py - 3 = downdraft/)
 APPS_DIR = ROOT_DIR.path('downdraft')
@@ -266,6 +267,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=3),
 }
 
 # Some really nice defaults
