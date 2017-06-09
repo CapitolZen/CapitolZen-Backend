@@ -1,3 +1,4 @@
 AvailableStates = (
-    ('MI', 'Michigan')
+    ('MI', 'Michigan'),
+    ('OH', "Ohio")
 )

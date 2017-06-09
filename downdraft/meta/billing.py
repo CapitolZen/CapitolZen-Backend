@@ -4,7 +4,7 @@ BASIC = 'basic'
 PREMIUM = 'premium'
 
 PlanChoices = (
-    (LIGHT, 'Lite'),
+    (CHEAP, 'Lite'),
     (BASIC, 'Basic'),
 )
 

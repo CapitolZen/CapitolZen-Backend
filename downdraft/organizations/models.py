@@ -64,7 +64,7 @@ class Organization(AbstractOrganization, AbstractBaseModel):
 
     logo = models.URLField(blank=True)
 
-    contacts = JSONField()
+    contacts = JSONField(blank=True, default=dict)
 
     @property
     def user_is_owner(self):

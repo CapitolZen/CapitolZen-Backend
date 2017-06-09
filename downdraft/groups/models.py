@@ -6,67 +6,35 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
+from downdraft.organizations.mixins import MixinResourcedOwnedByOrganization
 from downdraft.meta.billing import CHEAP
 
 
-class Group(AbstractBaseModel):
-    title = models.CharField(blank=False)
+class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+    title = models.CharField(blank=False, max_length=225)
     description = models.TextField(blank=True)
-    contacts = JSONField()
-    logo = models.URLField()
+    contacts = JSONField(blank=True)
+    logo = models.URLField(blank=True)
     organization = models.ForeignKey(
-        'organizations',
+        'organizations.Organization',
         on_delete=models.CASCADE,
     )
 
     class JSONAPIMeta:
         resource_name = "groups"
 
-    class Meta(self):
+    class Meta:
         abstract = False
-        verbose_name = _("group")
-        verbose_name_plural = _("groups")
+        verbose_name = "group"
+        verbose_name_plural = "groups"
 
     def __unicode__(self):
         return self.title
 
-    @staticmethod
-    @allow_staff_or_superuser
-    def has_read_permission(request):
-        return request.user.is_authenticated()
-
-    @staticmethod
-    @allow_staff_or_superuser
-    def has_write_permission(request):
-        return request.user.is_authenticated()
-
-    @staticmethod
-    def has_create_permission(request):
-        if request.organization.plan_type is not CHEAP:
-            allowed = True
-        else:
-            allowed = False
-
-        return request.organization.user.is_staff or request.user.is_superuser or allowed
-
-    def has_object_read_permission(self, request):
-        return self.organization.is_member(request.user) or \
-               request.user.is_staff or \
-               request.user.is_superuser
-
-    def has_object_write_permission(self, request):
-        return self.organization.user.is_admin() or \
-               self.organization.user.is_owner() or \
-               request.user.is_staff or \
-               request.user.is_superuser
-
-    def has_object_update_permission(self, request):
-        return self.organization.user.is_admin or request.user.is_staff or request.user.is_superuser
-
 
 class Comment(AbstractBaseModel):
-    author = models.ForeignKey('User', on_delete=models.CASCADE)
-    reactions = JSONField()
+    author = models.ForeignKey('users.User', on_delete=models.CASCADE)
+    reactions = JSONField(blank=True, null=True)
     attachments = ArrayField(models.URLField(blank=True))
     text = models.TextField()
 
@@ -77,18 +45,18 @@ class Comment(AbstractBaseModel):
     )
 
     visibility = models.CharField(
-        choices= VISIBILITY_OPTIONS,
+        choices=VISIBILITY_OPTIONS,
         max_length=255
     )
 
-    referenced_id = models.UUIDField
-    referenced_object = GenericForeignKey('content_type', 'reference_id')
+    referenced_id = models.UUIDField()
+    referenced_object = GenericForeignKey('content_type', 'referenced_id')
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
 
     class JSONAPIMeta:
         resource_name = "comments"
 
-    class Meta(self):
+    class Meta:
         abstract = False
-        verbose_name = _("comment")
-        verbose_name_plural = _("comments")
+        verbose_name = "comment"
+        verbose_name_plural = "comments"

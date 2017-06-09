@@ -44,7 +44,14 @@ CACHES = {
 MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware', ]
 INSTALLED_APPS += ['debug_toolbar', ]
 
-INTERNAL_IPS = ['127.0.0.1', '10.0.2.2', ]
+INTERNAL_IPS = ['127.0.0.1',
+                '10.0.2.2',
+                '192.168.56.1',
+                '192.168.56.101',
+                '192.168.56.101:8080',
+                '192.168.252.6:8000',
+                'mvcs.local.dev',
+                '192.168.33.15']
 
 
 import socket

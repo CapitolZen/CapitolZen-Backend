@@ -12,13 +12,15 @@ class Bill(AbstractBaseModel):
     committee = models.TextField()
     sponsor = models.TextField()
     title = models.TextField()
-    state_id = models.CharField()
-    categories = ArrayField()
+    state_id = models.CharField(max_length=225)
+    categories = ArrayField(
+        models.CharField(max_length=225, blank=True)
+    )
 
-    class Meta(self):
+    class Meta:
         abstract = False
-        verbose_name = _("bill")
-        verbose_name_plural = _("bill")
+        verbose_name = "bill"
+        verbose_name_plural = "bill"
 
     class JSONAPIMeta:
         resource_name = "bills"
@@ -27,7 +29,7 @@ class Bill(AbstractBaseModel):
 class Wrapper(AbstractBaseModel):
 
     organization = models.ForeignKey(
-        'organizations',
+        'organizations.Organization',
         on_delete=models.CASCADE
     )
 
@@ -66,10 +68,10 @@ class Wrapper(AbstractBaseModel):
         else:
             return False
 
-    class Meta(self):
+    class Meta:
         abstract = False
-        verbose_name = _("wrapper")
-        verbose_name_plural = _("wrapper")
+        verbose_name = "wrapper"
+        verbose_name_plural = "wrapper"
 
     class JSONAPIMeta:
         resource_name = "wrappers"
