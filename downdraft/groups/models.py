@@ -20,6 +20,8 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         on_delete=models.CASCADE,
     )
 
+    attachments = JSONField(blank=True)
+
     class JSONAPIMeta:
         resource_name = "groups"
 

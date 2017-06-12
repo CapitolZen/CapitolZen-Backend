@@ -1,6 +1,6 @@
 from crum import get_current_user
 from django.db.models import Q
-
+from pprint import pprint
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import detail_route
@@ -13,7 +13,6 @@ from dry_rest_permissions.generics import (DRYPermissions,
 from .models import (Organization, OrganizationInvite)
 from .serializers import (OrganizationSerializer, OrganizationInviteSerializer)
 from downdraft.users.serializers import UserSerializer
-from downdraft.groups.models import Group
 
 
 class OrganizationFilterBackend(DRYPermissionFiltersBase):
@@ -59,17 +58,9 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         """
         Override the perform_create to add the owner in automatically.
         """
-        serializer.save()
-        user = get_current_user()
-        organization = serializer.instance
-        organization.add_user(user)
-        # Create default group here
-        g = Group(
-            title=organization.name,
-            organization=organization,
-            description="Default group for your organization"
-        )
-        g.save()
+        user = serializer.context['request'].user
+        org = serializer.save()
+        org.add_user(user)
 
     permission_classes = (DRYPermissions, )
     queryset = Organization.objects.all()

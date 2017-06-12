@@ -19,8 +19,9 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     """
     Default Organization model.
     """
-
-    plan_type = models.CharField(max_length=256, choices=PlanChoices, default=BASIC),
+    PLAN_CHOICES = PlanChoices
+    PLAN_DEFAULT = BASIC
+    plan_type = models.CharField(max_length=256, choices=PLAN_CHOICES, default=PLAN_DEFAULT, blank=True),
 
     stripe_customer_id = models.CharField(max_length=256, blank=True)
     stripe_subscription_id = models.CharField(max_length=256, blank=True)
@@ -43,10 +44,10 @@ class Organization(AbstractOrganization, AbstractBaseModel):
         ('union', 'Labor Union'),
         ('multi_client', 'Multi Client'),
         ('corporate', 'Corporation'),
-        ('individual', 'Individual')
+        ('individual', 'Individual'),
     )
 
-    demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO)
+    demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO, default='individual')
 
     def create_subscription(self, plan=BASIC):
         stripe.api_key = 'asdf'
@@ -115,7 +116,7 @@ class Organization(AbstractOrganization, AbstractBaseModel):
             request.user.is_superuser
 
     def has_object_create_permission(self, request):
-        return request.user.is_authenticated()
+        return request.user.is_authenticated
 
 
 class OrganizationUser(AbstractOrganizationUser):

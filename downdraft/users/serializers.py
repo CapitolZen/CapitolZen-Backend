@@ -16,7 +16,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'name', 'username', 'user_is_staff', 'user_is_admin', 'organizations', 'password')
+        fields = ('id', 'name', 'username', 'user_is_staff', 'user_is_admin', 'organizations')
+        exclude = 'password'
         read_only_fields = ('id', 'user_is_staff', 'user_is_admin', 'organizations')
         lookup_field = 'username'
 
