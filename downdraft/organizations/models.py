@@ -21,23 +21,23 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     """
     PLAN_CHOICES = PlanChoices
     PLAN_DEFAULT = BASIC
-    plan_type = models.CharField(max_length=256, choices=PLAN_CHOICES, default=PLAN_DEFAULT, blank=True),
+    plan_type = models.CharField(max_length=256, blank=True, null=True),
 
     stripe_customer_id = models.CharField(max_length=256, blank=True)
     stripe_subscription_id = models.CharField(max_length=256, blank=True)
     stripe_payment_methods = ArrayField(
         base_field=models.CharField(max_length=256, blank=True),
-        default=list
+        default=list,
+        blank=True
     )
 
     billing_email = models.EmailField(max_length=256, blank=True, null=True)
     billing_phone = models.CharField(max_length=256, blank=True, null=True)
-    billing_address_one = models.CharField(max_length=254, null=True)
-    billing_address_two = models.CharField(max_length=254, blank=True,
-                                           null=True)
-    billing_city = models.CharField(max_length=254, null=True)
-    billing_state = models.CharField(max_length=100, null=True)
-    billing_zip_code = models.CharField(max_length=10, null=True)
+    billing_address_one = models.CharField(max_length=254, null=True, blank=True)
+    billing_address_two = models.CharField(max_length=254, blank=True, null=True)
+    billing_city = models.CharField(max_length=254, null=True, blank=True)
+    billing_state = models.CharField(max_length=100, null=True, blank=True)
+    billing_zip_code = models.CharField(max_length=10, null=True, blank=True)
 
     ORG_DEMO = (
         ('association', 'Association'),
@@ -64,7 +64,6 @@ class Organization(AbstractOrganization, AbstractBaseModel):
         return True
 
     logo = models.URLField(blank=True)
-
     contacts = JSONField(blank=True, default=dict)
 
     @property
