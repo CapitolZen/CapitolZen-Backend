@@ -51,6 +51,7 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             return super(UserViewSet, self).list(self, request, *args, **kwargs)
 
+
     permission_classes = (DRYPermissions, )
     serializer_class = UserSerializer
     queryset = User.objects.all()

@@ -19,34 +19,31 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     """
     Default Organization model.
     """
-
-    plan_type = models.CharField(max_length=256, choices=PlanChoices, default=BASIC),
+    PLAN_CHOICES = PlanChoices
+    PLAN_DEFAULT = BASIC
+    plan_type = models.CharField(max_length=256, blank=True, null=True, choices=PLAN_CHOICES),
 
     stripe_customer_id = models.CharField(max_length=256, blank=True)
     stripe_subscription_id = models.CharField(max_length=256, blank=True)
-    stripe_payment_methods = ArrayField(
-        base_field=models.CharField(max_length=256, blank=True),
-        default=list
-    )
+    stripe_payment_tokens = JSONField(blank=True, null=True)
 
     billing_email = models.EmailField(max_length=256, blank=True, null=True)
     billing_phone = models.CharField(max_length=256, blank=True, null=True)
-    billing_address_one = models.CharField(max_length=254, null=True)
-    billing_address_two = models.CharField(max_length=254, blank=True,
-                                           null=True)
-    billing_city = models.CharField(max_length=254, null=True)
-    billing_state = models.CharField(max_length=100, null=True)
-    billing_zip_code = models.CharField(max_length=10, null=True)
+    billing_address_one = models.CharField(max_length=254, null=True, blank=True)
+    billing_address_two = models.CharField(max_length=254, blank=True, null=True)
+    billing_city = models.CharField(max_length=254, null=True, blank=True)
+    billing_state = models.CharField(max_length=100, null=True, blank=True)
+    billing_zip_code = models.CharField(max_length=10, null=True, blank=True)
 
     ORG_DEMO = (
         ('association', 'Association'),
         ('union', 'Labor Union'),
         ('multi_client', 'Multi Client'),
         ('corporate', 'Corporation'),
-        ('individual', 'Individual')
+        ('individual', 'Individual'),
     )
 
-    demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO)
+    demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO, default='individual')
 
     def create_subscription(self, plan=BASIC):
         stripe.api_key = 'asdf'
@@ -63,7 +60,6 @@ class Organization(AbstractOrganization, AbstractBaseModel):
         return True
 
     logo = models.URLField(blank=True)
-
     contacts = JSONField(blank=True, default=dict)
 
     @property
@@ -115,7 +111,7 @@ class Organization(AbstractOrganization, AbstractBaseModel):
             request.user.is_superuser
 
     def has_object_create_permission(self, request):
-        return request.user.is_authenticated()
+        return request.user.is_authenticated
 
 
 class OrganizationUser(AbstractOrganizationUser):

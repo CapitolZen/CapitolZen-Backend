@@ -39,7 +39,7 @@ class Wrapper(AbstractBaseModel):
     )
 
     # Includes group reference && position
-    groups = JSONField()
+    groups = JSONField(blank=True)
 
     def update_group(self, group_id, position=False, note=''):
         if not group_id:

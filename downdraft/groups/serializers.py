@@ -7,14 +7,13 @@ from .models import Group, Comment
 class GroupSerializer(serializers.ModelSerializer):
     organization = ResourceRelatedField(
         many=False,
-        read_only=True,
-        source='organizations_organization'
+        read_only=True
     )
 
     class Meta:
         model = Group
-        fields = ('id',)
-        read_only_fields = ('id',)
+        fields = ('id', 'title', 'organization', 'attachments', 'contacts', 'description')
+        read_only_fields = ('id', 'organization')
 
 
 class CommentSerializer(serializers.ModelSerializer):

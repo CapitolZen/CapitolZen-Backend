@@ -1,6 +1,7 @@
 from rest_framework_json_api import serializers
 from rest_framework_json_api.relations import ResourceRelatedField
-
+from rest_framework.validators import UniqueValidator
+from pprint import pprint
 from .models import User
 
 
@@ -11,9 +12,17 @@ class UserSerializer(serializers.ModelSerializer):
         source='organizations_organization'
     )
 
+    username = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all())])
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'provider_info', 'user_is_staff',
-                  'user_is_admin', 'organizations')
-        read_only_fields = ('username', )
+        fields = ('id', 'name', 'username', 'user_is_staff', 'user_is_admin', 'organizations')
+        exclude = 'password'
+        read_only_fields = ('id', 'user_is_staff', 'user_is_admin', 'organizations')
         lookup_field = 'username'
+
+    def create(self, validated_data):
+        user = super().create(validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user

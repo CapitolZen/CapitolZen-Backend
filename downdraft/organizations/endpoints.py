@@ -1,6 +1,4 @@
-from crum import get_current_user
 from django.db.models import Q
-
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import detail_route
@@ -59,16 +57,18 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         """
         Override the perform_create to add the owner in automatically.
         """
-        serializer.save()
-        user = get_current_user()
-        organization = serializer.instance
-        organization.add_user(user)
-        # Create default group here
-        g = Group(
-            title=organization.name,
-            organization=organization,
-            description="Default group for your organization"
+        user = serializer.context['request'].user
+        org = serializer.save()
+        org.add_user(user)
+        """
+        Create default group
+        """
+        g = Group.objects.create(
+            title="Default Group for %s" % org.name,
+            organization=org,
+            description="Default group for your account"
         )
+
         g.save()
 
     permission_classes = (DRYPermissions, )

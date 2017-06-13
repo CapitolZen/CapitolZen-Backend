@@ -8,6 +8,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
 import environ
+import datetime
 
 ROOT_DIR = environ.Path(__file__) - 3  # (downdraft/config/settings/base.py - 3 = downdraft/)
 APPS_DIR = ROOT_DIR.path('downdraft')
@@ -256,6 +257,18 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=3),
+}
 
 # Some really nice defaults
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
