@@ -12,15 +12,15 @@ from downdraft.meta.billing import CHEAP
 
 class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     title = models.CharField(blank=False, max_length=225)
-    description = models.TextField(blank=True)
-    contacts = JSONField(blank=True)
-    logo = models.URLField(blank=True)
+    description = models.TextField(blank=True, null=True)
+    contacts = JSONField(blank=True, null=True)
+    logo = models.URLField(blank=True, null=True)
     organization = models.ForeignKey(
         'organizations.Organization',
         on_delete=models.CASCADE,
     )
 
-    attachments = JSONField(blank=True)
+    attachments = JSONField(blank=True, null=True)
 
     class JSONAPIMeta:
         resource_name = "groups"

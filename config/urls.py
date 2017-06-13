@@ -14,6 +14,7 @@ urlpatterns = [
     url(r'', include('downdraft.meta.urls')),
     url(r'', include('downdraft.organizations.urls')),
     url(r'', include('downdraft.users.urls')),
+    url(r'', include('downdraft.groups.urls'))
 ]
 
 if settings.DEBUG:

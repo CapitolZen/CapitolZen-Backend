@@ -4,14 +4,18 @@ from .models import (Organization, OrganizationInvite)
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
-    #permissions = DRYPermissionsField()
     user_is_member = serializers.ReadOnlyField()
     id = serializers.ReadOnlyField()
     demographic_org_type = serializers.ChoiceField(
         choices=Organization.ORG_DEMO,
         default='individual'
     )
-    billing_email = serializers.EmailField()
+
+    # plan_type = serializers.ChoiceField(
+    #     choices=Organization.PLAN_CHOICES,
+    #     allow_blank=True,
+    #     default='basic'
+    # )
 
     class Meta:
         model = Organization
@@ -19,7 +23,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
             'id', 'name', 'is_active', 'user_is_owner', 'billing_email', 'billing_phone',
             'user_is_admin', 'user_is_member', 'demographic_org_type', 'billing_address_one',
             'billing_address_two', 'billing_city', 'billing_state', 'billing_zip_code',
-            #'stripe_payment_methods', 'permissions',
+            'stripe_payment_tokens',
         )
 
     def create(self, validated_data):

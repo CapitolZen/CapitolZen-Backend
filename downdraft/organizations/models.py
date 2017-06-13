@@ -21,15 +21,11 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     """
     PLAN_CHOICES = PlanChoices
     PLAN_DEFAULT = BASIC
-    plan_type = models.CharField(max_length=256, blank=True, null=True),
+    plan_type = models.CharField(max_length=256, blank=True, null=True, choices=PLAN_CHOICES),
 
     stripe_customer_id = models.CharField(max_length=256, blank=True)
     stripe_subscription_id = models.CharField(max_length=256, blank=True)
-    stripe_payment_methods = ArrayField(
-        base_field=models.CharField(max_length=256, blank=True),
-        default=list,
-        blank=True
-    )
+    stripe_payment_tokens = JSONField(blank=True, null=True)
 
     billing_email = models.EmailField(max_length=256, blank=True, null=True)
     billing_phone = models.CharField(max_length=256, blank=True, null=True)

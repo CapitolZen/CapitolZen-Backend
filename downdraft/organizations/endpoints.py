@@ -1,6 +1,4 @@
-from crum import get_current_user
 from django.db.models import Q
-from pprint import pprint
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import detail_route
@@ -13,6 +11,7 @@ from dry_rest_permissions.generics import (DRYPermissions,
 from .models import (Organization, OrganizationInvite)
 from .serializers import (OrganizationSerializer, OrganizationInviteSerializer)
 from downdraft.users.serializers import UserSerializer
+from downdraft.groups.models import Group
 
 
 class OrganizationFilterBackend(DRYPermissionFiltersBase):
@@ -61,6 +60,16 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         user = serializer.context['request'].user
         org = serializer.save()
         org.add_user(user)
+        """
+        Create default group
+        """
+        g = Group.objects.create(
+            title="Default Group for %s" % org.name,
+            organization=org,
+            description="Default group for your account"
+        )
+
+        g.save()
 
     permission_classes = (DRYPermissions, )
     queryset = Organization.objects.all()
