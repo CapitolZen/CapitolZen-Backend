@@ -3,11 +3,11 @@ from django.db import models
 from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser
 from django.contrib.postgres.fields import ArrayField, JSONField
-from downdraft.meta.states import AvailableStates
+from downdraft.meta.states import AvailableStateChoices
 
 
 class Bill(AbstractBaseModel):
-    state = models.TextField(choices=AvailableStates)
+    state = models.TextField(choices=AvailableStateChoices)
     status = models.TextField()
     committee = models.TextField()
     sponsor = models.TextField()
