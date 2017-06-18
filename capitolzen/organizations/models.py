@@ -11,7 +11,7 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from organizations.abstract import (AbstractOrganization,
                                     AbstractOrganizationUser,
                                     AbstractOrganizationOwner)
-from downdraft.meta.billing import BASIC, PlanChoices
+from capitolzen.meta.billing import BASIC, PlanChoices
 import stripe
 
 

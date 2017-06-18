@@ -19,9 +19,9 @@ import sys
 from django.core.wsgi import get_wsgi_application
 
 # This allows easy placement of apps within the interior
-# downdraft directory.
+# capitolzen directory.
 app_path = os.path.dirname(os.path.abspath(__file__)).replace('/config', '')
-sys.path.append(os.path.join(app_path, 'downdraft'))
+sys.path.append(os.path.join(app_path, 'capitolzen'))
 
 
 

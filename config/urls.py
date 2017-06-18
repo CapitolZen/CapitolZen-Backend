@@ -11,10 +11,10 @@ urlpatterns = [
     url(r'^api-token-auth/', obtain_jwt_token),
     url(r'^api-token-refresh/', refresh_jwt_token),
 
-    url(r'', include('downdraft.meta.urls')),
-    url(r'', include('downdraft.organizations.urls')),
-    url(r'', include('downdraft.users.urls')),
-    url(r'', include('downdraft.groups.urls'))
+    url(r'', include('capitolzen.meta.urls')),
+    url(r'', include('capitolzen.organizations.urls')),
+    url(r'', include('capitolzen.users.urls')),
+    url(r'', include('capitolzen.groups.urls'))
 ]
 
 if settings.DEBUG:
@@ -23,7 +23,7 @@ if settings.DEBUG:
         url(r'^__debug__/', include(debug_toolbar.urls)),
     ]
 
-handler404 = 'downdraft.meta.views.page_not_found_view'
-handler500 = 'downdraft.meta.views.error_view'
-handler403 = 'downdraft.meta.views.permission_denied_view'
-handler400 = 'downdraft.meta.views.bad_request_view'
+handler404 = 'capitolzen.meta.views.page_not_found_view'
+handler500 = 'capitolzen.meta.views.error_view'
+handler403 = 'capitolzen.meta.views.permission_denied_view'
+handler400 = 'capitolzen.meta.views.bad_request_view'

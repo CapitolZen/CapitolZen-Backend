@@ -6,8 +6,8 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
-from downdraft.organizations.mixins import MixinResourcedOwnedByOrganization
-from downdraft.meta.billing import CHEAP
+from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
+from capitolzen.meta.billing import CHEAP
 
 
 class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):

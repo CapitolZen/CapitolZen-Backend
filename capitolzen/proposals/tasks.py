@@ -1,7 +1,7 @@
 from celery import shared_task
 from boto3 import client
 from json import dumps
-from downdraft.meta.states import AVAILABLE_STATES
+from capitolzen.meta.states import AVAILABLE_STATES
 from .models import Bill
 from pprint import pprint
 

@@ -10,8 +10,8 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 import environ
 import datetime
 
-ROOT_DIR = environ.Path(__file__) - 3  # (downdraft/config/settings/base.py - 3 = downdraft/)
-APPS_DIR = ROOT_DIR.path('downdraft')
+ROOT_DIR = environ.Path(__file__) - 3  # (capitolzen/config/settings/base.py - 3 = capitolzen/)
+APPS_DIR = ROOT_DIR.path('capitolzen')
 
 # Load operating system environment variables and then prepare to use them
 env = environ.Env()
@@ -63,11 +63,11 @@ ADMIN_APPS = [
 ]
 
 LOCAL_APPS = [
-    'downdraft.meta.apps.MetaConfig',
-    'downdraft.users.apps.UsersConfig',
-    'downdraft.organizations.apps.OrganizationsConfig',
-    'downdraft.groups.apps.GroupsConfig',
-    'downdraft.proposals.apps.ProposalsConfig'
+    'capitolzen.meta.apps.MetaConfig',
+    'capitolzen.users.apps.UsersConfig',
+    'capitolzen.organizations.apps.OrganizationsConfig',
+    'capitolzen.groups.apps.GroupsConfig',
+    'capitolzen.proposals.apps.ProposalsConfig'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + ADMIN_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -87,7 +87,7 @@ MIDDLEWARE = [
 # MIGRATIONS CONFIGURATION
 # ------------------------------------------------------------------------------
 MIGRATION_MODULES = {
-    'sites': 'downdraft.contrib.sites.migrations'
+    'sites': 'capitolzen.contrib.sites.migrations'
 }
 
 # DEBUG
@@ -120,7 +120,7 @@ MANAGERS = ADMINS
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {
-    'default': env.db('DATABASE_URL', default='postgres:///downdraft'),
+    'default': env.db('DATABASE_URL', default='postgres:///capitolzen'),
 }
 DATABASES['default']['ATOMIC_REQUESTS'] = True
 
@@ -302,8 +302,8 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
 ACCOUNT_ALLOW_REGISTRATION = env.bool('DJANGO_ACCOUNT_ALLOW_REGISTRATION', True)
-ACCOUNT_ADAPTER = 'downdraft.users.adapters.AccountAdapter'
-SOCIALACCOUNT_ADAPTER = 'downdraft.users.adapters.SocialAccountAdapter'
+ACCOUNT_ADAPTER = 'capitolzen.users.adapters.AccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'capitolzen.users.adapters.SocialAccountAdapter'
 
 # Custom user app defaults
 # Select the correct user model
@@ -315,7 +315,7 @@ LOGIN_URL = 'account_login'
 AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 
 ########## CELERY
-INSTALLED_APPS += ['downdraft.tasks.celery.CeleryConfig']
+INSTALLED_APPS += ['capitolzen.tasks.celery.CeleryConfig']
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='django://')
 if CELERY_BROKER_URL == 'django://':
     CELERY_RESULT_BACKEND = 'redis://'
@@ -328,7 +328,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Detroit'
 CELERYBEAT_SCHEDULE = {
     'data_import': {
-        'task': 'downdraft.proposals.tasks.update_all_bills',
+        'task': 'capitolzen.proposals.tasks.update_all_bills',
         'schedule': 14400
     }
 }

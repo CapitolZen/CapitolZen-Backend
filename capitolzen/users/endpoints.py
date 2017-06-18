@@ -5,7 +5,7 @@ from dry_rest_permissions.generics import DRYPermissions
 from dry_rest_permissions.generics import DRYPermissionFiltersBase
 from django_filters.rest_framework import DjangoFilterBackend
 
-from downdraft.organizations.models import Organization
+from capitolzen.organizations.models import Organization
 
 from .models import User
 from .serializers import UserSerializer

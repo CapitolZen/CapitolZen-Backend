@@ -9,11 +9,11 @@ if not settings.configured:
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.development')  # pragma: no cover
 
 
-app = Celery('downdraft')
+app = Celery('capitolzen')
 
 
 class CeleryConfig(AppConfig):
-    name = 'downdraft.tasks'
+    name = 'capitolzen.tasks'
     verbose_name = 'Celery Config'
 
     def ready(self):

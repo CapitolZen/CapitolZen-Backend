@@ -4,6 +4,6 @@ from django.apps import AppConfig
 
 
 class ProposalsConfig(AppConfig):
-    name = 'downdraft.proposals'
+    name = 'capitolzen.proposals'
     label = 'proposals'
     verbose_name = 'Proposals'

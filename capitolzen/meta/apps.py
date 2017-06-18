@@ -4,4 +4,4 @@ from django.apps import AppConfig
 
 
 class MetaConfig(AppConfig):
-    name = 'downdraft.meta'
+    name = 'capitolzen.meta'

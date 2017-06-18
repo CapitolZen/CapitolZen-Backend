@@ -11,7 +11,7 @@ services:
       - postgres_data_dev:/var/lib/postgresql/data
       - postgres_backup_dev:/backups
     environment:
-      - POSTGRES_USER=downdraft
+      - POSTGRES_USER=capitolzen
 
   django:
     restart: on-failure
@@ -25,8 +25,8 @@ services:
       - postgres
       - mailhog
     environment:
-      - POSTGRES_USER=downdraft
-      - POSTGRES_PASSWROD=downdraft
+      - POSTGRES_USER=capitolzen
+      - POSTGRES_PASSWROD=capitolzen
       - USE_DOCKER=yes
     volumes:
       - .:/app
@@ -44,7 +44,7 @@ services:
     depends_on:
       - postgres
     environment:
-      - POSTGRES_USER=downdraft
+      - POSTGRES_USER=capitolzen
     volumes:
       - .:/app
 
@@ -59,8 +59,8 @@ services:
     depends_on:
       - postgres
     environment:
-      - POSTGRES_USER=downdraft
-      - POSTGRES_PASSWORD=downdraft
+      - POSTGRES_USER=capitolzen
+      - POSTGRES_PASSWORD=capitolzen
     volumes:
       - .:/app
     links:
@@ -82,15 +82,15 @@ services:
       dockerfile: ./compose/django/Dockerfile-dev
     env_file: .env
     environment:
-      - POSTGRES_USER=downdraft
-      - POSTGRES_PASSWORD=downdraft
+      - POSTGRES_USER=capitolzen
+      - POSTGRES_PASSWORD=capitolzen
     depends_on:
      - postgres
      - redis
     links:
       - postgres
       - redis
-    command: ["./utilities/wait-for-it.sh -t 90", "postgres:5432", "--", celery, -A, downdraft.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
+    command: ["./utilities/wait-for-it.sh -t 90", "postgres:5432", "--", celery, -A, capitolzen.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
     volumes:
       - .:/app
 
@@ -102,15 +102,15 @@ services:
       dockerfile: ./compose/django/Dockerfile-dev
     env_file: .env
     environment:
-      - POSTGRES_USER=downdraft
-      - POSTGRES_PASSWORD=downdraft
+      - POSTGRES_USER=capitolzen
+      - POSTGRES_PASSWORD=capitolzen
     depends_on:
       - postgres
       - redis
     links:
       - postgres
       - redis
-    command: ["./utilities/wait-for-it.sh -t 90", "postgres:5432", "--", celery, -A, downdraft.tasks, beat, --workdir=/app, -l, INFO]
+    command: ["./utilities/wait-for-it.sh -t 90", "postgres:5432", "--", celery, -A, capitolzen.tasks, beat, --workdir=/app, -l, INFO]
     volumes:
       - .:/app
 

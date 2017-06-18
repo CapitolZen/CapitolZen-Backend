@@ -10,8 +10,8 @@ from dry_rest_permissions.generics import (DRYPermissions,
 
 from .models import (Organization, OrganizationInvite)
 from .serializers import (OrganizationSerializer, OrganizationInviteSerializer)
-from downdraft.users.serializers import UserSerializer
-from downdraft.groups.models import Group
+from capitolzen.users.serializers import UserSerializer
+from capitolzen.groups.models import Group
 
 
 class OrganizationFilterBackend(DRYPermissionFiltersBase):

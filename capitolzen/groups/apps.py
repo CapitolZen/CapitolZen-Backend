@@ -4,6 +4,6 @@ from django.apps import AppConfig
 
 
 class GroupsConfig(AppConfig):
-    name = 'downdraft.groups'
+    name = 'capitolzen.groups'
     label = 'groups'
     verbose_name = 'Groups'
