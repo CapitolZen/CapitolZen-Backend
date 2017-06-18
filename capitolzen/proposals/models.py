@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from django.db import models
 from config.models import AbstractBaseModel
-from dry_rest_permissions.generics import allow_staff_or_superuser
+from dry_rest_permissions.generics import allow_staff_or_superuser, authenticated_users
 from django.contrib.postgres.fields import ArrayField, JSONField
 from capitolzen.meta.states import AvailableStateChoices
 
@@ -14,8 +14,11 @@ class Bill(AbstractBaseModel):
     title = models.TextField()
     state_id = models.CharField(max_length=225)
     categories = ArrayField(
-        models.CharField(max_length=225, blank=True)
+        models.CharField(max_length=225, blank=True),
+        default=list
     )
+    history = JSONField(default=dict, blank=True, null=True)
+    summary = models.TextField()
 
     class Meta:
         abstract = False
@@ -24,6 +27,35 @@ class Bill(AbstractBaseModel):
 
     class JSONAPIMeta:
         resource_name = "bills"
+
+    def serialzie_categories(self, data):
+        categories = self.categories
+        categories += data
+        self.categories = categories
+
+    def serialize_history(self, data):
+        history = self.history
+        history += data
+        self.history = history
+
+    @staticmethod
+    @authenticated_users
+    def has_read_permission(request):
+        return True
+
+    @authenticated_users
+    def has_object_read_permission(self, request):
+        return True
+
+    @staticmethod
+    @allow_staff_or_superuser
+    def has_write_permission(request):
+        return True
+
+    @staticmethod
+    @allow_staff_or_superuser
+    def has_create_permission(request):
+        return True
 
 
 class Wrapper(AbstractBaseModel):
