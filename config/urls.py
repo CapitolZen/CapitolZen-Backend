@@ -14,7 +14,8 @@ urlpatterns = [
     url(r'', include('capitolzen.meta.urls')),
     url(r'', include('capitolzen.organizations.urls')),
     url(r'', include('capitolzen.users.urls')),
-    url(r'', include('capitolzen.groups.urls'))
+    url(r'', include('capitolzen.groups.urls')),
+    url(r'', include('capitolzen.proposals.urls'))
 ]
 
 if settings.DEBUG:

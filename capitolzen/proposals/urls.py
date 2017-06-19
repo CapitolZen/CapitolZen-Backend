@@ -4,7 +4,7 @@ from .endpoints import BillViewSet
 
 router = routers.SimpleRouter()
 
-router.register(r'bills', ProposalViewSet, base_name="bills")
+router.register(r'bills', BillViewSet, base_name="bills")
 
 urlpatterns = [
     url(r'^', include(router.urls)),
