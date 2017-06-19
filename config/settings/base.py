@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 """
 import environ
 import datetime
+from celery.schedules import crontab
 
 ROOT_DIR = environ.Path(__file__) - 3  # (capitolzen/config/settings/base.py - 3 = capitolzen/)
 APPS_DIR = ROOT_DIR.path('capitolzen')
@@ -131,7 +132,7 @@ DATABASES['default']['ATOMIC_REQUESTS'] = True
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # In a Windows environment this must be set to your system time zone.
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Detroit'
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#language-code
 LANGUAGE_CODE = 'en-us'
@@ -327,9 +328,13 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Detroit'
 CELERYBEAT_SCHEDULE = {
-    'data_import': {
+    'data_update': {
         'task': 'capitolzen.proposals.tasks.update_all_bills',
-        'schedule': 14400
+        'schedule': crontab(minute=0, hour='*/3')
+    },
+    'data_import': {
+        'task': 'capitolzen.proposals.tasks.get_new_bills',
+        'schedule': crontab()
     }
 }
 ########## END CELERY
@@ -337,6 +342,7 @@ CELERYBEAT_SCHEDULE = {
 # AWS
 AWS_ACCESS_ID = env("AWS_ACCESSID", default='')
 AWS_SECRET_KEY = env("AWS_SECRETKEY", default='')
+AWS_REGION = env("AWS_REGION", default='us-east-1')
 
 # Location of root django.contrib.admin URL, use {% url 'admin:index' %}
 ADMIN_URL = r'^admin/'

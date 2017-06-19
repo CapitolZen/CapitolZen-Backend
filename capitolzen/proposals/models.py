@@ -28,15 +28,18 @@ class Bill(AbstractBaseModel):
     class JSONAPIMeta:
         resource_name = "bills"
 
-    def serialzie_categories(self, data):
-        categories = self.categories
-        categories += data
-        self.categories = categories
+    def update_from_source(self, data):
+        self.status = data['status']
+        self.committee = data['currentCommittee']
+        self.serialize_history(data['history'])
+        self.serialize_categories(data['categories'])
+        self.save()
+
+    def serialize_categories(self, data):
+        self.categories = data
 
     def serialize_history(self, data):
-        history = self.history
-        history += data
-        self.history = history
+        self.history = data
 
     @staticmethod
     @authenticated_users

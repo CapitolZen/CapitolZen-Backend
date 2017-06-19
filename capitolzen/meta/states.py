@@ -4,7 +4,7 @@ AvailableStateChoices = (
 )
 
 
-AVAILABLE_STATES = (
+AVAILABLE_STATES = [
     {
         "id": "MI",
         "title": "Michigan",
@@ -14,6 +14,7 @@ AVAILABLE_STATES = (
         "upper_bill_start": "0001",
         "is_active": True
     }
-)
+]
+
 
 
