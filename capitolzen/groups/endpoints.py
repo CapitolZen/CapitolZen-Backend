@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from dry_rest_permissions.generics import (DRYPermissions,
                                            DRYPermissionFiltersBase)
 
-from downdraft.proposals.models import Bill, Wrapper
+from capitolzen.proposals.models import Bill, Wrapper
 from .models import Group
 from .serializers import GroupSerializer
 

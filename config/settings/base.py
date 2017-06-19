@@ -9,9 +9,10 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 """
 import environ
 import datetime
+from celery.schedules import crontab
 
-ROOT_DIR = environ.Path(__file__) - 3  # (downdraft/config/settings/base.py - 3 = downdraft/)
-APPS_DIR = ROOT_DIR.path('downdraft')
+ROOT_DIR = environ.Path(__file__) - 3  # (capitolzen/config/settings/base.py - 3 = capitolzen/)
+APPS_DIR = ROOT_DIR.path('capitolzen')
 
 # Load operating system environment variables and then prepare to use them
 env = environ.Env()
@@ -63,11 +64,11 @@ ADMIN_APPS = [
 ]
 
 LOCAL_APPS = [
-    'downdraft.meta.apps.MetaConfig',
-    'downdraft.users.apps.UsersConfig',
-    'downdraft.organizations.apps.OrganizationsConfig',
-    'downdraft.groups.apps.GroupsConfig',
-    'downdraft.proposals.apps.ProposalsConfig'
+    'capitolzen.meta.apps.MetaConfig',
+    'capitolzen.users.apps.UsersConfig',
+    'capitolzen.organizations.apps.OrganizationsConfig',
+    'capitolzen.groups.apps.GroupsConfig',
+    'capitolzen.proposals.apps.ProposalsConfig'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + ADMIN_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -87,7 +88,7 @@ MIDDLEWARE = [
 # MIGRATIONS CONFIGURATION
 # ------------------------------------------------------------------------------
 MIGRATION_MODULES = {
-    'sites': 'downdraft.contrib.sites.migrations'
+    'sites': 'capitolzen.contrib.sites.migrations'
 }
 
 # DEBUG
@@ -120,7 +121,7 @@ MANAGERS = ADMINS
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {
-    'default': env.db('DATABASE_URL', default='postgres:///downdraft'),
+    'default': env.db('DATABASE_URL', default='postgres:///capitolzen'),
 }
 DATABASES['default']['ATOMIC_REQUESTS'] = True
 
@@ -131,7 +132,7 @@ DATABASES['default']['ATOMIC_REQUESTS'] = True
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # In a Windows environment this must be set to your system time zone.
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Detroit'
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#language-code
 LANGUAGE_CODE = 'en-us'
@@ -259,6 +260,23 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 REST_FRAMEWORK = {
+    'PAGE_SIZE': 20,
+    'ORDERING_PARAM': 'sort',
+    'EXCEPTION_HANDLER': 'rest_framework_json_api.exceptions.exception_handler',
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework_json_api.pagination.PageNumberPagination',
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework_json_api.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework_json_api.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+    'DEFAULT_METADATA_CLASS': 'rest_framework_json_api.metadata.JSONAPIMetadata',
+    'DEFAULT_MODEL_SERIALIZER_CLASS':
+        'rest_framework.serializers.HyperlinkedModelSerializer',
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
@@ -268,7 +286,16 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
     ),
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=3),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
 }
+
+JSON_API_FORMAT_KEYS = 'dasherize'
+JSON_API_FILTER_KEYWORD = 'filter\[(?P<field>\w+)\]'
+
+CORS_ORIGIN_WHITELIST = (
+    'app.capitolzen.com',
+    'capitolzen.com'
+)
 
 # Some really nice defaults
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
@@ -276,8 +303,8 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
 ACCOUNT_ALLOW_REGISTRATION = env.bool('DJANGO_ACCOUNT_ALLOW_REGISTRATION', True)
-ACCOUNT_ADAPTER = 'downdraft.users.adapters.AccountAdapter'
-SOCIALACCOUNT_ADAPTER = 'downdraft.users.adapters.SocialAccountAdapter'
+ACCOUNT_ADAPTER = 'capitolzen.users.adapters.AccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'capitolzen.users.adapters.SocialAccountAdapter'
 
 # Custom user app defaults
 # Select the correct user model
@@ -289,14 +316,33 @@ LOGIN_URL = 'account_login'
 AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 
 ########## CELERY
-INSTALLED_APPS += ['downdraft.tasks.celery.CeleryConfig']
+INSTALLED_APPS += ['capitolzen.tasks.celery.CeleryConfig']
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='django://')
 if CELERY_BROKER_URL == 'django://':
     CELERY_RESULT_BACKEND = 'redis://'
 else:
     CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+BROKER_URL = '{0}/{1}'.format(env('REDIS_URL', default='redis://127.0.0.1:6379'), 1)
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'America/Detroit'
+CELERYBEAT_SCHEDULE = {
+    'data_update': {
+        'task': 'capitolzen.proposals.tasks.update_all_bills',
+        'schedule': crontab(minute=0, hour='*/3')
+    },
+    'data_import': {
+        'task': 'capitolzen.proposals.tasks.get_new_bills',
+        'schedule': crontab()
+    }
+}
 ########## END CELERY
 
+# AWS
+AWS_ACCESS_ID = env("AWS_ACCESSID", default='')
+AWS_SECRET_KEY = env("AWS_SECRETKEY", default='')
+AWS_REGION = env("AWS_REGION", default='us-east-1')
 
 # Location of root django.contrib.admin URL, use {% url 'admin:index' %}
 ADMIN_URL = r'^admin/'

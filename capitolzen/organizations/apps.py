@@ -4,6 +4,6 @@ from django.apps import AppConfig
 
 
 class OrganizationsConfig(AppConfig):
-    name = 'downdraft.organizations'
+    name = 'capitolzen.organizations'
     label = 'organizations'
     verbose_name = 'Organization'

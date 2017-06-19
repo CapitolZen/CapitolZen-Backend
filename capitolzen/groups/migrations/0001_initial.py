@@ -8,7 +8,7 @@ import django.contrib.postgres.fields.jsonb
 from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
-import downdraft.organizations.mixins
+import capitolzen.organizations.mixins
 import model_utils.fields
 import uuid
 
@@ -64,6 +64,6 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'groups',
                 'abstract': False,
             },
-            bases=(models.Model, downdraft.organizations.mixins.MixinResourcedOwnedByOrganization),
+            bases=(models.Model, capitolzen.organizations.mixins.MixinResourcedOwnedByOrganization),
         ),
     ]
