@@ -17,7 +17,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'name', 'username', 'user_is_staff', 'user_is_admin', 'organizations')
-        exclude = 'password'
+        # this currently breaks users with: TypeError: The `exclude` option must be a list or tuple. Got str.
+        # exclude = 'password'
         read_only_fields = ('id', 'user_is_staff', 'user_is_admin', 'organizations')
         lookup_field = 'username'
 
