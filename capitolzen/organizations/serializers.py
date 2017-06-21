@@ -6,6 +6,7 @@ from .models import (Organization, OrganizationInvite)
 class OrganizationSerializer(serializers.ModelSerializer):
     user_is_member = serializers.ReadOnlyField()
     id = serializers.ReadOnlyField()
+    is_active = serializers.ReadOnlyField()
     demographic_org_type = serializers.ChoiceField(
         choices=Organization.ORG_DEMO,
         default='individual'
@@ -13,7 +14,6 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
     # plan_type = serializers.ChoiceField(
     #     choices=Organization.PLAN_CHOICES,
-    #     allow_blank=True,
     #     default='basic'
     # )
 
@@ -28,6 +28,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         org = Organization.objects.create(**validated_data)
+        org.is_active = True
         org.save()
         return org
 

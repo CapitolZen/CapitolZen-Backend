@@ -1,7 +1,6 @@
 from rest_framework_json_api import serializers
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework.validators import UniqueValidator
-from pprint import pprint
 from .models import User
 
 

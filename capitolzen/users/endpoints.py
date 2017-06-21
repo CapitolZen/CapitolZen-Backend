@@ -4,7 +4,7 @@ from rest_framework.exceptions import NotAuthenticated
 from dry_rest_permissions.generics import DRYPermissions
 from dry_rest_permissions.generics import DRYPermissionFiltersBase
 from django_filters.rest_framework import DjangoFilterBackend
-
+from rest_framework.decorators import list_route
 from capitolzen.organizations.models import Organization
 
 from .models import User
@@ -51,6 +51,9 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             return super(UserViewSet, self).list(self, request, *args, **kwargs)
 
+    @list_route(methods=['GET'])
+    def current(self, request):
+        return Response(UserSerializer(request.user).data)
 
     permission_classes = (DRYPermissions, )
     serializer_class = UserSerializer

@@ -10,7 +10,10 @@ from .models import Bill, Wrapper
 from .serializers import BillSerializer, WrapperSerializer
 
 
-class BillViewSet(viewsets.ModelViewSet):
+class BillViewSet(viewsets.ReadOnlyModelViewSet):
+    class Meta:
+        ordering = ['state', 'state_id']
+
     permission_classes = (IsAuthenticated,)
     serializer_class = BillSerializer
-    queryset = Bill.objects.all()
+    queryset = Bill.objects.all().order_by('state', 'state_id')
