@@ -7,7 +7,7 @@ from .models import Bill, Wrapper
 class BillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bill
-        fields = ('id',)
+        fields = ('id', 'state', 'title', 'sponsor', 'summary', 'status', 'state_id', 'state')
 
 
 class WrapperSerializer(serializers.ModelSerializer):
@@ -23,5 +23,6 @@ class WrapperSerializer(serializers.ModelSerializer):
 
     bill = ResourceRelatedField(
         many=False,
-        source='proposals_bill'
+        source='proposals_bill',
+        read_only=True
     )

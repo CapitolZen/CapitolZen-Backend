@@ -24,7 +24,8 @@ class GroupViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['post'])
     def add_bill(self, request):
         group = self.get_object()
-        bill = Bill.objects.get(state=request.data['state'], state_id=request.data['state_id'])
+        print(request['bill_id'])
+        bill = Bill.objects.get(request['bill_id'])
         w = Wrapper(
             organization=request.user.organization,
             bill=bill
