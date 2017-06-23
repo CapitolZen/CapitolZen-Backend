@@ -1,8 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
-from rest_framework.decorators import detail_route
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import viewsets, filters
+from rest_framework.permissions import IsAuthenticated
 
 from dry_rest_permissions.generics import (DRYPermissions,
                                            DRYPermissionFiltersBase)
@@ -17,3 +15,12 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = BillSerializer
     queryset = Bill.objects.all().order_by('state', 'state_id')
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('sponsor', 'title', 'state_id', 'summary',
+                     'categories', 'status', 'state', 'committee')
+
+
+class WrapperViewSet(viewsets.ModelViewSet):
+    permission_classes = (DRYPermissions,)
+    serializer_class = WrapperSerializer
+    queryset = Wrapper.objects.all()

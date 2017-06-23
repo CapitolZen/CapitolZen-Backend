@@ -121,5 +121,5 @@ services:
   mailhog:
     image: mailhog/mailhog
     ports:
-      - "8025:8025"
+      - "8024:8024"
 
