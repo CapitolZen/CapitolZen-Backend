@@ -4,6 +4,7 @@ from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser, authenticated_users
 from django.contrib.postgres.fields import ArrayField, JSONField
 from capitolzen.meta.states import AvailableStateChoices
+from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
 
 
 class Bill(AbstractBaseModel):
@@ -61,20 +62,25 @@ class Bill(AbstractBaseModel):
         return True
 
 
-class Wrapper(AbstractBaseModel):
+class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
 
     organization = models.ForeignKey(
         'organizations.Organization',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
     )
 
     bill = models.ForeignKey(
-        Bill,
+        'proposals.Bill',
         on_delete=models.CASCADE,
+        blank=True,
+        null=True
     )
 
     # Includes group reference && position
-    groups = JSONField(blank=True)
+    groups = JSONField(blank=True, default=dict)
+    notes = JSONField(blank=True, default=dict)
 
     def update_group(self, group_id, position=False, note=''):
         if not group_id:
@@ -92,8 +98,6 @@ class Wrapper(AbstractBaseModel):
 
         groups.append(new_group)
         self.groups = groups
-
-    notes = JSONField(blank=True)
 
     @staticmethod
     def valid_position(position):

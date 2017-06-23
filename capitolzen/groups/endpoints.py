@@ -1,3 +1,4 @@
+from json import loads
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import detail_route
@@ -5,6 +6,7 @@ from rest_framework.response import Response
 from dry_rest_permissions.generics import (DRYPermissions,
                                            DRYPermissionFiltersBase)
 
+from capitolzen.organizations.models import Organization
 from capitolzen.proposals.models import Bill, Wrapper
 from .models import Group
 from .serializers import GroupSerializer
@@ -21,19 +23,31 @@ class GroupViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         return GroupSerializer
 
+    def get_queryset(self):
+        ## TODO FIltering here
+        user = self.request.user
+        return Group.objects.all()
+
     @detail_route(methods=['post'])
-    def add_bill(self, request):
-        group = self.get_object()
-        print(request['bill_id'])
-        bill = Bill.objects.get(request['bill_id'])
-        w = Wrapper(
-            organization=request.user.organization,
-            bill=bill
-        )
-        w.update_group(group.id, request.position)
-        w.save()
-        Response({"status_code": status.HTTP_200_OK, "detail": "Bill added", "wrapper": w})
+    def add_bill(self, request, pk=None):
+        if not pk:
+            Response({"status_code": status.HTTP_400_BAD_REQUEST, "message": "Missing requirement"})\
+                .status_code(status.HTTP_400_BAD_REQUEST)
+        group = Group.objects.get(pk=pk)
+        print(request.body)
+        data = request.body.decode('utf-8')
+        data = loads(data)
+        bills = Bill.objects.filter(id__in=data['bills'])
+        bill_list = []
+        for bill in bills:
+            w = Wrapper.objects.create(
+                                       organization=group.organization,
+                                       bill=bill,
+                                       )
+            w.save()
+            bill_list.append(w.id)
+
+        return Response({"status_code": status.HTTP_200_OK, "message": "Bill(s) added", "bills": bill_list})
 
     permission_classes = (DRYPermissions,)
-    queryset = Group.objects.all()
     filter_backends = (GroupFilterBackend, DjangoFilterBackend)
