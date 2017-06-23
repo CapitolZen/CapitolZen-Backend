@@ -1,15 +1,14 @@
 from json import loads
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
-from rest_framework.decorators import detail_route
+from rest_framework import viewsets, status, filters
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 from dry_rest_permissions.generics import (DRYPermissions,
                                            DRYPermissionFiltersBase)
 
-from capitolzen.organizations.models import Organization
 from capitolzen.proposals.models import Bill, Wrapper
-from .models import Group
-from .serializers import GroupSerializer
+from .models import Group, Report
+from .serializers import GroupSerializer, ReportSerializer
 
 
 class GroupFilterBackend(DRYPermissionFiltersBase):
@@ -28,13 +27,17 @@ class GroupViewSet(viewsets.ModelViewSet):
         user = self.request.user
         return Group.objects.all()
 
-    @detail_route(methods=['post'])
+    @list_route(methods=['GET'])
+    def bills(self, request):
+        # TODO: Finish this
+        return Response({"stuff": "here"})
+
+    @detail_route(methods=['POST'])
     def add_bill(self, request, pk=None):
         if not pk:
             Response({"status_code": status.HTTP_400_BAD_REQUEST, "message": "Missing requirement"})\
                 .status_code(status.HTTP_400_BAD_REQUEST)
         group = Group.objects.get(pk=pk)
-        print(request.body)
         data = request.body.decode('utf-8')
         data = loads(data)
         bills = Bill.objects.filter(id__in=data['bills'])
@@ -51,3 +54,10 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     permission_classes = (DRYPermissions,)
     filter_backends = (GroupFilterBackend, DjangoFilterBackend)
+
+
+class ReportViewSet(viewsets.ModelViewSet):
+    serializer_class = ReportSerializer
+    queryset = Report.objects.all()
+    permission_classes = (DRYPermissions,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
