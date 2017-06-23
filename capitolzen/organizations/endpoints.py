@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 
@@ -11,6 +11,7 @@ from dry_rest_permissions.generics import (DRYPermissions,
 from .models import (Organization, OrganizationInvite)
 from .serializers import (OrganizationSerializer, OrganizationInviteSerializer)
 from capitolzen.users.serializers import UserSerializer
+from capitolzen.users.models import User
 from capitolzen.groups.models import Group
 
 
@@ -53,13 +54,19 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
+    # @list_route(methods=['get'])
+    # def current(self, request):
+    #     user = User.objects.get(request.user)
+
     def perform_create(self, serializer):
         """
         Override the perform_create to add the owner in automatically.
         """
-        user = serializer.context['request'].user
+        user = self.request.user
         org = serializer.save()
-        org.add_user(user)
+        org.is_active = True
+        org.add_user(user, is_admin=True)
+        org.save()
         """
         Create default group
         """

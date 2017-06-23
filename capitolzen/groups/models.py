@@ -5,9 +5,8 @@ from dry_rest_permissions.generics import allow_staff_or_superuser
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-
+from django_fsm import FSMField, transition
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
-from capitolzen.meta.billing import CHEAP
 
 
 class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
@@ -34,11 +33,36 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         return self.title
 
 
+# TODO Permissions
+class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+    author = models.ForeignKey('users.User', blank=True)
+    organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE)
+    group = models.ForeignKey('groups.Group')
+    attachments = JSONField(blank=True, default=dict)
+    bills = JSONField(blank=True, default=dict)
+    scheduled = models.BooleanField(default=False)
+    status = FSMField(default='draft')
+    publish_date = models.DateTimeField(blank=True)
+
+    class JSONAPIMeta:
+        resource_name = "reports"
+
+    class Meta:
+        abstract = False
+        verbose_name = "report"
+        verbose_name_plural = "reports"
+
+    @transition(field=status, source='draft', target='published')
+    def publish(self):
+        # TODO notifications
+        pass
+
+
 class Comment(AbstractBaseModel):
     author = models.ForeignKey('users.User', on_delete=models.CASCADE)
     reactions = JSONField(blank=True, null=True)
-    attachments = ArrayField(models.URLField(blank=True))
     text = models.TextField()
+    documents = JSONField(blank=True, default=dict)
 
     VISIBILITY_OPTIONS = (
         ('public', 'anyone'),

@@ -1,13 +1,14 @@
+from json import loads
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
-from rest_framework.decorators import detail_route
+from rest_framework import viewsets, status, filters
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 from dry_rest_permissions.generics import (DRYPermissions,
                                            DRYPermissionFiltersBase)
 
 from capitolzen.proposals.models import Bill, Wrapper
-from .models import Group
-from .serializers import GroupSerializer
+from .models import Group, Report
+from .serializers import GroupSerializer, ReportSerializer
 
 
 class GroupFilterBackend(DRYPermissionFiltersBase):
@@ -21,18 +22,42 @@ class GroupViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         return GroupSerializer
 
-    @detail_route(methods=['post'])
-    def add_bill(self, request):
-        group = self.get_object()
-        bill = Bill.objects.get(state=request.data['state'], state_id=request.data['state_id'])
-        w = Wrapper(
-            organization=request.user.organization,
-            bill=bill
-        )
-        w.update_group(group.id, request.position)
-        w.save()
-        Response({"status_code": status.HTTP_200_OK, "detail": "Bill added", "wrapper": w})
+    def get_queryset(self):
+        ## TODO FIltering here
+        user = self.request.user
+        return Group.objects.all()
+
+    @list_route(methods=['GET'])
+    def bills(self, request):
+        # TODO: Finish this
+        return Response({"stuff": "here"})
+
+    @detail_route(methods=['POST'])
+    def add_bill(self, request, pk=None):
+        if not pk:
+            Response({"status_code": status.HTTP_400_BAD_REQUEST, "message": "Missing requirement"})\
+                .status_code(status.HTTP_400_BAD_REQUEST)
+        group = Group.objects.get(pk=pk)
+        data = request.body.decode('utf-8')
+        data = loads(data)
+        bills = Bill.objects.filter(id__in=data['bills'])
+        bill_list = []
+        for bill in bills:
+            w = Wrapper.objects.create(
+                                       organization=group.organization,
+                                       bill=bill,
+                                       )
+            w.save()
+            bill_list.append(w.id)
+
+        return Response({"status_code": status.HTTP_200_OK, "message": "Bill(s) added", "bills": bill_list})
 
     permission_classes = (DRYPermissions,)
-    queryset = Group.objects.all()
     filter_backends = (GroupFilterBackend, DjangoFilterBackend)
+
+
+class ReportViewSet(viewsets.ModelViewSet):
+    serializer_class = ReportSerializer
+    queryset = Report.objects.all()
+    permission_classes = (DRYPermissions,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
