@@ -52,12 +52,3 @@ class User(AbstractUser):
 
     def has_object_create_permission(self, request):
         return True
-
-
-class Alert:
-
-    user = models.ForeignKey('users.User',)
-    message = models.TextField()
-
-    def __str__(self):
-        return self.message
