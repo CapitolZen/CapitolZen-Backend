@@ -57,6 +57,6 @@ class AlertsViewSet(viewsets.ModelViewSet):
 
     permission_classes = (DRYPermissions, )
     serializer_class = AlertsSerializer
-    queryset = ''
+    queryset = Alerts.objects.all()
     filter_backends = (AlertsFilterBackend, DjangoFilterBackend)
     lookup_field = "message"

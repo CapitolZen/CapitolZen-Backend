@@ -9,7 +9,7 @@ from dry_rest_permissions.generics import allow_staff_or_superuser
 
 class Alerts(AbstractBaseModel):
 
-    user = models.ForeignKey('users.User',)
+    # user = models.ForeignKey('users.User',)
     message = models.TextField()
 
     def __str__(self):
