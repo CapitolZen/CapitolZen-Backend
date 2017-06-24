@@ -45,6 +45,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     'django_extensions',
     'localflavor',
+    'corsheaders',
     'rest_framework',
     'rest_framework_jwt',
     'dry_rest_permissions',
@@ -78,6 +79,7 @@ INSTALLED_APPS = DJANGO_APPS + ADMIN_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 # MIDDLEWARE CONFIGURATION
 # ------------------------------------------------------------------------------
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -270,6 +272,7 @@ REST_FRAMEWORK = {
         'rest_framework_json_api.pagination.PageNumberPagination',
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework_json_api.parsers.JSONParser',
+        'rest_framework.parsers.JSONParser',
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser'
     ),
@@ -297,7 +300,8 @@ JSON_API_FILTER_KEYWORD = 'filter\[(?P<field>\w+)\]'
 
 CORS_ORIGIN_WHITELIST = (
     'app.capitolzen.com',
-    'capitolzen.com'
+    'capitolzen.com',
+    'localhost:4200'
 )
 
 # Some really nice defaults
