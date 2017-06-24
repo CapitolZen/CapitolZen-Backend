@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Message',
+            name='Alerts',
             fields=[
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
@@ -25,8 +25,8 @@ class Migration(migrations.Migration):
                 ('message', models.TextField(auto_created=True, serialize=False, verbose_name='message')),
             ],
             options={
-                'verbose_name_plural': 'message',
-                'verbose_name': 'message',
+                'verbose_name_plural': 'Alerts',
+                'verbose_name': 'alerts',
                 'abstract': False,
             },
         ),
