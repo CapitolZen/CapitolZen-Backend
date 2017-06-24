@@ -12,6 +12,11 @@ class Alerts(AbstractBaseModel):
     # user = models.ForeignKey('users.User',)
     message = models.TextField()
 
+    class Meta:
+        abstract = False
+        verbose_name = "Alert"
+        verbose_name_plural = "Alerts"
+
     def __str__(self):
         return self.message
 

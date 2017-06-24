@@ -43,9 +43,9 @@ class AlertsViewSet(viewsets.ModelViewSet):
     """
     def list(self, request, *args, **kwargs):
         if "alerts" in request._request.GET:
-            organization_id = request._request.GET['alerts']
-            organization = Alerts.objects.get(pk=organization_id)
-            alert = organization.users.all()
+            # = request._request.GET['alerts']
+            #organization = Alerts.objects.get(pk=organization_id)
+            alert = Alerts.obects.all()
             serializer = AlertsSerializer(alert, many=True)
             return Response(serializer.data)
         else:

@@ -15,7 +15,7 @@ class AlertsSerializer(serializers.ModelSerializer):
         lookup_field = 'message'
 
     def create(self, validated_data):
-        mes = super().create(validated_data)
-        mes.set_password(validated_data['password'])
-        mes.save()
-        return mes
+        message = super().create(validated_data)
+        # message.set_password(validated_data['password'])
+        message.save()
+        return message
