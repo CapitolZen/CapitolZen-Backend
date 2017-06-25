@@ -27,6 +27,7 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     stripe_subscription_id = models.CharField(max_length=256, blank=True)
     stripe_payment_tokens = JSONField(blank=True, null=True)
 
+    billing_name = models.CharField(max_length=256, blank=True, null=True)
     billing_email = models.EmailField(max_length=256, blank=True, null=True)
     billing_phone = models.CharField(max_length=256, blank=True, null=True)
     billing_address_one = models.CharField(max_length=254, null=True, blank=True)
@@ -44,21 +45,6 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     )
 
     demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO, default='individual')
-
-    def create_subscription(self, plan=BASIC):
-        stripe.api_key = 'asdf'
-        sub = stripe.subscription.create(
-            customer=self.stripe_customer_id,
-            plan=plan,
-        )
-
-        self.stripe_subscription_id = sub.id
-        self.save()
-
-    def update_subscription(self, plan, **kwargs):
-        sub = self.stripe_subscription_id
-        return True
-
     logo = models.URLField(blank=True)
     contacts = JSONField(blank=True, default=dict)
 
@@ -112,6 +98,20 @@ class Organization(AbstractOrganization, AbstractBaseModel):
 
     def has_object_create_permission(self, request):
         return request.user.is_authenticated
+
+    def create_subscription(self, plan=BASIC):
+        stripe.api_key = 'asdf'
+        sub = stripe.subscription.create(
+            customer=self.stripe_customer_id,
+            plan=plan,
+        )
+
+        self.stripe_subscription_id = sub.id
+        self.save()
+
+    def update_subscription(self, plan, **kwargs):
+        sub = self.stripe_subscription_id
+        return True
 
 
 class OrganizationUser(AbstractOrganizationUser):
