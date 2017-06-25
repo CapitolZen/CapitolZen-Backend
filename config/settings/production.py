@@ -29,6 +29,12 @@ WHITENOISE_MIDDLEWARE = ['whitenoise.middleware.WhiteNoiseMiddleware', ]
 MIDDLEWARE = WHITENOISE_MIDDLEWARE + MIDDLEWARE
 
 
+#
+# DATABASE
+DATABASES = {
+    'default': env.db(), # Raises ImproperlyConfigured exception if DATABASE_URL not in os.environ
+}
+
 # SECURITY CONFIGURATION
 # ------------------------------------------------------------------------------
 # See https://docs.djangoproject.com/en/dev/ref/middleware/#module-django.middleware.security
