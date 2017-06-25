@@ -29,12 +29,6 @@ WHITENOISE_MIDDLEWARE = ['whitenoise.middleware.WhiteNoiseMiddleware', ]
 MIDDLEWARE = WHITENOISE_MIDDLEWARE + MIDDLEWARE
 
 
-#
-# DATABASE
-DATABASES = {
-    'default': env.db(), # Raises ImproperlyConfigured exception if DATABASE_URL not in os.environ
-}
-
 # SECURITY CONFIGURATION
 # ------------------------------------------------------------------------------
 # See https://docs.djangoproject.com/en/dev/ref/middleware/#module-django.middleware.security
@@ -101,6 +95,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # EMAIL
 # ------------------------------------------------------------------------------
+"""
 DEFAULT_FROM_EMAIL = env('DJANGO_DEFAULT_FROM_EMAIL',
                          default='capitolzen-web <noreply@example.com>')
 EMAIL_SUBJECT_PREFIX = env('DJANGO_EMAIL_SUBJECT_PREFIX', default='[capitolzen-web]')
@@ -113,7 +108,7 @@ ANYMAIL = {
     'MAILGUN_SENDER_DOMAIN': env('MAILGUN_SENDER_DOMAIN')
 }
 EMAIL_BACKEND = 'anymail.backends.mailgun.MailgunBackend'
-
+"""
 # TEMPLATE CONFIGURATION
 # ------------------------------------------------------------------------------
 # See:
