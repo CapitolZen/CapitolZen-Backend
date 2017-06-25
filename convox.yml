@@ -1,0 +1,16 @@
+services:
+  nginx:
+    build:
+      path: ./compose/nginx
+    health:
+      interval: 5
+      path: /
+      timeout: 3
+    port:
+      port: 443
+      scheme: http
+    scale:
+      count:
+        min: 1
+        max: 1
+      memory: 256
