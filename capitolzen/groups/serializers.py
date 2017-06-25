@@ -6,7 +6,7 @@ from .models import Group, Report, Comment
 
 
 class GroupSerializer(serializers.ModelSerializer):
-    organization = serializers.PrimaryKeyRelatedField(
+    organization = ResourceRelatedField(
         many=False,
         queryset=Organization.objects
     )
@@ -19,15 +19,15 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class ReportSerializer(serializers.ModelSerializer):
-    author = serializers.PrimaryKeyRelatedField(
+    author = ResourceRelatedField(
         many=False,
         queryset=User.objects
     )
-    organization = serializers.PrimaryKeyRelatedField(
+    organization = ResourceRelatedField(
         many=False,
         queryset=Organization.objects
     )
-    group = serializers.PrimaryKeyRelatedField(
+    group = ResourceRelatedField(
         many=False,
         queryset=Group.objects
     )
@@ -41,7 +41,7 @@ class ReportSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     referenced_object = ResourceRelatedField(
         many=False,
-        read_only=True,
+        read_only=True
     )
 
     class Meta:
