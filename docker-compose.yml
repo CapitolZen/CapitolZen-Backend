@@ -1,56 +1,32 @@
 version: '2'
 
-volumes:
-  postgres_data: {}
-  postgres_backup: {}
-
 services:
-  postgres:
-    build: ./compose/postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - postgres_backup:/backups
-    env_file: .env
-
   django:
-    build:
-      context: .
-      dockerfile: ./compose/django/Dockerfile
-    depends_on:
-      - postgres
-      - redis
+    build: ./compose/django/Dockerfile
     command: /gunicorn.sh
     env_file: .env
+    container_name: django
+    ports:
+      - 5000
 
   nginx:
     build: ./compose/nginx
+    links:
+      - django
     depends_on:
       - django
-
     ports:
-      - "0.0.0.0:80:80"
-
-
-  redis:
-    image: redis:3.0
+      - 443:443
+    container_name: nginx
 
   celeryworker:
-    build:
-      context: .
-      dockerfile: ./compose/django/Dockerfile
+    user: django
+    build: ./compose/django/Dockerfile
     env_file: .env
-    depends_on:
-     - postgres
-     - redis
-    command: celery -A capitolzen.tasks worker -l INFO
+    command: [celery, -A, capitolzen.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
 
   celerybeat:
-    build:
-      context: .
-      dockerfile: ./compose/django/Dockerfile
+    user: django
+    build: ./compose/django/Dockerfile
     env_file: .env
-    depends_on:
-      - postgres
-      - redis
-    command: celery -A capitolzen.tasks beat -l INFO
-
+    command: [celery, -A, capitolzen.tasks, beat, --workdir=/app, -l, INFO]
