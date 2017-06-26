@@ -36,6 +36,7 @@ awesome-slugify==1.6.5
 django-allauth==0.32.0
 argon2-cffi==16.3.0
 django-fsm==2.6.0
+django-debug-toolbar==1.7
 
 #
 # DRF
