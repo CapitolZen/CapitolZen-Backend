@@ -10,6 +10,10 @@ from dry_rest_permissions.generics import allow_staff_or_superuser
 class Alerts(AbstractBaseModel):
 
     # user = models.ForeignKey('users.User',)
+
+    # bill = models.ForeignKey('proposals.Bill',)
+
+
     message = models.TextField()
 
     class Meta:

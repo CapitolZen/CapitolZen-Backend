@@ -4,6 +4,7 @@ import django.db.models.deletion
 import django.utils.timezone
 import model_utils.fields
 import uuid
+from capitolzen.proposals.models import Bill
 
 
 class Migration(migrations.Migration):
@@ -23,6 +24,7 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('meta', django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
                 ('message', models.TextField(auto_created=True, serialize=False, verbose_name='message')),
+                ('bill', models.TextField(default=Bill.categories, editable=False, verbose_name='categories'))
             ],
             options={
                 'verbose_name_plural': 'Alerts',

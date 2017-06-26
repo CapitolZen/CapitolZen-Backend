@@ -5,8 +5,7 @@ from dry_rest_permissions.generics import DRYPermissions
 from dry_rest_permissions.generics import DRYPermissionFiltersBase
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import list_route
-from capitolzen.alerts.models import Alerts
-
+from capitolzen.proposals.models import Bill
 from .models import Alerts
 from .serializers import AlertsSerializer
 
@@ -44,7 +43,7 @@ class AlertsViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         if "alerts" in request._request.GET:
             # = request._request.GET['alerts']
-            #organization = Alerts.objects.get(pk=organization_id)
+            bill = Bill.objects.all()
             alert = Alerts.obects.all()
             serializer = AlertsSerializer(alert, many=True)
             return Response(serializer.data)
