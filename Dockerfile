@@ -1,1 +1,0 @@
-compose/django/Dockerfile
