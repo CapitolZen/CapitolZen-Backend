@@ -20,5 +20,18 @@ test:
 deployment:
   production:
     branch: master
-    heroku:
-      appname: cz-app-backend
+    commands:
+      - |
+        cat >~/.netrc <<EOF
+        machine api.heroku.com
+          login $HEROKU_EMAIL
+          password $HEROKU_TOKEN
+        machine git.heroku.com
+          login $HEROKU_EMAIL
+          password $HEROKU_TOKEN
+        EOF
+      - chmod 600 ~/.netrc # Heroku cli complains about permissions without this
+      - "[[ ! -s \"$(git rev-parse --git-dir)/shallow\" ]] || git fetch --unshallow"
+      - git push git@heroku.com:cz-app-backend.git $CIRCLE_SHA1:refs/heads/master
+      - heroku run python manage.py migrate --app cz-app-backend:
+          timeout: 400 # if your deploys take a long time
