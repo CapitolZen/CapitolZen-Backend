@@ -28,15 +28,16 @@ env.read_env()
 DJANGO_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sites',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'django_filters'
 ]
 
+# noinspection PyPackageRequirements
 THIRD_PARTY_APPS = [
+    'cacheops',
+    'django_filters',
     'django_extensions',
     'localflavor',
     'corsheaders',
