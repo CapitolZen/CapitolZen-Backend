@@ -1,68 +1,26 @@
-"""
-Local settings
-
-- Run in Debug mode
-
-- Use mailhog for emails
-
-- Add Django Debug Toolbar
-- Add django-extensions as app
-"""
-
-from .base import *  # noqa
+import requests
+import socket
+import os
+from config.settings.base import *
 
 # DEBUG
 # ------------------------------------------------------------------------------
-DEBUG = env.bool('DJANGO_DEBUG', default=True)
+DEBUG = True
 TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
-CORS_ORIGIN_WHITELIST += ('localhost:4200', )
 ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_WHITELIST += ('localhost:4200', )
+INTERNAL_IPS = [
+                '127.0.0.1',
+                ]
 
-
-# SECRET CONFIGURATION
-# ------------------------------------------------------------------------------
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
-# Note: This key only used for development and testing.
-SECRET_KEY = env('DJANGO_SECRET_KEY', default='->ySRlDpz,Q~y{@8J^9QfKi77:CSIl/(`hDbQ*jZsLa2qIY|H!')
-
-# Mail settings
-# ------------------------------------------------------------------------------
-
-EMAIL_PORT = 1025
-
-EMAIL_HOST = env('EMAIL_HOST', default='mailhog')
-
-
-# CACHING
-# ------------------------------------------------------------------------------
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': ''
-    }
-}
-
-# django-debug-toolbar
-# ------------------------------------------------------------------------------
-MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware', ]
-INSTALLED_APPS += ['debug_toolbar', ]
-
-INTERNAL_IPS = ['127.0.0.1',
-                '10.0.2.2',
-                '192.168.56.1',
-                '192.168.56.101',
-                '192.168.56.101:8080',
-                '192.168.252.6:8000',
-                'mvcs.local.dev',
-                '192.168.33.15']
-
-
-import socket
-import os
 # tricks to have debug toolbar when developing with docker
 if os.environ.get('USE_DOCKER') == 'yes':
     ip = socket.gethostbyname(socket.gethostname())
-    INTERNAL_IPS += [ip[:-1] + '1']
+    INTERNAL_IPS += [ip[:-1] + "1"]
+
+
+MIDDLEWARE += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+INSTALLED_APPS += ('debug_toolbar', )
 
 DEBUG_TOOLBAR_CONFIG = {
     'DISABLE_PANELS': [
@@ -71,6 +29,19 @@ DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TEMPLATE_CONTEXT': True,
 }
 
-# TESTING
+# Mail settings
 # ------------------------------------------------------------------------------
-TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+EMAIL_PORT = 1025
+EMAIL_HOST = env("EMAIL_HOST", default='mailhog')
+
+CORS_ALLOW_METHODS = (
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS'
+)
+
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False

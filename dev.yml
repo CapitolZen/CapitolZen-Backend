@@ -5,6 +5,9 @@ volumes:
   postgres_backup_dev: {}
 
 services:
+
+  #
+  # DB
   postgres:
     build: ./compose/postgres
     volumes:
@@ -13,6 +16,15 @@ services:
     environment:
       - POSTGRES_USER=capitolzen
 
+  #
+  # Cache
+  redis:
+    image: redis:latest
+    ports:
+      - "6379"
+
+  #
+  # App
   django:
     restart: on-failure
     build:
@@ -36,18 +48,6 @@ services:
       - postgres
       - redis
 
-
-  pycharm:
-    build:
-      context: .
-      dockerfile: ./compose/django/Dockerfile-dev
-    depends_on:
-      - postgres
-    environment:
-      - POSTGRES_USER=capitolzen
-    volumes:
-      - .:/app
-
   #
   # Local Development utility for running commands.
   pycharm:
@@ -66,13 +66,6 @@ services:
     links:
       - postgres
       - redis
-
-  #
-  # Cache
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
 
   #
   # Workers
@@ -116,7 +109,6 @@ services:
 
   #
   # Intercepts mail sent and provides a nice UI for debugging.
-
   mailhog:
     image: mailhog/mailhog
     ports:
