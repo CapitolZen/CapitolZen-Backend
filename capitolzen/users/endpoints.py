@@ -6,6 +6,7 @@ from dry_rest_permissions.generics import DRYPermissionFiltersBase
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import list_route
 from capitolzen.organizations.models import Organization
+from capitolzen.organizations.serializers import OrganizationSerializer
 
 from .models import User
 from .serializers import UserSerializer

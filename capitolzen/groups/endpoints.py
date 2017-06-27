@@ -23,9 +23,8 @@ class GroupViewSet(viewsets.ModelViewSet):
         return GroupSerializer
 
     def get_queryset(self):
-        ## TODO FIltering here
         user = self.request.user
-        return Group.objects.all()
+        return Group.objects.filter(organization__users=user)
 
     @list_route(methods=['GET'])
     def bills(self, request):
