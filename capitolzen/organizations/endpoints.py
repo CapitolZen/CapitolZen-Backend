@@ -54,9 +54,12 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
-    # @list_route(methods=['get'])
-    # def current(self, request):
-    #     user = User.objects.get(request.user)
+    @list_route(methods=['get'])
+    def current(self, request):
+        user = User.objects.get(request.user)
+        orgs = Organization.objects.filter(user=user)
+        serializer = OrganizationSerializer(orgs, many=True)
+        return Response(serializer.data)
 
     def perform_create(self, serializer):
         """
