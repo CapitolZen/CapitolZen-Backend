@@ -1,5 +1,3 @@
-# Pro-tip: Try not to put anything here. Avoid dependencies in
-#	production that aren't in development.
 -r base.txt
 
 
@@ -19,6 +17,7 @@ django-storages-redux==1.3.2
 # -------------------------------------------------------
 django-anymail==0.9
 
-
-
+# APM and Error Monitoring
+# --------------------------------------------------------
+opbeat==3.5.2
 

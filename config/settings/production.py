@@ -16,8 +16,8 @@ from .base import *  # noqa
 # SECRET CONFIGURATION
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
-# Raises ImproperlyConfigured exception if DJANGO_SECRET_KEY not in os.environ
-SECRET_KEY = env('DJANGO_SECRET_KEY')
+# Raises ImproperlyConfigured exception if APPLICATION_SECRET_KEY not in os.environ
+SECRET_KEY = env('APPLICATION_SECRET_KEY')
 
 
 # This ensures that Django will be able to detect a secure connection
@@ -194,5 +194,8 @@ LOGGING = {
 # Custom Admin URL, use {% url 'admin:index' %}
 ADMIN_URL = env('DJANGO_ADMIN_URL')
 
-# Your production stuff: Below this line define 3rd party library settings
-# ------------------------------------------------------------------------------
+OPBEAT = {
+    'ORGANIZATION_ID': env('OPBEAT_ORGANIZATION_ID', default=''),
+    'APP_ID': env('OPBEAT_APP_ID', default=''),
+    'SECRET_TOKEN': env('OPBEAT_SECRET_TOKEN', default=''),
+}

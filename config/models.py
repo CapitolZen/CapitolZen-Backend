@@ -11,9 +11,5 @@ class AbstractBaseModel(TimeStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     meta = JSONField(blank=True, null=True)
 
-    @property
-    def uuid(self):
-        return self.id
-
     class Meta:
         abstract = True
