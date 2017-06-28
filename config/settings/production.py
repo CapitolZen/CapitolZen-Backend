@@ -118,31 +118,6 @@ TEMPLATES[0]['OPTIONS']['loaders'] = [
         'django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader', ]),
 ]
 
-# DATABASE CONFIGURATION
-# ------------------------------------------------------------------------------
-
-# Use the Heroku-style specification
-# Raises ImproperlyConfigured exception if DATABASE_URL not in os.environ
-DATABASES['default'] = env.db('DATABASE_URL')
-
-# CACHING
-# ------------------------------------------------------------------------------
-
-REDIS_LOCATION = '{0}/{1}'.format(env('REDIS_URL', default='redis://127.0.0.1:6379'), 0)
-# Heroku URL does not pass the DB number, so we parse it in
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_LOCATION,
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'IGNORE_EXCEPTIONS': True,  # mimics memcache behavior.
-                                        # http://niwinz.github.io/django-redis/latest/#_memcached_exceptions_behavior
-        }
-    }
-}
-
-
 # LOGGING CONFIGURATION
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#logging
@@ -193,6 +168,9 @@ LOGGING = {
 
 # Custom Admin URL, use {% url 'admin:index' %}
 ADMIN_URL = env('DJANGO_ADMIN_URL')
+
+INSTALLED_APPS += ('opbeat.contrib.django', )
+MIDDLEWARE = ('opbeat.contrib.django.middleware.OpbeatAPMMiddleware', ) + MIDDLEWARE
 
 OPBEAT = {
     'ORGANIZATION_ID': env('OPBEAT_ORGANIZATION_ID', default=''),

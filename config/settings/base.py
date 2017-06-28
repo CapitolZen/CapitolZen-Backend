@@ -115,6 +115,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': env.db('DATABASE_URL', default='postgres:///capitolzen'),
 }
+
 DATABASES['default']['ATOMIC_REQUESTS'] = True
 
 
