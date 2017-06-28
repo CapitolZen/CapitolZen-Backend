@@ -7,7 +7,7 @@ from dry_rest_permissions.generics import (DRYPermissions,
                                            DRYPermissionFiltersBase)
 
 from capitolzen.proposals.models import Bill, Wrapper
-from .models import Group, Report
+from capitolzen.groups.models import Group, Report
 from .serializers import GroupSerializer, ReportSerializer
 
 

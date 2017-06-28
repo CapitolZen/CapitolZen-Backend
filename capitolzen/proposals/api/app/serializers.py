@@ -1,6 +1,6 @@
 from rest_framework_json_api import serializers
 from capitolzen.organizations.models import Organization
-from .models import Bill, Wrapper
+from capitolzen.proposals.models import Bill, Wrapper
 
 
 class BillSerializer(serializers.ModelSerializer):

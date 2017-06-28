@@ -1,15 +1,14 @@
-from rest_framework import viewsets
-from rest_framework.response import Response
-from rest_framework.exceptions import NotAuthenticated
-from dry_rest_permissions.generics import DRYPermissions
-from dry_rest_permissions.generics import DRYPermissionFiltersBase
 from django_filters.rest_framework import DjangoFilterBackend
+from dry_rest_permissions.generics import DRYPermissionFiltersBase
+from dry_rest_permissions.generics import DRYPermissions
+from rest_framework import viewsets
 from rest_framework.decorators import list_route
-from capitolzen.organizations.models import Organization
-from capitolzen.organizations.serializers import OrganizationSerializer
+from rest_framework.exceptions import NotAuthenticated
+from rest_framework.response import Response
 
-from .models import User
-from .serializers import UserSerializer
+from capitolzen.organizations.models import Organization
+from capitolzen.users.api.app.serializers import UserSerializer
+from capitolzen.users.models import User
 
 
 class UserFilterBackend(DRYPermissionFiltersBase):

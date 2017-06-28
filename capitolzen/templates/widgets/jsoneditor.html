@@ -1,0 +1,27 @@
+<div class="row">
+    <div class="col s12 editor-wrapper">
+        <label>{{ name }}</label>
+        <div id="{{ name }}_editor"></div>
+
+        <textarea cols="40" id="id_{{ name }}" name="{{ name }}" rows="10" required="" style="display: none">{{ data }}</textarea>
+
+        <script>
+            var container = document.getElementById("{{ name }}_editor");
+
+            var options = {
+                modes: ['code', 'tree'],
+                search: true,
+
+                onChange: function () {
+                    var json = editor.get();
+                    document.getElementById("id_{{ name }}").value=JSON.stringify(json);
+                }
+            };
+
+            var editor = new JSONEditor(container, options);
+            var json = {{ data|safe }};
+            editor.set(json);
+        </script>
+
+    </div>
+</div>

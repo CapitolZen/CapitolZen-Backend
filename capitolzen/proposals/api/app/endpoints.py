@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from dry_rest_permissions.generics import (DRYPermissions,
                                            DRYPermissionFiltersBase)
-from .models import Bill, Wrapper
+from capitolzen.proposals.models import Bill, Wrapper
 from .serializers import BillSerializer, WrapperSerializer
 
 

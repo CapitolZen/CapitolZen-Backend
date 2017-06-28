@@ -2,7 +2,7 @@ from rest_framework_json_api import serializers
 from rest_framework_json_api.relations import ResourceRelatedField
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import User
-from .models import Group, Report, Comment
+from capitolzen.groups.models import Group, Report, Comment
 
 
 class GroupSerializer(serializers.ModelSerializer):

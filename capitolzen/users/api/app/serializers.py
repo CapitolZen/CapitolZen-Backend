@@ -1,7 +1,7 @@
 from rest_framework_json_api import serializers
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework.validators import UniqueValidator
-from .models import User
+from capitolzen.users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):

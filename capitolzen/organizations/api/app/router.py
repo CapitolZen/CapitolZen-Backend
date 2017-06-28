@@ -7,6 +7,4 @@ router = routers.SimpleRouter()
 router.register(r'organizations', OrganizationViewSet, base_name="organization")
 router.register(r'invites', OrganizationInviteViewSet, base_name="invite")
 
-urlpatterns = [
-    url(r'^', include(router.urls)),
-]
+urlpatterns = router.urls

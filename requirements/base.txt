@@ -42,6 +42,7 @@ django-cacheops==3.2.1
 #
 # DRF
 djangorestframework==3.6.3
+coreapi==2.3.0
 drfdocs==0.0.11
 djangorestframework-jwt==1.11.0
 djangorestframework-jsonapi==2.2.0
