@@ -22,7 +22,6 @@ urlpatterns = [
 
 urlpatterns += app_api_urls
 
-
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns += [

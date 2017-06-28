@@ -194,5 +194,8 @@ LOGGING = {
 # Custom Admin URL, use {% url 'admin:index' %}
 ADMIN_URL = env('DJANGO_ADMIN_URL')
 
-# Your production stuff: Below this line define 3rd party library settings
-# ------------------------------------------------------------------------------
+OPBEAT = {
+    'ORGANIZATION_ID': env('OPBEAT_ORGANIZATION_ID', default=''),
+    'APP_ID': env('OPBEAT_APP_ID', default=''),
+    'SECRET_TOKEN': env('OPBEAT_SECRET_TOKEN', default=''),
+}
