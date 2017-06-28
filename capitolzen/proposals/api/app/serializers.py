@@ -1,4 +1,5 @@
 from rest_framework_json_api import serializers
+from rest_framework_json_api.relations import ResourceRelatedField
 from capitolzen.organizations.models import Organization
 from capitolzen.proposals.models import Bill, Wrapper
 
@@ -6,7 +7,7 @@ from capitolzen.proposals.models import Bill, Wrapper
 class BillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bill
-        fields = ('id', 'state', 'title', 'sponsor', 'summary', 'status', 'state_id', 'state')
+        fields = ('id', 'state', 'title', 'sponsor', 'summary', 'status', 'state_id', 'state', 'current_committee')
 
 
 class WrapperSerializer(serializers.ModelSerializer):
@@ -14,7 +15,7 @@ class WrapperSerializer(serializers.ModelSerializer):
         model = Wrapper
         fields = ('id', 'bill', 'groups', 'organization', 'notes')
 
-    bill = serializers.PrimaryKeyRelatedField(many=False, queryset=Bill.objects)
-    organization = serializers.PrimaryKeyRelatedField(many=False, queryset=Organization.objects)
+    bill = ResourceRelatedField(many=False, queryset=Bill.objects)
+    organization = ResourceRelatedField(many=False, queryset=Organization.objects)
     id = serializers.ReadOnlyField()
 

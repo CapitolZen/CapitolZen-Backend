@@ -17,10 +17,18 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Bill.objects.all().order_by('state', 'state_id')
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('sponsor', 'title', 'state_id', 'summary',
-                     'categories', 'status', 'state', 'committee')
+                     'categories', 'status', 'state', 'current_committee')
 
 
 class WrapperViewSet(viewsets.ModelViewSet):
+    class Meta:
+        ordering = ['bill__state', 'bill__state_id']
+
     permission_classes = (DRYPermissions,)
     serializer_class = WrapperSerializer
-    queryset = Wrapper.objects.all()
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filter_fields = ('bill__state', 'group')
+
+    def get_queryset(self):
+        return Wrapper.objects.filter(organization__user=self.request.user),
+

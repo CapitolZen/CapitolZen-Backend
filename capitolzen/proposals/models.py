@@ -10,7 +10,7 @@ from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
 class Bill(AbstractBaseModel):
     state = models.TextField(choices=AvailableStateChoices)
     status = models.TextField()
-    committee = models.TextField()
+    current_committee = models.TextField()
     sponsor = models.TextField()
     title = models.TextField()
     state_id = models.CharField(max_length=225)
@@ -19,6 +19,7 @@ class Bill(AbstractBaseModel):
         default=list
     )
     history = JSONField(default=dict, blank=True, null=True)
+    versions = JSONField(default=dict, blank=True)
     summary = models.TextField()
 
     class Meta:

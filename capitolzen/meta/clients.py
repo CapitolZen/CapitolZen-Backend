@@ -11,3 +11,10 @@ def aws_client(service='lambda'):
                     )
 
     return bclient
+
+
+class DocManager:
+    def __init__(self, org_instance):
+        self.org_id = org_instance.id
+        client = aws_client(service='s3')
+        self.client = client()
