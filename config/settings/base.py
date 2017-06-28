@@ -14,35 +14,30 @@ from celery.schedules import crontab
 ROOT_DIR = environ.Path(__file__) - 3  # (capitolzen/config/settings/base.py - 3 = capitolzen/)
 APPS_DIR = ROOT_DIR.path('capitolzen')
 
-# Load operating system environment variables and then prepare to use them
+# LOCATION VARS
+# ------------------------------------------------------------------------------
+# (project_name/config/settings/common.py - 3 = project_name/)
+ROOT_DIR = environ.Path(__file__) - 3
+APPS_DIR = ROOT_DIR.path('capitolzen')
+
 env = environ.Env()
-
-# .env file, should load only in development environment
-READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=False)
-
-if READ_DOT_ENV_FILE:
-    # Operating System Environment variables have precedence over variables defined in the .env file,
-    # that is to say variables from the .env files will only be used if not defined
-    # as environment variables.
-    env_file = str(ROOT_DIR.path('.env'))
-    print('Loading : {}'.format(env_file))
-    env.read_env(env_file)
-    print('The .env file has been loaded. See base.py for more information')
+env.read_env()
 
 # APP CONFIGURATION
 # ------------------------------------------------------------------------------
 DJANGO_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sites',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'django_filters'
 ]
 
+# noinspection PyPackageRequirements
 THIRD_PARTY_APPS = [
+    'cacheops',
+    'django_filters',
     'django_extensions',
     'localflavor',
     'corsheaders',
@@ -51,7 +46,6 @@ THIRD_PARTY_APPS = [
     'dry_rest_permissions',
     'rest_framework_docs',
     'annoying',
-    'clear_cache',
     'health_check',
     'health_check.db',
     'health_check.cache',
@@ -90,12 +84,6 @@ MIDDLEWARE = [
     'capitolzen.meta.middleware.AuthenticationMiddlewareJWT',
 ]
 
-# MIGRATIONS CONFIGURATION
-# ------------------------------------------------------------------------------
-MIGRATION_MODULES = {
-    'sites': 'capitolzen.contrib.sites.migrations'
-}
-
 # DEBUG
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#debug
@@ -128,7 +116,40 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': env.db('DATABASE_URL', default='postgres:///capitolzen'),
 }
+
 DATABASES['default']['ATOMIC_REQUESTS'] = True
+
+
+# Cache
+# ------------------------------------------------------------------------------
+REDIS_LOCATION = '{0}/{1}'.format(env('REDIS_URL',
+                                      default='redis://redis:6379'), 0)
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_LOCATION,
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'IGNORE_EXCEPTIONS': True,  # mimics memcache behavior.
+                                        # http://niwenz.github.io/django-redis/latest/#_memcached_exceptions_behavior
+        }
+    }
+}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+CACHEOPS_REDIS = '{0}/{1}'.format(env('REDIS_URL',
+                                      default='redis://127.0.0.1:6379'), 3)
+
+CACHEOPS_DEFAULTS = {
+    'timeout': 60*60
+}
+
+CACHEOPS = {
+    'users.user': {'ops': 'get', 'timeout': 60*60},
+    'organizations.organization': {'ops': 'all', 'timeout': 60*60},
+}
 
 
 # GENERAL CONFIGURATION
@@ -153,6 +174,8 @@ USE_L10N = True
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#use-tz
 USE_TZ = True
+
+SECRET_KEY = env("APPLICATION_SECRET_KEY", default="")
 
 # TEMPLATE CONFIGURATION
 # ------------------------------------------------------------------------------
@@ -261,7 +284,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # ------------------------------------------------------------------------------
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 REST_FRAMEWORK = {
@@ -322,18 +344,16 @@ LOGIN_URL = 'account_login'
 # SLUGLIFIER
 AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 
-########## CELERY
-INSTALLED_APPS += ['capitolzen.tasks.celery.CeleryConfig']
-CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='django://')
-if CELERY_BROKER_URL == 'django://':
-    CELERY_RESULT_BACKEND = 'redis://'
-else:
-    CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+# CELERY
+# ------------------------------------------------------------------------------
+INSTALLED_APPS += ('capitolzen.tasks.celery.CeleryConfig',)
 BROKER_URL = '{0}/{1}'.format(env('REDIS_URL', default='redis://127.0.0.1:6379'), 1)
+CELERY_RESULT_BACKEND = '{0}/{1}'.format(env('REDIS_URL', default='redis://127.0.0.1:6379'), 1)
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Detroit'
+
 CELERYBEAT_SCHEDULE = {
     'data_update': {
         'task': 'capitolzen.proposals.tasks.update_all_bills',
@@ -344,7 +364,46 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab()
     }
 }
-########## END CELERY
+
+# LOGGING CONFIGURATION
+# ------------------------------------------------------------------------------
+# See: https://docs.djangoproject.com/en/dev/ref/settings/#logging
+# A sample logging configuration. The only tangible logging
+# performed by this configuration is to send an email to
+# the site admins on every HTTP 500 error when DEBUG=False.
+# See http://docs.djangoproject.com/en/dev/topics/logging for
+# more details on how to customize your logging configuration.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d '
+                      '%(thread)d %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}
 
 # AWS
 AWS_ACCESS_ID = env("AWS_ACCESSID", default='')
