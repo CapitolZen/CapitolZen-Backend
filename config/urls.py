@@ -13,7 +13,7 @@ app_api_urls = [
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^docs/', include_docs_urls(title='V1 Fleet API', patterns=app_api_urls)),
+    url(r'^docs/', include_docs_urls(title='API', patterns=app_api_urls)),
     url(r'^health/', include('health_check.urls')),
     url(r'^api-token-auth/', obtain_jwt_token),
     url(r'^api-token-refresh/', refresh_jwt_token),
