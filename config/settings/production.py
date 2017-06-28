@@ -169,8 +169,8 @@ LOGGING = {
 # Custom Admin URL, use {% url 'admin:index' %}
 ADMIN_URL = env('DJANGO_ADMIN_URL')
 
-INSTALLED_APPS += ('opbeat.contrib.django', )
-MIDDLEWARE = ('opbeat.contrib.django.middleware.OpbeatAPMMiddleware', ) + MIDDLEWARE
+INSTALLED_APPS += ['opbeat.contrib.django', ]
+MIDDLEWARE = ['opbeat.contrib.django.middleware.OpbeatAPMMiddleware', ] + MIDDLEWARE
 
 OPBEAT = {
     'ORGANIZATION_ID': env('OPBEAT_ORGANIZATION_ID', default=''),
