@@ -1,12 +1,13 @@
-from rest_framework import viewsets
-from rest_framework.response import Response
-from rest_framework.exceptions import NotAuthenticated
-from dry_rest_permissions.generics import DRYPermissions
-from dry_rest_permissions.generics import DRYPermissionFiltersBase
 from django_filters.rest_framework import DjangoFilterBackend
+from dry_rest_permissions.generics import DRYPermissionFiltersBase
+from dry_rest_permissions.generics import DRYPermissions
+from rest_framework import viewsets
 from rest_framework.decorators import list_route
-from .models import Alerts
-from .serializers import AlertsSerializer
+from rest_framework.exceptions import NotAuthenticated
+from rest_framework.response import Response
+
+from capitolzen.alerts.api.app.serializers import AlertsSerializer
+from capitolzen.alerts.models import Alerts
 
 
 class AlertsFilterBackend(DRYPermissionFiltersBase):

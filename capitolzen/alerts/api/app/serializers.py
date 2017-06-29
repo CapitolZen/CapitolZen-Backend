@@ -1,5 +1,5 @@
 from rest_framework_json_api import serializers
-from .models import Alerts
+from capitolzen.alerts.models import Alerts
 
 
 class AlertsSerializer(serializers.ModelSerializer):
