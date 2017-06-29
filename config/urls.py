@@ -8,7 +8,8 @@ app_api_urls = [
     url(r'', include('capitolzen.organizations.api.app.router')),
     url(r'', include('capitolzen.users.api.app.router')),
     url(r'', include('capitolzen.groups.api.app.router')),
-    url(r'', include('capitolzen.proposals.api.app.router'))
+    url(r'', include('capitolzen.proposals.api.app.router')),
+    url(r'', include('capitolzen.alerts.api.app.router'))
 ]
 
 urlpatterns = [
@@ -18,7 +19,6 @@ urlpatterns = [
     url(r'^api-token-auth/', obtain_jwt_token),
     url(r'^api-token-refresh/', refresh_jwt_token),
     url(r'', include('capitolzen.meta.urls')),
-    url(r'', include('capitolzen.alerts.urls'))
 ]
 
 urlpatterns += app_api_urls
