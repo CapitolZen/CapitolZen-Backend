@@ -5,13 +5,15 @@ from .models import Alerts
 logger = get_task_logger(__name__)
 
 
-@shared_task(name="create_alert_task")
-def create_alert_task():
+@shared_task
+def create_alert_task(bill):
+
+    # if bill.categories == 'shit':
 
     new_alert = Alerts.objects.create(
-            message='test alert time!'
-        )
+        message=bill,
+    )
 
-    # new_bill.serialize_history(data.history)
-    # new_bill.serialize_categories(data.categories)
     new_alert.save()
+
+    return new_alert

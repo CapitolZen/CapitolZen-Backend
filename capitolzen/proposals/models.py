@@ -5,6 +5,7 @@ from dry_rest_permissions.generics import allow_staff_or_superuser, authenticate
 from django.contrib.postgres.fields import ArrayField, JSONField
 from capitolzen.meta.states import AvailableStateChoices
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
+from capitolzen.alerts.tasks import create_alert_task
 
 
 class Bill(AbstractBaseModel):
@@ -41,6 +42,9 @@ class Bill(AbstractBaseModel):
 
     def serialize_history(self, data):
         self.history = data
+
+    def create_alert(self):
+        create_alert_task(self.title)
 
     @staticmethod
     @authenticated_users
