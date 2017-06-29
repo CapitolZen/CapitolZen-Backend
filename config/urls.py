@@ -18,10 +18,6 @@ urlpatterns = [
     url(r'^api-token-auth/', obtain_jwt_token),
     url(r'^api-token-refresh/', refresh_jwt_token),
     url(r'', include('capitolzen.meta.urls')),
-    url(r'', include('capitolzen.organizations.urls')),
-    url(r'', include('capitolzen.users.urls')),
-    url(r'', include('capitolzen.groups.urls')),
-    url(r'', include('capitolzen.proposals.urls')),
     url(r'', include('capitolzen.alerts.urls'))
 ]
 

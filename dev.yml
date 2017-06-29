@@ -38,7 +38,7 @@ services:
       - mailhog
     environment:
       - POSTGRES_USER=capitolzen
-      - POSTGRES_PASSWROD=capitolzen
+      - POSTGRES_PASSWORD=capitolzen
       - USE_DOCKER=yes
     volumes:
       - .:/app
