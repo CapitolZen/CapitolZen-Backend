@@ -7,6 +7,5 @@ class AlertsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Alerts
         fields = ('id', 'message')
-        lookup_field = 'message'
 
     id = serializers.ReadOnlyField()
