@@ -10,11 +10,14 @@ class Alerts(AbstractBaseModel):
 
     class Meta:
         abstract = False
-        verbose_name = "Alert"
-        verbose_name_plural = "Alerts"
+        verbose_name = "alert"
+        verbose_name_plural = "alert"
+
+    class JSONAPIMeta:
+        resource_name = "alerts"
 
     def __str__(self):
-        return self.message
+        return self
 
     @staticmethod
     @allow_staff_or_superuser
@@ -27,14 +30,21 @@ class Alerts(AbstractBaseModel):
         return False
 
     @staticmethod
+    @allow_staff_or_superuser
     def has_create_permission(request):
         return True
 
+    @staticmethod
+    @allow_staff_or_superuser
     def has_object_read_permission(self, request):
         return True
 
+    @staticmethod
+    @allow_staff_or_superuser
     def has_object_write_permission(self, request):
         return True
 
+    @staticmethod
+    @allow_staff_or_superuser
     def has_object_create_permission(self, request):
         return True

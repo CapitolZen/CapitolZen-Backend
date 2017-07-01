@@ -4,14 +4,9 @@ from capitolzen.alerts.models import Alerts
 
 class AlertsSerializer(serializers.ModelSerializer):
 
-
     class Meta:
         model = Alerts
-        fields = ('message',)
+        fields = ('id', 'message')
         lookup_field = 'message'
 
-    def create(self, validated_data):
-        message = super().create(validated_data)
-        message.set_password(validated_data['password'])
-        message.save()
-        return message
+    id = serializers.ReadOnlyField()
