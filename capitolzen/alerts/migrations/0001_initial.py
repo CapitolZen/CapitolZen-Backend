@@ -25,8 +25,8 @@ class Migration(migrations.Migration):
                 ('message', models.TextField(auto_created=True, serialize=False, verbose_name='message')),
             ],
             options={
-                'verbose_name_plural': 'Alerts',
-                'verbose_name': 'alerts',
+                'verbose_name_plural': 'alert',
+                'verbose_name': 'alert',
                 'abstract': False,
             },
         ),

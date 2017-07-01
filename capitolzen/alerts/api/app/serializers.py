@@ -6,6 +6,6 @@ class AlertsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Alerts
-        fields = ('id', 'message')
+        fields = ('id', 'message', 'created')
 
     id = serializers.ReadOnlyField()
