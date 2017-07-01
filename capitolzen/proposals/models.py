@@ -88,6 +88,7 @@ class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
 
     position = models.CharField(blank=True, max_length=255)
     notes = JSONField(blank=True, default=dict)
+    starred = models.BooleanField(default=False)
 
     @staticmethod
     def valid_position(position):
