@@ -52,3 +52,4 @@ class User(AbstractUser):
 
     def has_object_create_permission(self, request):
         return True
+
