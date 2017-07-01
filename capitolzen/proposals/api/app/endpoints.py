@@ -24,7 +24,7 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
 class WrapperFilter(filters.FilterSet):
     class Meta:
         model = Wrapper
-        fields = ['bill__state', 'bill__state_id', 'organization', 'group']
+        fields = ['bill__state', 'bill__state_id', 'bill__id', 'organization', 'group']
 
 
 class WrapperViewSet(viewsets.ModelViewSet):
