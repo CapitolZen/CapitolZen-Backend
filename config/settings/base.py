@@ -363,11 +363,6 @@ CELERYBEAT_SCHEDULE = {
         'task': 'capitolzen.proposals.tasks.get_new_bills',
         'schedule': crontab()
     },
-    'alert': {
-        'task': 'capitolzen.alerts.tasks.create_alert_task',
-        'schedule': crontab(),
-        'args': ('bill',)
-    }
 }
 
 # LOGGING CONFIGURATION

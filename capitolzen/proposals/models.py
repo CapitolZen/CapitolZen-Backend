@@ -43,9 +43,6 @@ class Bill(AbstractBaseModel):
     def serialize_history(self, data):
         self.history = data
 
-    def create_alert(self):
-        create_alert_task(self.title)
-
     @staticmethod
     @authenticated_users
     def has_read_permission(request):
@@ -64,6 +61,10 @@ class Bill(AbstractBaseModel):
     @allow_staff_or_superuser
     def has_create_permission(request):
         return True
+
+    def save(self, *args, **kwargs):
+        create_alert_task.delay()
+        super(Bill, self).save(*args, **kwargs)
 
 
 class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):

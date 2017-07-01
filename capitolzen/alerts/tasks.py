@@ -6,12 +6,10 @@ logger = get_task_logger(__name__)
 
 
 @shared_task
-def create_alert_task(bill):
-
-    # if bill.categories == 'shit':
+def create_alert_task():
 
     new_alert = Alerts.objects.create(
-        message=bill,
+        message='A bill was created!',
     )
 
     new_alert.save()
