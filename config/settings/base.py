@@ -409,6 +409,6 @@ LOGGING = {
 AWS_ACCESS_ID = env("AWS_ACCESSID", default='')
 AWS_SECRET_KEY = env("AWS_SECRETKEY", default='')
 AWS_REGION = env("AWS_REGION", default='us-east-1')
-
+AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
 # Location of root django.contrib.admin URL, use {% url 'admin:index' %}
 ADMIN_URL = r'^admin/'

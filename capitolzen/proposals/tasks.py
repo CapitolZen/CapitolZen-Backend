@@ -22,18 +22,35 @@ def get_new_bills():
         lower_bills = Bill.objects \
             .filter(state=state['id'], state_id__startswith=state['lower_bill_prefix']) \
             .order_by('state_id')\
-            .reverse()[0]
+            .reverse()
+
+        if not lower_bills.count():
+            lower_start = "%s-%s" % (state['lower_bill_prefix'], state['lower_bill_start'])
+            lower_bills = {"state_id": lower_start}
+        else:
+            lower_bills = lower_bills[0]
 
         upper_bills = Bill.objects \
             .filter(state=state['id'], state_id__startswith=state['upper_bill_prefix']) \
             .order_by('state_id')\
-            .reverse()[0]
+            .reverse()
 
+        if not upper_bills.count():
+            upper_start = "%s-%s" % (state['upper_bill_prefix'], state['upper_bill_start'])
+            upper_bills = {"state_id": upper_start}
+        else:
+            upper_bills = upper_bills[0]
+        print(upper_bills)
+        print(lower_bills)
         billies = [lower_bills, upper_bills]
-        for g in billies:
-            res = fetch_data(state['id'], g.state_id)
+        for bill in billies:
+            res = fetch_data(state['id'], bill.state_id)
+            data = res.get('data', None)
+            if not data:
+                print('nothing found')
+                continue
+            create_bill_from_source(data)
             next_bill = res.get('nextBill', False)
-            print(next_bill)
             if next_bill:
                 new_res = fetch_data(state['id'], next_bill)
                 data = new_res.get('data', False)
@@ -42,17 +59,17 @@ def get_new_bills():
 
 
 def create_bill_from_source(data):
-    new_bill = Bill.objects.create(
-        state_id=data['stateId'],
-        state=data['state'],
-        title=data['title'],
-        sponsor=data['sponsor'],
-        summary=data['summary'],
-        status=data['status'],
-        committee=data['currentCommittee'],
-    )
+    new_bill = Bill.objects.create()
 
-    # new_bill.serialize_history(data.history)
+    setattr(new_bill, 'state_id', data['state_id'])
+    setattr(new_bill, 'state', data['state'])
+    setattr(new_bill, 'title', data['title'])
+    setattr(new_bill, 'sponsor', data['sponsor'])
+    setattr(new_bill, 'summary', data['summary'])
+    setattr(new_bill, 'status', data['status'])
+    setattr(new_bill, 'current_committee', data['current_committee'])
+    setattr(new_bill, 'versions', data['versions'])
+    setattr(new_bill, 'history', data['history'])
     # new_bill.serialize_categories(data.categories)
     new_bill.save()
 

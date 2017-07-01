@@ -11,7 +11,7 @@ from capitolzen.alerts.tasks import create_alert_task
 class Bill(AbstractBaseModel):
     state = models.TextField(choices=AvailableStateChoices)
     status = models.TextField()
-    committee = models.TextField()
+    current_committee = models.TextField()
     sponsor = models.TextField()
     title = models.TextField()
     state_id = models.CharField(max_length=225)
@@ -20,6 +20,7 @@ class Bill(AbstractBaseModel):
         default=list
     )
     history = JSONField(default=dict, blank=True, null=True)
+    versions = JSONField(default=dict, blank=True)
     summary = models.TextField()
 
     class Meta:
@@ -83,26 +84,16 @@ class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         null=True
     )
 
-    # Includes group reference && position
-    groups = JSONField(blank=True, default=dict)
+    group = models.ForeignKey(
+        'groups.Group',
+        blank=False,
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    position = models.CharField(blank=True, max_length=255)
     notes = JSONField(blank=True, default=dict)
-
-    def update_group(self, group_id, position=False, note=''):
-        if not group_id:
-            raise Exception
-
-        if not self.valid_position(position):
-            raise Exception
-
-        groups = self.groups
-        new_group = {
-            'id': group_id,
-            'position': position,
-            'note': note
-        }
-
-        groups.append(new_group)
-        self.groups = groups
+    starred = models.BooleanField(default=False)
 
     @staticmethod
     def valid_position(position):
