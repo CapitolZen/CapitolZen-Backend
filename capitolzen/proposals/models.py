@@ -64,7 +64,7 @@ class Bill(AbstractBaseModel):
         return True
 
     def save(self, *args, **kwargs):
-        create_alert_task.delay()
+        create_alert_task.delay(self.title)
         super(Bill, self).save(*args, **kwargs)
 
 
