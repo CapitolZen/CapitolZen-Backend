@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import filters as django_filter
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticated
 
@@ -20,6 +21,12 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
                      'categories', 'status', 'state', 'current_committee')
 
 
+class WrapperFilter(filters.FilterSet):
+    class Meta:
+        model = Wrapper
+        fields = ['bill__state', 'bill__state_id', 'organization', 'group']
+
+
 class WrapperViewSet(viewsets.ModelViewSet):
     class Meta:
         ordering = ['bill__state', 'bill__state_id']
@@ -27,8 +34,8 @@ class WrapperViewSet(viewsets.ModelViewSet):
     permission_classes = (DRYPermissions,)
     serializer_class = WrapperSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    filter_fields = ('bill__state', 'group')
+    filter_class = WrapperFilter
 
     def get_queryset(self):
-        return Wrapper.objects.filter(organization__user=self.request.user),
+        return Wrapper.objects.filter(organization__users=self.request.user)
 

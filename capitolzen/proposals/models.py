@@ -79,26 +79,15 @@ class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         null=True
     )
 
-    # Includes group reference && position
-    groups = JSONField(blank=True, default=dict)
+    group = models.ForeignKey(
+        'groups.Group',
+        blank=False,
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    position = models.CharField(blank=True, max_length=255)
     notes = JSONField(blank=True, default=dict)
-
-    def update_group(self, group_id, position=False, note=''):
-        if not group_id:
-            raise Exception
-
-        if not self.valid_position(position):
-            raise Exception
-
-        groups = self.groups
-        new_group = {
-            'id': group_id,
-            'position': position,
-            'note': note
-        }
-
-        groups.append(new_group)
-        self.groups = groups
 
     @staticmethod
     def valid_position(position):
