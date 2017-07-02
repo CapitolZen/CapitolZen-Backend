@@ -7,6 +7,7 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from capitolzen.meta.clients import DocManager
 from capitolzen.groups.models import Group
 from capitolzen.users.api.app.serializers import UserSerializer
 from capitolzen.users.models import User
@@ -52,6 +53,13 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         users = organization.users.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def logo_upload(self):
+        organization = self.get_object()
+        c = DocManager(org_instance=organization)
+        url = c.upload_logo()
+        return Response({"status": status.HTTP_200_OK, "url": url})
 
     @list_route(methods=['get'])
     def current(self, request):

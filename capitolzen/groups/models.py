@@ -35,7 +35,7 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
 
 # TODO Permissions
 class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
-    author = models.ForeignKey('users.User', blank=True)
+    user = models.ForeignKey('users.User', blank=True)
     organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE)
     group = models.ForeignKey('groups.Group')
     attachments = JSONField(blank=True, default=dict)
@@ -43,6 +43,9 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     scheduled = models.BooleanField(default=False)
     status = FSMField(default='draft')
     publish_date = models.DateTimeField(blank=True)
+    publish_output = models.CharField(blank=True, max_length=255)
+    title = models.CharField(default="Generated Report", max_length=255)
+    description = models.TextField(blank=True)
 
     class JSONAPIMeta:
         resource_name = "reports"
