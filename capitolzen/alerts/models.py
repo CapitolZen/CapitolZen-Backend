@@ -7,6 +7,9 @@ from dry_rest_permissions.generics import allow_staff_or_superuser
 class Alerts(AbstractBaseModel):
 
     message = models.TextField()
+    user = models.TextField()
+    organization = models.TextField()
+    group = models.TextField()
 
     class Meta:
         abstract = False

@@ -4,7 +4,7 @@ from config.admin import BaseModelAdmin
 
 
 class AlertsAdmin(BaseModelAdmin):
-    list_display = ['message', 'created']
+    list_display = ['message', 'created', 'user', 'organization', 'group']
 
 admin.site.register(Alerts, AlertsAdmin)
 

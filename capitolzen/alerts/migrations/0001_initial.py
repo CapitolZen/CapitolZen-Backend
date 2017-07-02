@@ -4,6 +4,7 @@ import django.db.models.deletion
 import django.utils.timezone
 import model_utils.fields
 import uuid
+from capitolzen.users.models import User
 
 
 class Migration(migrations.Migration):
@@ -23,6 +24,9 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('meta', django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
                 ('message', models.TextField(auto_created=True, serialize=False, verbose_name='message')),
+                ('user', models.TextField(auto_created=True, serialize=False, verbose_name='user')),
+                ('organization', models.TextField(auto_created=True, serialize=False, verbose_name='user')),
+                ('group', models.TextField(auto_created=True, serialize=False, verbose_name='user')),
             ],
             options={
                 'verbose_name_plural': 'alert',
