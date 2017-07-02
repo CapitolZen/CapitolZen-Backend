@@ -3,6 +3,8 @@ from config.models import AbstractBaseModel
 from django.db import models
 from dry_rest_permissions.generics import allow_staff_or_superuser
 from capitolzen.organizations.models import Organization
+from capitolzen.groups.models import Group
+from capitolzen.users.models import User
 
 
 class Alerts(AbstractBaseModel):
