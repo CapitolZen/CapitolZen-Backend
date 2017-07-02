@@ -26,8 +26,8 @@ class Migration(migrations.Migration):
                 ('meta', django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
                 ('message', models.TextField(auto_created=True, serialize=False, verbose_name='message')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='users.User')),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='organizations.Organization')),
-                ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='groups.Group')),
+                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='organizations.Organization', db_constraint=False, null=True)),
+                ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='groups.Group', db_constraint=False, null=True)),
             ],
             options={
                 'verbose_name_plural': 'alert',
