@@ -2,14 +2,30 @@ from django.contrib.auth.models import AbstractUser
 from config.models import AbstractBaseModel
 from django.db import models
 from dry_rest_permissions.generics import allow_staff_or_superuser
+from capitolzen.organizations.models import Organization
 
 
 class Alerts(AbstractBaseModel):
 
+    organization = models.ForeignKey(
+        'organizations.Organization',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    group = models.ForeignKey(
+        'groups.Group',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     message = models.TextField()
-    user = models.TextField()
-    organization = models.TextField()
-    group = models.TextField()
 
     class Meta:
         abstract = False
