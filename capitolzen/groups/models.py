@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from json import dumps
 from django.db import models
 from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser
@@ -14,12 +15,13 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     description = models.TextField(blank=True, null=True)
     contacts = JSONField(blank=True, null=True)
     logo = models.URLField(blank=True, null=True)
+    starred = models.BooleanField(default=False)
+    attachments = JSONField(blank=True, null=True)
+
     organization = models.ForeignKey(
         'organizations.Organization',
         on_delete=models.CASCADE,
     )
-
-    attachments = JSONField(blank=True, null=True)
 
     class JSONAPIMeta:
         resource_name = "groups"
@@ -34,18 +36,19 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
 
 
 # TODO Permissions
-class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization, ReportOutPutMixin):
     user = models.ForeignKey('users.User', blank=True)
     organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE)
     group = models.ForeignKey('groups.Group')
     attachments = JSONField(blank=True, default=dict)
-    bills = JSONField(blank=True, default=dict)
+    wrappers = JSONField(blank=True, default=dict)
     scheduled = models.BooleanField(default=False)
     status = FSMField(default='draft')
     publish_date = models.DateTimeField(blank=True)
     publish_output = models.CharField(blank=True, max_length=255)
     title = models.CharField(default="Generated Report", max_length=255)
     description = models.TextField(blank=True)
+    template = JSONField(default=dict)
 
     class JSONAPIMeta:
         resource_name = "reports"
@@ -54,6 +57,7 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         abstract = False
         verbose_name = "report"
         verbose_name_plural = "reports"
+
 
     @transition(field=status, source='draft', target='published')
     def publish(self):
