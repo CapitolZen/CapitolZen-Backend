@@ -17,11 +17,7 @@ class AlertsFilterBackend(DRYPermissionFiltersBase):
     """
 
     def filter_list_queryset(self, request, queryset, view):
-
-        if request.user.is_anonymous():
-            # Return nothing if the user isn't authed
-            raise NotAuthenticated()
-
+        queryset = Alerts.objects.filter(user=request.user)
         return queryset
 
 

@@ -29,6 +29,8 @@ class Alerts(AbstractBaseModel):
     )
     message = models.TextField()
 
+    is_read = models.BooleanField(null=False)
+
     class Meta:
         abstract = False
         verbose_name = "alert"
