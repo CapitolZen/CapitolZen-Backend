@@ -86,11 +86,11 @@ class AlertsViewSet(viewsets.ModelViewSet):
         return Response(AlertsSerializer(request.user).data)
 
     @detail_route(methods=['POST'])
-    def dismiss(self, request):
-        serializer = AlertsSerializer(data=request.data)
-        if serializer.is_valid():
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def dismiss(self, request, id):
+        thing = Alerts.objects.get(id=id)
+        thing.is_read = True
+        thing.save()
+        return Response(id, status=status.HTTP_200_OK)
 
     permission_classes = (DRYPermissions, )
     serializer_class = AlertsSerializer

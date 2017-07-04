@@ -33,3 +33,4 @@ class AlertsSerializer(serializers.ModelSerializer):
         fields = ('id', 'message', 'is_read', 'created', 'user', 'organization', 'group')
 
     id = serializers.ReadOnlyField()
+    message = serializers.ReadOnlyField(required=False)
