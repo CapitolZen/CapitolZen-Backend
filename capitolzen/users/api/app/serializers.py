@@ -1,7 +1,7 @@
 from rest_framework_json_api import serializers
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework.validators import UniqueValidator
-from capitolzen.users.models import User
+from capitolzen.users.models import User, Alerts
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,3 +24,12 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+
+class AlertsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Alerts
+        fields = ('id', 'message', 'is_read', 'created', 'user', 'organization', 'group')
+
+    id = serializers.ReadOnlyField()

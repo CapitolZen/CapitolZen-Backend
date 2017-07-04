@@ -64,8 +64,7 @@ LOCAL_APPS = [
     'capitolzen.users.apps.UsersConfig',
     'capitolzen.organizations.apps.OrganizationsConfig',
     'capitolzen.groups.apps.GroupsConfig',
-    'capitolzen.proposals.apps.ProposalsConfig',
-    'capitolzen.alerts.apps.AlertConfig'
+    'capitolzen.proposals.apps.ProposalsConfig'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + ADMIN_APPS + THIRD_PARTY_APPS + LOCAL_APPS

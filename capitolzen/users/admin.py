@@ -1,8 +1,9 @@
 from django import forms
 from django.contrib import admin
+from config.admin import BaseModelAdmin
 from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
-from .models import User
+from .models import User, Alerts
 
 
 class MyUserChangeForm(UserChangeForm):
@@ -37,3 +38,9 @@ class MyUserAdmin(AuthUserAdmin):
     ) + AuthUserAdmin.fieldsets
     list_display = ('username', 'name', 'is_superuser')
     search_fields = ['name']
+
+
+class AlertsAdmin(BaseModelAdmin):
+    list_display = ['message', 'is_read', 'created', 'user', 'organization', 'group']
+
+admin.site.register(Alerts, AlertsAdmin)

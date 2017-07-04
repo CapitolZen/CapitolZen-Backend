@@ -8,8 +8,7 @@ app_api_urls = [
     url(r'', include('capitolzen.organizations.api.app.router')),
     url(r'', include('capitolzen.users.api.app.router')),
     url(r'', include('capitolzen.groups.api.app.router')),
-    url(r'', include('capitolzen.proposals.api.app.router')),
-    url(r'', include('capitolzen.alerts.api.app.router'))
+    url(r'', include('capitolzen.proposals.api.app.router'))
 ]
 
 urlpatterns = [

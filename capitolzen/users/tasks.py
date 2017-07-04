@@ -21,4 +21,3 @@ def create_alert_task(title, categories):
         )
 
     new_alert.save()
-
