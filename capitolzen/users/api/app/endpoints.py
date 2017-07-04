@@ -87,9 +87,9 @@ class AlertsViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['POST'])
     def dismiss(self, request, id):
-        thing = Alerts.objects.get(id=id)
-        thing.is_read = True
-        thing.save()
+        alert = Alerts.objects.get(id=id)
+        alert.is_read = True
+        alert.save()
         return Response(id, status=status.HTTP_200_OK)
 
     permission_classes = (DRYPermissions, )
