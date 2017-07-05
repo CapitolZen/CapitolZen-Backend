@@ -57,6 +57,20 @@ ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['example.com', ])
 
 INSTALLED_APPS += ['gunicorn', ]
 
+# CACHE
+# ------------------------------------------------------------------------------
+# Redis apparently doesn't really do the muti-db thing much anymore
+# works fine for local stuff but the recommended way now is to have
+# multiple endpoints.
+
+CACHES['default']['LOCATION'] = '{0}/{1}'.format(env('CACHE_APP_DEFAULT_URL',
+                                      default='redis://redis:6379'), 0)
+
+CACHEOPS_REDIS = '{0}/{1}'.format(env('CACHE_APP_OPCACHE_URL',
+                                      default='redis://127.0.0.1:6379'), 0)
+
+BROKER_URL = '{0}/{1}'.format(env('CACHE_APP_CELERY_URL', default='redis://127.0.0.1:6379'), 0)
+CELERY_RESULT_BACKEND = '{0}/{1}'.format(env('CACHE_APP_CELERY_URL', default='redis://127.0.0.1:6379'), 0)
 
 # STORAGE CONFIGURATION
 # ------------------------------------------------------------------------------
