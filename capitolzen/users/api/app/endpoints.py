@@ -81,6 +81,10 @@ class AlertsViewSet(viewsets.ModelViewSet):
         else:
             return super(AlertsViewSet, self).list(self, request, *args, **kwargs)
 
+    def get_queryset(self):
+        user = self.request.user
+        return Alerts.objects.filter(user=user)
+
     @list_route(methods=['GET'])
     def current(self, request):
         return Response(AlertsSerializer(request.user).data)
