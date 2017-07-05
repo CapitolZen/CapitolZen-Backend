@@ -72,15 +72,6 @@ class AlertsFilterBackend(DRYPermissionFiltersBase):
 
 
 class AlertsViewSet(viewsets.ModelViewSet):
-    def list(self, request, *args, **kwargs):
-        if "alerts" in request._request.GET:
-            # = request._request.GET['alerts']
-            alert = Alerts.obects.all()
-            serializer = AlertsSerializer(alert, many=True)
-            return Response(serializer.data)
-        else:
-            return super(AlertsViewSet, self).list(self, request, *args, **kwargs)
-
     def get_queryset(self):
         user = self.request.user
         return Alerts.objects.filter(user=user)
