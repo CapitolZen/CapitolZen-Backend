@@ -89,7 +89,7 @@ class AlertsViewSet(viewsets.ModelViewSet):
 
     permission_classes = (DRYPermissions, )
     serializer_class = AlertsSerializer
-    queryset = Alerts.objects.all()
+    queryset = Alerts.objects.get_queryset()
     filter_backends = (AlertsFilterBackend, DjangoFilterBackend)
     lookup_field = "id"
 
