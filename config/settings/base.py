@@ -139,7 +139,7 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
 CACHEOPS_REDIS = '{0}/{1}'.format(env('REDIS_URL',
-                                      default='redis://127.0.0.1:6379'), 3)
+                                      default='redis://127.0.0.1:6379'), 2)
 
 CACHEOPS_DEFAULTS = {
     'timeout': 60*60
