@@ -36,7 +36,7 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
 
 
 # TODO Permissions
-class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization, ReportOutPutMixin):
+class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     user = models.ForeignKey('users.User', blank=True)
     organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE)
     group = models.ForeignKey('groups.Group')
@@ -57,7 +57,6 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization, ReportOutPutM
         abstract = False
         verbose_name = "report"
         verbose_name_plural = "reports"
-
 
     @transition(field=status, source='draft', target='published')
     def publish(self):

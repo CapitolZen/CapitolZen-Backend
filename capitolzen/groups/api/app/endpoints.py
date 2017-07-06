@@ -56,7 +56,11 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 class ReportViewSet(viewsets.ModelViewSet):
+    def get_queryset(self):
+        queryset = Report.objects.filter(organization__users=self.request.user)
+        return queryset
+
     serializer_class = ReportSerializer
-    queryset = Report.objects.all()
     permission_classes = (DRYPermissions,)
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
+    filter_fields = ('organization', 'group', 'created', 'status', 'title', 'user')
