@@ -32,7 +32,7 @@ class Bill(AbstractBaseModel):
 
     def update_from_source(self, data):
         self.status = data['status']
-        self.committee = data['currentCommittee']
+        self.current_committee = data['current_committee']
         self.serialize_history(data['history'])
         self.serialize_categories(data['categories'])
         self.save()

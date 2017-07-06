@@ -1,5 +1,6 @@
-from celery import shared_task
+from collections import namedtuple
 from json import dumps, loads
+from celery import shared_task
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from capitolzen.meta.states import AVAILABLE_STATES
 from capitolzen.meta.clients import aws_client
@@ -12,51 +13,54 @@ SEARCH_FUNCTION = 'capitolzen_search_bills'
 @shared_task
 def update_all_bills():
     for state in AVAILABLE_STATES:
-        bills = Bill.objects.filter(state=state['id'])
+        bills = Bill.objects.filter(state=state.name)
         for bill in bills:
-            update_bill_from_source(state=state['id'], bill_id=bill['state_id'])
+            update_bill_from_source(state=state.name, bill_id=bill.state_id)
 
 
 @shared_task
 def get_new_bills():
+
+    BillStruct = namedtuple('BillStruct', 'state_id')
+
     for state in AVAILABLE_STATES:
         lower_bills = Bill.objects \
-            .filter(state=state['id'], state_id__startswith=state['lower_bill_prefix']) \
+            .filter(state=state.name, state_id__startswith=state.lower_bill_prefix) \
             .order_by('state_id')\
             .reverse()
 
         if not lower_bills.count():
-            lower_start = "%s-%s" % (state['lower_bill_prefix'], state['lower_bill_start'])
-            lower_bills = {"state_id": lower_start}
+            lower_start = "%s-%s" % (state.lower_bill_prefix, state.lower_bill_start)
+            lower_bills = BillStruct(state_id=lower_start)
         else:
             lower_bills = lower_bills[0]
 
         upper_bills = Bill.objects \
-            .filter(state=state['id'], state_id__startswith=state['upper_bill_prefix']) \
+            .filter(state=state.name, state_id__startswith=state.upper_bill_prefix) \
             .order_by('state_id')\
             .reverse()
 
         if not upper_bills.count():
-            upper_start = "%s-%s" % (state['upper_bill_prefix'], state['upper_bill_start'])
-            upper_bills = {"state_id": upper_start}
+            upper_start = "%s-%s" % (state.upper_bill_prefix, state.upper_bill_start)
+            upper_bills = BillStruct(state_id=upper_start)
         else:
             upper_bills = upper_bills[0]
 
         billies = [lower_bills, upper_bills]
         for bill in billies:
-            res = fetch_data(state['id'], bill.state_id)
+            res = fetch_data(state.name, bill.state_id)
             data = res.get('data', None)
             if not data:
                 continue
 
-            create_bill_from_source(state[id], bill.state_id, data)
+            create_bill_from_source(state.name, bill.state_id, data)
 
             next_bill = res.get('nextBill', False)
             if next_bill:
-                new_res = fetch_data(state['id'], next_bill)
+                new_res = fetch_data(state.name, next_bill)
                 data = new_res.get('data', False)
                 if data:
-                    create_bill_from_source(data)
+                    create_bill_from_source(data['state'], data['state_id'], data)
 
 
 def create_bill_from_source(state, state_id, data):
