@@ -34,7 +34,7 @@ class Bill(AbstractBaseModel):
         self.status = data['status']
         self.current_committee = data['current_committee']
         self.serialize_history(data['history'])
-        self.serialize_categories(data['categories'])
+        # self.serialize_categories(data['categories'])
         self.save()
 
     def serialize_categories(self, data):
@@ -86,7 +86,7 @@ class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         null=True
     )
 
-    position = models.CharField(blank=True, max_length=255)
+    position = models.CharField(blank=True, max_length=255, )
     notes = JSONField(blank=True, default=dict)
     starred = models.BooleanField(default=False)
 
