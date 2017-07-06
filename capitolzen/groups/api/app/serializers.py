@@ -19,7 +19,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class ReportSerializer(serializers.ModelSerializer):
-    author = ResourceRelatedField(
+    user = ResourceRelatedField(
         many=False,
         queryset=User.objects
     )
@@ -34,8 +34,8 @@ class ReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Report
-        fields = ('id', 'created', 'organization', 'group', 'bills',
-                  'attachments', 'status', 'scheduled', 'publish_date', 'author')
+        fields = ('id', 'created', 'organization', 'group', 'wrappers',
+                  'attachments', 'status', 'scheduled', 'publish_date', 'user')
 
 
 class CommentSerializer(serializers.ModelSerializer):

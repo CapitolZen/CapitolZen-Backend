@@ -1,5 +1,6 @@
 from celery import shared_task
 from json import dumps, loads
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from capitolzen.meta.states import AVAILABLE_STATES
 from capitolzen.meta.clients import aws_client
 from .models import Bill
@@ -40,16 +41,16 @@ def get_new_bills():
             upper_bills = {"state_id": upper_start}
         else:
             upper_bills = upper_bills[0]
-        print(upper_bills)
-        print(lower_bills)
+
         billies = [lower_bills, upper_bills]
         for bill in billies:
             res = fetch_data(state['id'], bill.state_id)
             data = res.get('data', None)
             if not data:
-                print('nothing found')
                 continue
-            create_bill_from_source(data)
+
+            create_bill_from_source(state[id], bill.state_id, data)
+
             next_bill = res.get('nextBill', False)
             if next_bill:
                 new_res = fetch_data(state['id'], next_bill)
@@ -58,20 +59,24 @@ def get_new_bills():
                     create_bill_from_source(data)
 
 
-def create_bill_from_source(data):
-    new_bill = Bill.objects.create()
+def create_bill_from_source(state, state_id, data):
+    exists = bill_exists(state, state_id,)
+    if exists:
+        update_bill(state, state_id, data)
+    else:
+        new_bill = Bill.objects.create()
 
-    setattr(new_bill, 'state_id', data['state_id'])
-    setattr(new_bill, 'state', data['state'])
-    setattr(new_bill, 'title', data['title'])
-    setattr(new_bill, 'sponsor', data['sponsor'])
-    setattr(new_bill, 'summary', data['summary'])
-    setattr(new_bill, 'status', data['status'])
-    setattr(new_bill, 'current_committee', data['current_committee'])
-    setattr(new_bill, 'versions', data['versions'])
-    setattr(new_bill, 'history', data['history'])
-    # new_bill.serialize_categories(data.categories)
-    new_bill.save()
+        setattr(new_bill, 'state_id', data['state_id'])
+        setattr(new_bill, 'state', data['state'])
+        setattr(new_bill, 'title', data['title'])
+        setattr(new_bill, 'sponsor', data['sponsor'])
+        setattr(new_bill, 'summary', data['summary'])
+        setattr(new_bill, 'status', data['status'])
+        setattr(new_bill, 'current_committee', data['current_committee'])
+        setattr(new_bill, 'versions', data['versions'])
+        setattr(new_bill, 'history', data['history'])
+        # new_bill.serialize_categories(data.categories)
+        new_bill.save()
 
 
 def update_bill_from_source(state, bill_id):
@@ -79,7 +84,6 @@ def update_bill_from_source(state, bill_id):
     data = response.get('data', False)
     if not data:
         return None
-
     output = {'next_bill': False}
     try:
         bill = Bill.objects.get(state_id=data['stateId'], state=data['state'])
@@ -113,3 +117,18 @@ def fetch_data(state, bill_id):
     response = res['Payload'].read()
     return loads(response)
 
+
+def update_bill(state, state_id, data):
+    bill = Bill.objects.get(state=state, state_id=state_id)
+    bill.update_from_source(data)
+
+
+def bill_exists(state, state_id):
+    try:
+        Bill.objects.get(state=state, state_id=state_id)
+        return True
+    except MultipleObjectsReturned:
+        # TODO: add logging/error reporting here
+        return True
+    except ObjectDoesNotExist:
+        return False
