@@ -17,6 +17,7 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     logo = models.URLField(blank=True, null=True)
     starred = models.BooleanField(default=False)
     attachments = JSONField(blank=True, null=True)
+    saved_filters = JSONField(default=dict)
 
     organization = models.ForeignKey(
         'organizations.Organization',
@@ -49,6 +50,7 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     title = models.CharField(default="Generated Report", max_length=255)
     description = models.TextField(blank=True)
     template = JSONField(default=dict)
+    recurring = models.BooleanField(default=False)
 
     class JSONAPIMeta:
         resource_name = "reports"

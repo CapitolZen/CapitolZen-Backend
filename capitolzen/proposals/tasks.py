@@ -79,6 +79,8 @@ def create_bill_from_source(state, state_id, data):
         setattr(new_bill, 'current_committee', data['current_committee'])
         setattr(new_bill, 'versions', data['versions'])
         setattr(new_bill, 'history', data['history'])
+        setattr(new_bill, 'last_action_date', data['last_action_date'])
+        setattr(new_bill, 'remote_url', data['remote_url'])
         # new_bill.serialize_categories(data.categories)
         new_bill.save()
 
