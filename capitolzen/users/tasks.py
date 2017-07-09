@@ -16,7 +16,7 @@ def create_alert_task(title, categories, bill):
         new_alert = Alerts.objects.create(
             message='A new bill called ' + title + ' has been created.',
             user=user,
-            bill=bill
+            # bill=bill
             # group='test',
             # organization='test'
         )
