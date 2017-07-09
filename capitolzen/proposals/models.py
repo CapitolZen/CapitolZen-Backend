@@ -65,7 +65,7 @@ class Bill(AbstractBaseModel):
 
     def save(self, *args, **kwargs):
         super(Bill, self).save(*args, **kwargs)
-        create_alert_task.delay(self.title, self.categories)
+        create_alert_task.delay(self.title, self.categories, self.id, self.state, self.state_id)
 
 
 class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
