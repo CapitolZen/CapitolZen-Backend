@@ -76,12 +76,12 @@ class Alerts(AbstractBaseModel):
         blank=True
     )
     
-    bill = models.ForeignKey(
-        'proposals.Bill',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
+    # bill = models.ForeignKey(
+    #    'proposals.Bill',
+    #    on_delete=models.CASCADE,
+    #    null=True,
+    #    blank=True
+    # )
     
     is_read = models.BooleanField(default=False)
     message = models.TextField()
