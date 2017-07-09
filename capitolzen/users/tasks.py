@@ -7,7 +7,7 @@ logger = get_task_logger(__name__)
 
 
 @shared_task
-def create_alert_task(title, categories):
+def create_alert_task(title, categories, bill):
 
     temp = categories
     users = User.objects.all()
@@ -16,6 +16,7 @@ def create_alert_task(title, categories):
         new_alert = Alerts.objects.create(
             message='A new bill called ' + title + ' has been created.',
             user=user,
+            bill=bill
             # group='test',
             # organization='test'
         )
