@@ -5,6 +5,7 @@ from dry_rest_permissions.generics import allow_staff_or_superuser, authenticate
 from django.contrib.postgres.fields import ArrayField, JSONField
 from capitolzen.meta.states import AvailableStateChoices
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
+from capitolzen.users.tasks import create_alert_task
 
 
 class Bill(AbstractBaseModel):
@@ -61,6 +62,10 @@ class Bill(AbstractBaseModel):
     @allow_staff_or_superuser
     def has_create_permission(request):
         return True
+
+    def save(self, *args, **kwargs):
+        super(Bill, self).save(*args, **kwargs)
+        create_alert_task.delay(self.title, self.categories, self)
 
 
 class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):

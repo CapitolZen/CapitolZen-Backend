@@ -11,3 +11,9 @@ class UsersConfig(AppConfig):
             Users signal registration
         """
         pass
+
+
+class AlertConfig(AppConfig):
+    name = 'capitolzen.alerts'
+    label = 'alerts'
+    verbose_name = 'Alerts'

@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from config.models import AbstractBaseModel
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
@@ -53,3 +54,69 @@ class User(AbstractUser):
     def has_object_create_permission(self, request):
         return True
 
+
+class Alerts(AbstractBaseModel):
+
+    organization = models.ForeignKey(
+        'organizations.Organization',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    group = models.ForeignKey(
+        'groups.Group',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    
+    # bill = models.ForeignKey(
+    #    'proposals.Bill',
+    #    on_delete=models.CASCADE,
+    #    null=True,
+    #    blank=True
+    # )
+    
+    is_read = models.BooleanField(default=False)
+    message = models.TextField()
+
+    class Meta:
+        abstract = False
+        verbose_name = "alert"
+        verbose_name_plural = "alert"
+
+    class JSONAPIMeta:
+        resource_name = "alerts"
+
+    @staticmethod
+    @allow_staff_or_superuser
+    def has_read_permission(request):
+        return True
+
+    @staticmethod
+    @allow_staff_or_superuser
+    def has_write_permission(request):
+        return False
+
+    @staticmethod
+    @allow_staff_or_superuser
+    def has_create_permission(request):
+        return True
+
+    @allow_staff_or_superuser
+    def has_object_read_permission(self, request):
+        return True
+
+    @allow_staff_or_superuser
+    def has_object_write_permission(self, request):
+        return True
+
+    @allow_staff_or_superuser
+    def has_object_create_permission(self, request):
+        return True

@@ -2,13 +2,16 @@ from django_filters.rest_framework import DjangoFilterBackend
 from dry_rest_permissions.generics import DRYPermissionFiltersBase
 from dry_rest_permissions.generics import DRYPermissions
 from rest_framework import viewsets
-from rest_framework.decorators import list_route
+from rest_framework.decorators import list_route, detail_route
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
 
 from capitolzen.organizations.models import Organization
 from capitolzen.users.api.app.serializers import UserSerializer
 from capitolzen.users.models import User
+from capitolzen.users.api.app.serializers import AlertsSerializer
+from capitolzen.users.models import Alerts
+from rest_framework import status
 
 
 class UserFilterBackend(DRYPermissionFiltersBase):
@@ -60,3 +63,33 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     filter_backends = (UserFilterBackend, DjangoFilterBackend)
     lookup_field = "username"
+
+
+class AlertsFilterBackend(DRYPermissionFiltersBase):
+    def filter_list_queryset(self, request, queryset, view):
+        queryset = Alerts.objects.filter(user=request.user)
+        return queryset
+
+
+class AlertsViewSet(viewsets.ModelViewSet):
+    def get_queryset(self):
+        user = self.request.user
+        return Alerts.objects.filter(user=user)
+
+    @list_route(methods=['GET'])
+    def current(self, request):
+        return Response(AlertsSerializer(request.user).data)
+
+    @detail_route(methods=['POST'])
+    def dismiss(self, request, id):
+        alert = Alerts.objects.get(id=id)
+        alert.is_read = True
+        alert.save()
+        return Response(id, status=status.HTTP_200_OK)
+
+    permission_classes = (DRYPermissions, )
+    serializer_class = AlertsSerializer
+    queryset = Alerts.objects.get_queryset()
+    filter_backends = (AlertsFilterBackend, DjangoFilterBackend)
+    lookup_field = "id"
+
