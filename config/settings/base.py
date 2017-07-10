@@ -360,7 +360,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'data_import': {
         'task': 'capitolzen.proposals.tasks.get_new_bills',
-        'schedule': crontab()
+        'schedule': crontab(minute=0, hour='*/3')
     }
 }
 

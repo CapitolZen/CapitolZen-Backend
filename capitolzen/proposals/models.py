@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from datetime import datetime
 from django.db import models
 from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser, authenticated_users
@@ -22,6 +23,9 @@ class Bill(AbstractBaseModel):
     history = JSONField(default=dict, blank=True, null=True)
     versions = JSONField(default=dict, blank=True)
     summary = models.TextField()
+    last_action_date = models.DateTimeField(default=datetime.now())
+    affected_section = models.TextField(blank=True, null=True)
+    remote_url = models.URLField(null=True, blank=True)
 
     class Meta:
         abstract = False
@@ -35,6 +39,7 @@ class Bill(AbstractBaseModel):
         self.status = data['status']
         self.current_committee = data['current_committee']
         self.serialize_history(data['history'])
+        self.last_action_date = data['last_action_date']
         # self.serialize_categories(data['categories'])
         self.save()
 

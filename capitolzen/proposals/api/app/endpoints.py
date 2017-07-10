@@ -17,8 +17,8 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = BillSerializer
     queryset = Bill.objects.all().order_by('state', 'state_id')
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    search_fields = ('sponsor', 'title', 'state_id', 'summary',
-                     'categories', 'status', 'state', 'current_committee')
+    search_fields = ('sponsor', 'title', 'state_id', 'summary', 'last_action_date',
+                     'categories', 'status', 'state', 'current_committee', 'affected_section')
 
 
 class WrapperFilter(filters.FilterSet):
