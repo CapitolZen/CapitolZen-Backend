@@ -1,3 +1,4 @@
+from json import loads
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from dry_rest_permissions.generics import (DRYPermissions,
@@ -58,15 +59,21 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     def logo_upload(self):
         organization = self.get_object()
         c = DocManager(org_instance=organization)
-        url = c.upload_logo()
-        return Response({"status": status.HTTP_200_OK, "url": url})
+        params = c.upload_logo()
+        params['acl'] = 'public-read'
+        return Response({"status": status.HTTP_200_OK, "params": params})
 
-    @detail_route(methods=['get'])
-    def asset_upload(self, request):
+    @detail_route(methods=['POST'])
+    def asset_upload(self, request, pk):
         organization = self.get_object()
         c = DocManager(org_instance=organization)
-        url = c.upload_asset(request.group_id)
-        return Response({"status": status.HTTP_200_OK, "url": url})
+
+        data = loads(request.body)
+
+        acl = data.get('acl', False)
+        params = c.upload_asset(file=data['file_name'], group_id=data['group_id'], acl=acl)
+
+        return Response({"status": status.HTTP_200_OK, "params": params})
 
     @list_route(methods=['get'])
     def current(self, request):

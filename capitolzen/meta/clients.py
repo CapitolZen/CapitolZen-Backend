@@ -16,39 +16,38 @@ def aws_client(service='lambda'):
 class DocManager:
     def __init__(self, org_instance):
         self.organization = org_instance
-        client = aws_client(service='s3')
-        self.client = client()
+        self.client = aws_client('s3')
         self.bucket = settings.AWS_BUCKET_NAME
 
     def upload_logo(self):
         key = "%s/organization/assets/" % self.organization.id
         conditions = [
             {'acl': 'public-read'},
-            {'starts-with', '$key', key}
+            {'success_action_status': '201'}
         ]
-
-        url = self.client.generate_presigned_post(
+        data = self.client.generate_presigned_post(
             Bucket=self.bucket,
+            Key=key,
             Conditions=conditions
         )
+        return data
 
-        return url
-
-    def upload_asset(self, group_id=False):
+    def upload_asset(self, file, acl=False, group_id=False):
         if not group_id:
-            key = "%s/uploads/" % self.organization.id
-            conditions = [
-                {'acl': 'public-read'},
-                {'starts-with', '$key', key}
-            ]
+            key = "%s/uploads/%s" % (self.organization.id, file)
         else:
-            key = "%s/%s/uploads/" % (self.organization.id, group_id)
-            conditions = [
-                {'acl': 'public-read'},
-                {'starts-with', '$key', key}
-            ]
-        url = self.client.generate_presigned_post(
+            key = "%s/%s/uploads/%s" % (self.organization.id, group_id, file)
+
+        if not acl:
+            acl = 'public-read'
+
+        conditions = [
+            {'acl': acl},
+            {'success_action_status': '201'}
+        ]
+        data = self.client.generate_presigned_post(
             Bucket=self.bucket,
+            Key=key,
             Conditions=conditions
         )
-        return url
+        return data
