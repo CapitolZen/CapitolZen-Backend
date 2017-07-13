@@ -16,20 +16,19 @@ def aws_client(service='lambda'):
 class DocManager:
     def __init__(self, org_instance):
         self.organization = org_instance
-        client = aws_client(service='s3')
-        self.client = client()
+        self.client = aws_client('s3')
         self.bucket = settings.AWS_BUCKET_NAME
 
     def upload_logo(self):
         key = "%s/organization/assets/" % self.organization.id
-        conditions = [
-            {'acl': 'public-read'},
-            {'starts-with', '$key', key}
-        ]
 
-        url = self.client.generate_presigned_post(
-            Bucket=self.bucket,
-            Conditions=conditions
+        params = {
+            'Bucket': self.bucket,
+            'Key': key,
+        }
+        url = self.client.generate_presigned_url(
+            'put_object',
+            Params=params,
         )
 
         return url
@@ -37,18 +36,15 @@ class DocManager:
     def upload_asset(self, group_id=False):
         if not group_id:
             key = "%s/uploads/" % self.organization.id
-            conditions = [
-                {'acl': 'public-read'},
-                {'starts-with', '$key', key}
-            ]
         else:
             key = "%s/%s/uploads/" % (self.organization.id, group_id)
-            conditions = [
-                {'acl': 'public-read'},
-                {'starts-with', '$key', key}
-            ]
-        url = self.client.generate_presigned_post(
-            Bucket=self.bucket,
-            Conditions=conditions
+
+        params = {
+            'Bucket': self.bucket,
+            'Key': key,
+        }
+        url = self.client.generate_presigned_url(
+            'put_object',
+            Params=params,
         )
         return url

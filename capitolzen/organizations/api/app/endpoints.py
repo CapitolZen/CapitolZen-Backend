@@ -62,10 +62,10 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         return Response({"status": status.HTTP_200_OK, "url": url})
 
     @detail_route(methods=['get'])
-    def asset_upload(self, request):
+    def asset_upload(self, request, pk):
         organization = self.get_object()
         c = DocManager(org_instance=organization)
-        url = c.upload_asset(request.group_id)
+        url = c.upload_asset(request.query_params['group_id'])
         return Response({"status": status.HTTP_200_OK, "url": url})
 
     @list_route(methods=['get'])
