@@ -21,10 +21,14 @@ class DocManager:
 
     def upload_logo(self):
         key = "%s/organization/assets/" % self.organization.id
-
+        conditions = [
+            {'acl': 'public-read'},
+            {'success_action_status': '201'}
+        ]
         data = self.client.generate_presigned_post(
             Bucket=self.bucket,
             Key=key,
+            Conditions=conditions
         )
         return data
 

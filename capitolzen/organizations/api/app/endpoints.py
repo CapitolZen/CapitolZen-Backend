@@ -60,6 +60,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         organization = self.get_object()
         c = DocManager(org_instance=organization)
         params = c.upload_logo()
+        params['acl'] = 'public-read'
         return Response({"status": status.HTTP_200_OK, "params": params})
 
     @detail_route(methods=['POST'])
