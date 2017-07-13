@@ -22,29 +22,28 @@ class DocManager:
     def upload_logo(self):
         key = "%s/organization/assets/" % self.organization.id
 
-        params = {
-            'Bucket': self.bucket,
-            'Key': key,
-        }
-        url = self.client.generate_presigned_url(
-            'put_object',
-            Params=params,
+        data = self.client.generate_presigned_post(
+            Bucket=self.bucket,
+            Key=key,
         )
+        return data
 
-        return url
-
-    def upload_asset(self, group_id=False):
+    def upload_asset(self, file, acl=False, group_id=False):
         if not group_id:
-            key = "%s/uploads/" % self.organization.id
+            key = "%s/uploads/%s" % (self.organization.id, file)
         else:
-            key = "%s/%s/uploads/" % (self.organization.id, group_id)
+            key = "%s/%s/uploads/%s" % (self.organization.id, group_id, file)
 
-        params = {
-            'Bucket': self.bucket,
-            'Key': key,
-        }
-        url = self.client.generate_presigned_url(
-            'put_object',
-            Params=params,
+        if not acl:
+            acl = 'public-read'
+
+        conditions = [
+            {'acl': acl},
+            {'success_action_status': '201'}
+        ]
+        data = self.client.generate_presigned_post(
+            Bucket=self.bucket,
+            Key=key,
+            Conditions=conditions
         )
-        return url
+        return data
