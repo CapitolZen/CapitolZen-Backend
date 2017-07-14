@@ -417,3 +417,4 @@ ADMIN_URL = r'^admin/'
 # ------------------------------------------------------------------------------
 STREAM_API_KEY = env("STREAM_API_KEY", default="")
 STREAM_API_SECRET = env("STREAM_API_SECRET", default="")
+STREAM_LOCATION = 'us-east'

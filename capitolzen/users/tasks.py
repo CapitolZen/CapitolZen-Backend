@@ -7,7 +7,7 @@ logger = get_task_logger(__name__)
 
 
 @shared_task
-def create_alert_task(title, categories, bill):
+def create_alert_task(title, categories):
 
     temp = categories
     users = User.objects.all()

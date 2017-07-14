@@ -5,6 +5,8 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from dry_rest_permissions.generics import allow_staff_or_superuser
+from stream_django.activity import Activity
+from stream_django.feed_manager import feed_manager
 
 
 @python_2_unicode_compatible
@@ -55,7 +57,7 @@ class User(AbstractUser):
         return True
 
 
-class Alerts(AbstractBaseModel):
+class Alerts(AbstractBaseModel, Activity):
 
     organization = models.ForeignKey(
         'organizations.Organization',
@@ -75,16 +77,24 @@ class Alerts(AbstractBaseModel):
         null=True,
         blank=True
     )
-    
-    # bill = models.ForeignKey(
-    #    'proposals.Bill',
-    #    on_delete=models.CASCADE,
-    #    null=True,
-    #    blank=True
-    # )
-    
+
+    #bill = models.ForeignKey(
+    #   'proposals.Bill',
+    #   on_delete=models.CASCADE,
+    #   null=True,
+    #   blank=True
+    #)
+
     is_read = models.BooleanField(default=False)
     message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def activity_alert_attr(self):
+        user_feed_1 = feed_manager.feed('user', '1')
+        activity_data = {'actor': 1, 'verb': 'alert', 'object': 1, 'foreign_id': 'alert:1'}
+        activity_response = user_feed_1.add_activity(activity_data)
+        return activity_response
 
     class Meta:
         abstract = False
