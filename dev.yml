@@ -113,4 +113,3 @@ services:
     image: mailhog/mailhog
     ports:
       - "8024:8024"
-
