@@ -97,6 +97,12 @@ class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     starred = models.BooleanField(default=False)
     summary = models.TextField(blank=True, null=True)
 
+    @property
+    def display_summary(self):
+        if not self.summary:
+            return self.bill.summary
+        return self.summary
+
     @staticmethod
     def valid_position(position):
         valid = ['support', 'oppose', 'neutral', False]
