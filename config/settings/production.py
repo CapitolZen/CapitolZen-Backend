@@ -200,4 +200,5 @@ OPBEAT = {
     'SECRET_TOKEN': env('OPBEAT_SECRET_TOKEN', default=''),
 }
 
-MIDDLEWARE = ('opbeat.contrib.django.middleware.OpbeatAPMMiddleware',) + MIDDLEWARE
+MIDDLEWARE = ['opbeat.contrib.django.middleware.OpbeatAPMMiddleware', ] + MIDDLEWARE
+INSTALLED_APPS += ['opbeat.contrib.django', ]
