@@ -8,6 +8,7 @@ from dry_rest_permissions.generics import (DRYPermissions,
 
 from capitolzen.proposals.models import Bill, Wrapper
 from capitolzen.groups.models import Group, Report
+from capitolzen.groups.tasks import generate_report, async_generate_report
 from .serializers import GroupSerializer, ReportSerializer
 
 
@@ -64,3 +65,14 @@ class ReportViewSet(viewsets.ModelViewSet):
     permission_classes = (DRYPermissions,)
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
     filter_fields = ('organization', 'group', 'created', 'status', 'title', 'user')
+
+    def perform_create(self, serializer):
+        serializer.save()
+        report = serializer.instance
+        report.generate()
+
+    @detail_route(methods=['GET'])
+    def url(self, request, pk):
+        report = Report.objects.get(pk=pk)
+        url = generate_report(report)
+        return Response({"uhoh": "hotdog", "url": url, "status_code": status.HTTP_200_OK})
