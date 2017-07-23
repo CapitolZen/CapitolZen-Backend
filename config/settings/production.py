@@ -193,4 +193,3 @@ OPBEAT = {
 }
 
 MIDDLEWARE = ['opbeat.contrib.django.middleware.OpbeatAPMMiddleware', ] + MIDDLEWARE
-INSTALLED_APPS += ['opbeat.contrib.django', ]
