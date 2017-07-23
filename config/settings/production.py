@@ -199,3 +199,5 @@ OPBEAT = {
     'APP_ID': env('OPBEAT_APP_ID', default=''),
     'SECRET_TOKEN': env('OPBEAT_SECRET_TOKEN', default=''),
 }
+
+MIDDLEWARE = ('opbeat.contrib.django.middleware.OpbeatAPMMiddleware',) + MIDDLEWARE

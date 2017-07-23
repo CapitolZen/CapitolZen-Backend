@@ -8,7 +8,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django_fsm import FSMField, transition
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
-
+from .tasks import async_generate_report
 
 class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     title = models.CharField(blank=False, max_length=225)
@@ -51,6 +51,7 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     description = models.TextField(blank=True)
     template = JSONField(default=dict)
     recurring = models.BooleanField(default=False)
+    update_frequency = models.CharField(blank=True, max_length=255, null=True)
 
     class JSONAPIMeta:
         resource_name = "reports"
@@ -59,6 +60,9 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         abstract = False
         verbose_name = "report"
         verbose_name_plural = "reports"
+
+    def generate(self):
+        async_generate_report(self)
 
     @transition(field=status, source='draft', target='published')
     def publish(self):
