@@ -96,9 +96,17 @@ class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         null=True
     )
 
-    position = models.CharField(blank=True, max_length=255, )
+    position = models.CharField(blank=True, max_length=255)
+    position_detail = models.TextField(blank=True, null=True)
     notes = JSONField(blank=True, default=dict)
     starred = models.BooleanField(default=False)
+    summary = models.TextField(blank=True, null=True)
+
+    @property
+    def display_summary(self):
+        if not self.summary:
+            return self.bill.summary
+        return self.summary
 
     @staticmethod
     def valid_position(position):

@@ -9,13 +9,13 @@ class BillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bill
         fields = ('id', 'state', 'title', 'sponsor', 'summary', 'last_action_date', 'remote_url',
-                  'status', 'state_id', 'state', 'current_committee', 'affected_section')
+                  'status', 'state_id', 'state', 'current_committee', 'affected_section', 'versions', 'history')
 
 
 class WrapperSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wrapper
-        fields = ('id', 'bill', 'group', 'organization', 'notes', 'position')
+        fields = ('id', 'bill', 'group', 'organization', 'notes', 'position', 'summary', 'position_detail')
 
     bill = ResourceRelatedField(many=False, queryset=Bill.objects)
     organization = ResourceRelatedField(many=False, queryset=Organization.objects)
