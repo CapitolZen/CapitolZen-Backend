@@ -6,26 +6,46 @@ from dry_rest_permissions.generics import allow_staff_or_superuser, authenticate
 from django.contrib.postgres.fields import ArrayField, JSONField
 from capitolzen.meta.states import AvailableStateChoices
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
-from capitolzen.users.tasks import create_alert_task
+from .mixins import MixinExternalData
 
 
-class Bill(AbstractBaseModel):
+class Bill(AbstractBaseModel, MixinExternalData):
+    # External Data
     state = models.TextField(choices=AvailableStateChoices)
+    state_id = models.CharField(max_length=255)
+    remote_id = models.CharField(max_length=255)
+    session = models.CharField(max_length=255)
+    history = JSONField(default=dict, blank=True, null=True)
+    action_dates = JSONField(default=dict, blank=True, null=True)
+    chamber = models.CharField(max_length=255)
+    type = models.CharField(max_length=255)
     status = models.TextField()
     current_committee = models.TextField()
     sponsor = models.TextField()
     title = models.TextField()
-    state_id = models.CharField(max_length=225)
+    companions = ArrayField(blank=True, default=list, base_field=models.TextField(blank=True))
     categories = ArrayField(
-        models.CharField(max_length=225, blank=True),
+        models.CharField(max_length=255, blank=True),
         default=list
     )
-    history = JSONField(default=dict, blank=True, null=True)
-    versions = JSONField(default=dict, blank=True)
-    summary = models.TextField()
-    last_action_date = models.DateTimeField(default=datetime.now())
-    affected_section = models.TextField(blank=True, null=True)
-    remote_url = models.URLField(null=True, blank=True)
+    versions = JSONField(default=dict, blank=True),
+    votes = JSONField(default=dict, blank=True)
+    summary = models.TextField(blank=True, null=True)
+
+    # Properties
+    @property
+    def affected_section(self):
+        if self.type != "bill":
+            return False
+        return True
+
+    @property
+    def last_action_date(self):
+        return self.action_dates.get('last', False)
+
+    @property
+    def remote_url(self):
+        return self.sources.get('url', False)
 
     class Meta:
         abstract = False
@@ -34,43 +54,6 @@ class Bill(AbstractBaseModel):
 
     class JSONAPIMeta:
         resource_name = "bills"
-
-    def update_from_source(self, data):
-        self.status = data['status']
-        self.current_committee = data['current_committee']
-        self.serialize_history(data['history'])
-        self.last_action_date = data['last_action_date']
-        # self.serialize_categories(data['categories'])
-        self.save()
-
-    def serialize_categories(self, data):
-        self.categories = data
-
-    def serialize_history(self, data):
-        self.history = data
-
-    @staticmethod
-    @authenticated_users
-    def has_read_permission(request):
-        return True
-
-    @authenticated_users
-    def has_object_read_permission(self, request):
-        return True
-
-    @staticmethod
-    @allow_staff_or_superuser
-    def has_write_permission(request):
-        return True
-
-    @staticmethod
-    @allow_staff_or_superuser
-    def has_create_permission(request):
-        return True
-
-    def save(self, *args, **kwargs):
-        super(Bill, self).save(*args, **kwargs)
-        create_alert_task.delay(self.title, self.categories, self)
 
 
 class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
