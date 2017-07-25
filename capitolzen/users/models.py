@@ -5,12 +5,10 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from dry_rest_permissions.generics import allow_staff_or_superuser
-from stream_django.activity import Activity
-from stream_django.feed_manager import feed_manager
 
 
 @python_2_unicode_compatible
-class User(AbstractUser, Activity):
+class User(AbstractUser):
 
     # First Name and Last Name do not cover name patterns
     # around the globe.
@@ -53,73 +51,5 @@ class User(AbstractUser, Activity):
     def has_object_write_permission(self, request):
         return True
 
-    def has_object_create_permission(self, request):
-        return True
-
-
-class Alerts(AbstractBaseModel, Activity):
-
-    organization = models.ForeignKey(
-        'organizations.Organization',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
-    group = models.ForeignKey(
-        'groups.Group',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
-    user = models.ForeignKey(
-        'users.User',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
-
-    #bill = models.ForeignKey(
-    #   'proposals.Bill',
-    #   on_delete=models.CASCADE,
-    #   null=True,
-    #   blank=True
-    #)
-
-    is_read = models.BooleanField(default=False)
-    message = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        abstract = False
-        verbose_name = "alert"
-        verbose_name_plural = "alert"
-
-    class JSONAPIMeta:
-        resource_name = "alerts"
-
-    @staticmethod
-    @allow_staff_or_superuser
-    def has_read_permission(request):
-        return True
-
-    @staticmethod
-    @allow_staff_or_superuser
-    def has_write_permission(request):
-        return False
-
-    @staticmethod
-    @allow_staff_or_superuser
-    def has_create_permission(request):
-        return True
-
-    @allow_staff_or_superuser
-    def has_object_read_permission(self, request):
-        return True
-
-    @allow_staff_or_superuser
-    def has_object_write_permission(self, request):
-        return True
-
-    @allow_staff_or_superuser
     def has_object_create_permission(self, request):
         return True

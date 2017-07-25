@@ -10,6 +10,7 @@ from django_fsm import FSMField, transition
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
 from .tasks import async_generate_report
 
+
 class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     title = models.CharField(blank=False, max_length=225)
     description = models.TextField(blank=True, null=True)

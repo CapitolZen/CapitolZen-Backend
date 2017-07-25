@@ -1,6 +1,5 @@
 from celery.utils.log import get_task_logger
 from celery import shared_task
-from .models import Alerts
 from capitolzen.users.models import User
 
 logger = get_task_logger(__name__)

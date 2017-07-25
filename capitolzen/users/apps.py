@@ -12,8 +12,3 @@ class UsersConfig(AppConfig):
         """
         pass
 
-
-class AlertConfig(AppConfig):
-    name = 'capitolzen.alerts'
-    label = 'alerts'
-    verbose_name = 'Alerts'
