@@ -10,7 +10,7 @@ from stream_django.feed_manager import feed_manager
 
 
 @python_2_unicode_compatible
-class User(AbstractUser):
+class User(AbstractUser, Activity):
 
     # First Name and Last Name do not cover name patterns
     # around the globe.
@@ -88,13 +88,6 @@ class Alerts(AbstractBaseModel, Activity):
     is_read = models.BooleanField(default=False)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-
-    @property
-    def activity_alert_attr(self):
-        user_feed_1 = feed_manager.feed('user', '1')
-        activity_data = {'actor': 1, 'verb': 'alert', 'object': 1, 'foreign_id': 'alert:1'}
-        activity_response = user_feed_1.add_activity(activity_data)
-        return activity_response
 
     class Meta:
         abstract = False
