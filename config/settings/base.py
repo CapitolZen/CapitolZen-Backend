@@ -411,3 +411,6 @@ AWS_REGION = env("AWS_REGION", default='us-east-1')
 AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
 # Location of root django.contrib.admin URL, use {% url 'admin:index' %}
 ADMIN_URL = r'^admin/'
+
+# Open States
+OPEN_STATES_KEY = env("OPEN_STATES_KEY", default='')

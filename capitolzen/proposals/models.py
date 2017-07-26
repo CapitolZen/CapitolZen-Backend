@@ -20,8 +20,8 @@ class Bill(AbstractBaseModel, MixinExternalData):
     chamber = models.CharField(max_length=255)
     type = models.CharField(max_length=255)
     status = models.TextField()
-    current_committee = models.TextField()
-    sponsor = models.TextField()
+    current_committee = models.ForeignKey('proposals.Committee')
+    sponsor = models.ForeignKey('proposals.Legislator')
     title = models.TextField()
     companions = ArrayField(blank=True, default=list, base_field=models.TextField(blank=True))
     categories = ArrayField(
@@ -50,10 +50,59 @@ class Bill(AbstractBaseModel, MixinExternalData):
     class Meta:
         abstract = False
         verbose_name = "bill"
-        verbose_name_plural = "bill"
+        verbose_name_plural = "bills"
 
     class JSONAPIMeta:
         resource_name = "bills"
+
+
+class Legislator(AbstractBaseModel, MixinExternalData):
+    # External Data
+    remote_id = models.CharField(max_length=255)
+    state = models.CharField(max_length=255)
+    active = models.BooleanField(default=True)
+    chamber = models.CharField(max_length=255)
+    party = models.CharField(max_length=255)
+    email = models.EmailField(blank=True)
+    url = models.URLField(blank=True)
+    photo_url = models.URLField(blank=True)
+    first_name = models.CharField(max_length=255)
+    middle_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    suffixes = models.CharField(max_length=255, blank=True, null=True)
+
+    # Properties
+    @property
+    def full_name(self):
+        fl = "%s %s" % (self.first_name, self.last_name)
+        if self.suffixes:
+            fl = "%s %s" % (fl, self.suffixes)
+        return fl
+
+    class Meta:
+        abstract = False
+        verbose_name = "legislator"
+        verbose_name_plural = "legislators"
+
+    class JSONAPIMeta:
+        resource_name = "legislators"
+
+
+class Committee(AbstractBaseModel, MixinExternalData):
+
+    name = models.CharField(max_length=255)
+    state = models.CharField(max_length=255)
+    chamber = models.CharField(max_length=255)
+    remote_id = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
+
+    class Meta:
+        abstract = False
+        verbose_name = "Committee"
+        verbose_name_plural = "Committees"
+
+    class JSONAPIMeta:
+        resource_name = "committees"
 
 
 class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
