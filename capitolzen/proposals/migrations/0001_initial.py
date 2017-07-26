@@ -36,6 +36,7 @@ class Migration(migrations.Migration):
                 ('categories', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(blank=True, max_length=225), default=list, size=None)),
                 ('history', django.contrib.postgres.fields.jsonb.JSONField(blank=True, default=dict, null=True)),
                 ('summary', models.TextField()),
+                ('created_at', models.DateTimeField(auto_now_add=True))
             ],
             options={
                 'verbose_name': 'bill',

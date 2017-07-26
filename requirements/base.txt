@@ -14,6 +14,7 @@ boto3==1.4.4
 ipython
 asana==0.6.5
 stripe==1.56.0
+stream_django
 
 #
 # Django Contrib

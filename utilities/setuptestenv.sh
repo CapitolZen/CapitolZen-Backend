@@ -16,3 +16,4 @@ env | grep DATABASE_  >> ~/$CIRCLE_PROJECT_REPONAME/.env
 env | grep APPLICATION_  >> ~/$CIRCLE_PROJECT_REPONAME/.env
 env | grep REDIS  >> ~/$CIRCLE_PROJECT_REPONAME/.env
 env | grep CIRCLE >> ~/$CIRCLE_PROJECT_REPONAME/.env
+env | grep STREAM >> ~/$CIRCLE_PROJECT_REPONAME/.env

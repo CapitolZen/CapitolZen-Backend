@@ -6,10 +6,12 @@ from dry_rest_permissions.generics import allow_staff_or_superuser, authenticate
 from django.contrib.postgres.fields import ArrayField, JSONField
 from capitolzen.meta.states import AvailableStateChoices
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
-from capitolzen.users.tasks import create_alert_task
+from stream_django.activity import Activity
+from stream_django.feed_manager import feed_manager
+from capitolzen.users.models import User
 
 
-class Bill(AbstractBaseModel):
+class Bill(AbstractBaseModel, Activity):
     state = models.TextField(choices=AvailableStateChoices)
     status = models.TextField()
     current_committee = models.TextField()
@@ -34,6 +36,18 @@ class Bill(AbstractBaseModel):
 
     class JSONAPIMeta:
         resource_name = "bills"
+
+    user = models.ForeignKey('users.User', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def activity_bill_attr(self):
+        users = User.objects.all()
+        user_feed_1 = feed_manager.feed('notification', '2')
+        for user in users:
+            activity_data = {'actor': user, 'verb': 'bill', 'object': 'bill', 'foreign_id': 'bill:1'}
+            activity_response = user_feed_1.add_activity(activity_data)
+        return activity_response
 
     def update_from_source(self, data):
         self.status = data['status']
@@ -67,10 +81,6 @@ class Bill(AbstractBaseModel):
     @allow_staff_or_superuser
     def has_create_permission(request):
         return True
-
-    def save(self, *args, **kwargs):
-        super(Bill, self).save(*args, **kwargs)
-        create_alert_task.delay(self.title, self.categories, self)
 
 
 class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):

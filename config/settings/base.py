@@ -50,7 +50,8 @@ THIRD_PARTY_APPS = [
     'health_check.db',
     'health_check.cache',
     'asana',
-    'stripe'
+    'stripe',
+    'stream_django'
 ]
 
 ADMIN_APPS = [
@@ -411,3 +412,9 @@ AWS_REGION = env("AWS_REGION", default='us-east-1')
 AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
 # Location of root django.contrib.admin URL, use {% url 'admin:index' %}
 ADMIN_URL = r'^admin/'
+
+# GetStream.io
+# ------------------------------------------------------------------------------
+STREAM_API_KEY = env("STREAM_API_KEY", default="")
+STREAM_API_SECRET = env("STREAM_API_SECRET", default="")
+STREAM_LOCATION = 'us-east'

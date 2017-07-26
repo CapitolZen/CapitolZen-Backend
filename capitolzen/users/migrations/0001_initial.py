@@ -52,6 +52,7 @@ class Migration(migrations.Migration):
                 ('message', models.TextField(auto_created=True, serialize=False, verbose_name='message')),
                 ('is_read', models.BooleanField(auto_created=True, serialize=False, verbose_name='is_read')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='users.User')),
+                ('created_at', models.DateTimeField(auto_now_add=True))
             ],
             options={
                 'verbose_name_plural': 'alert',
