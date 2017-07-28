@@ -64,11 +64,35 @@ def update_legislator(localid, remoteid):
     leg.update_from_source(source)
 
 
+@shared_task
+def update_committees(state):
+    cmtes = _get_committees(state)
+    for cm in cmtes:
+        try:
+            c = Committee.objects.get(remote_id=cm['id'])
+
+            if c.modified < cm['updated_at']:
+                c.name = cm['committee']
+                c.subcommittee = cm.get('subcommittee', None)
+                c.save()
+
+        except ObjectDoesNotExist:
+            c = Committee.objects.create(
+                remote_id=cm['id'],
+                state=cm['state'],
+                chamber=cm['chamber'],
+                name=cm['committee'],
+                subcommittee=cm.get('subcommittee', None),
+                parent_id=cm['parent_id'],
+            )
+            c.save()
+
+
 def _list_state_bills(state, chamber):
     url = "%s/bills/" % OPEN_STATES_URL
 
     r = get(url,
-            params={"state": state, "chamber": chamber},
+            params={"state": state, "chamber": chamber, "search_window": "session"},
             headers=HEADERS
             )
     return r.json()
@@ -82,7 +106,7 @@ def _get_state_bill(bill):
 
 def _list_state_legislators(state):
     url = "%s/legislators/" % OPEN_STATES_URL
-    r = get(url, params={"state": state}, headers=HEADERS)
+    r = get(url, params={"state": state, "active": True}, headers=HEADERS)
     return r.json()
 
 
@@ -92,9 +116,18 @@ def _get_legislator(remoteid):
     return r.json()
 
 
+def _get_committees(state):
+    url = "%s/committees/" % OPEN_STATES_URL
+    r = get(url, headers=HEADERS, params={"state": state})
+    return r.json()
+
+
 def bootstrap(state):
+    print('updating committees')
+    update_committees(state)
     chambers = ['upper', 'lower']
     for chamber in chambers:
+        print('getting bills for chamber')
         bills = _list_state_bills(state, chamber)
         for b in bills:
             new_bill = Bill.objects.create(remote_id=b['id'], state=state)
@@ -108,3 +141,4 @@ def import_leg(state):
         l = Legislator.objects.create(remote_id=human['id'])
         l.save()
         update_legislator(l.id, human['id'])
+

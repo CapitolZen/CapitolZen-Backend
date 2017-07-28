@@ -4,7 +4,7 @@ from django.db import models
 from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser, authenticated_users
 from django.contrib.postgres.fields import ArrayField, JSONField
-from capitolzen.meta.states import AvailableStateChoices
+from capitolzen.meta.states import AvailableStateChoices, AVAILABLE_STATES
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
 from .mixins import MixinExternalData
 
@@ -20,7 +20,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
     chamber = models.CharField(max_length=255, null=True)
     type = models.CharField(max_length=255, null=True)
     status = models.TextField(null=True)
-    current_committee = models.ForeignKey('proposals.Committee')
+    current_committee = models.ForeignKey('proposals.Committee', null=True)
     sponsor = models.ForeignKey('proposals.Legislator')
     cosponsors = JSONField(default=dict, blank=True)
     title = models.TextField()
@@ -69,6 +69,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
             setattr(self, value, source.get(key, None))
 
         # TODO SPonsors
+        # TODO Committee
 
         self.type = next(source.get('type', ['bill']))
         for cat in source.categories:
@@ -145,7 +146,8 @@ class Committee(AbstractBaseModel, MixinExternalData):
     state = models.CharField(max_length=255)
     chamber = models.CharField(max_length=255)
     remote_id = models.CharField(max_length=255)
-    title = models.CharField(max_length=255)
+    parent_id = models.CharField(max_length=255, null=True, blank=True)
+    subcommittee = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         abstract = False
