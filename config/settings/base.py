@@ -354,14 +354,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Detroit'
 
 CELERYBEAT_SCHEDULE = {
-    'data_update': {
-        'task': 'capitolzen.proposals.tasks.update_all_bills',
-        'schedule': crontab(minute=0, hour='*/3')
-    },
-    'data_import': {
-        'task': 'capitolzen.proposals.tasks.get_new_bills',
-        'schedule': crontab(minute=0, hour='*/3')
-    }
+
 }
 
 # LOGGING CONFIGURATION
@@ -414,3 +407,4 @@ ADMIN_URL = r'^admin/'
 
 # Open States
 OPEN_STATES_KEY = env("OPEN_STATES_KEY", default='')
+OPEN_STATES_URL = env("OPEN_STATES_URL", default='https://openstates.org/api/v1/')

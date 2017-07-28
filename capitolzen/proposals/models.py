@@ -22,15 +22,18 @@ class Bill(AbstractBaseModel, MixinExternalData):
     status = models.TextField()
     current_committee = models.ForeignKey('proposals.Committee')
     sponsor = models.ForeignKey('proposals.Legislator')
+    co_sponsor = models.ManyToManyField(Legislator)
     title = models.TextField()
     companions = ArrayField(blank=True, default=list, base_field=models.TextField(blank=True))
     categories = ArrayField(
-        models.CharField(max_length=255, blank=True),
+        models.TextField(blank=True),
         default=list
     )
     versions = JSONField(default=dict, blank=True),
     votes = JSONField(default=dict, blank=True)
     summary = models.TextField(blank=True, null=True)
+    sources = JSONField(default=dict, blank=True)
+    documents = JSONField(default=dict, blank=True)
 
     # Properties
     @property
@@ -46,6 +49,32 @@ class Bill(AbstractBaseModel, MixinExternalData):
     @property
     def remote_url(self):
         return self.sources.get('url', False)
+
+    def update_from_source(self, source):
+        props = {
+            "actions": "history",
+            "sources": "sources",
+            "session": "session",
+            "id": "remote_id",
+            "votes": "votes",
+            "versions": "versions",
+            "documents": "documents",
+            "title": "title",
+            "state": "state",
+            "action_dates": "action_dates",
+            "bill_id": "state_id",
+        }
+
+        for key, value in props.items():
+            setattr(self, value, source.get(key))
+
+        # TODO SPonsors
+
+        self.type = next(source.get('type', ['bill']))
+        for cat in source.categories:
+            self.categories.append(cat)
+
+        self.save()
 
     class Meta:
         abstract = False
