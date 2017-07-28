@@ -12,17 +12,17 @@ from .mixins import MixinExternalData
 class Bill(AbstractBaseModel, MixinExternalData):
     # External Data
     state = models.TextField(choices=AvailableStateChoices)
-    state_id = models.CharField(max_length=255)
-    remote_id = models.CharField(max_length=255)
-    session = models.CharField(max_length=255)
+    state_id = models.CharField(max_length=255, null=True)
+    remote_id = models.CharField(max_length=255, null=True)
+    session = models.CharField(max_length=255, null=True)
     history = JSONField(default=dict, blank=True, null=True)
     action_dates = JSONField(default=dict, blank=True, null=True)
-    chamber = models.CharField(max_length=255)
-    type = models.CharField(max_length=255)
-    status = models.TextField()
+    chamber = models.CharField(max_length=255, null=True)
+    type = models.CharField(max_length=255, null=True)
+    status = models.TextField(null=True)
     current_committee = models.ForeignKey('proposals.Committee')
     sponsor = models.ForeignKey('proposals.Legislator')
-    co_sponsor = models.ManyToManyField(Legislator)
+    cosponsors = JSONField(default=dict, blank=True)
     title = models.TextField()
     companions = ArrayField(blank=True, default=list, base_field=models.TextField(blank=True))
     categories = ArrayField(
@@ -66,7 +66,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
         }
 
         for key, value in props.items():
-            setattr(self, value, source.get(key))
+            setattr(self, value, source.get(key, None))
 
         # TODO SPonsors
 
@@ -92,6 +92,7 @@ class Legislator(AbstractBaseModel, MixinExternalData):
     active = models.BooleanField(default=True)
     chamber = models.CharField(max_length=255)
     party = models.CharField(max_length=255)
+    district = models.CharField(max_length=255, null=True)
     email = models.EmailField(blank=True)
     url = models.URLField(blank=True)
     photo_url = models.URLField(blank=True)
@@ -107,6 +108,27 @@ class Legislator(AbstractBaseModel, MixinExternalData):
         if self.suffixes:
             fl = "%s %s" % (fl, self.suffixes)
         return fl
+
+    def update_from_source(self, source):
+        props = {
+            "state": "state",
+            "last_name": "last_name",
+            "first_name": "first_name",
+            "middle_name": "middle_name",
+            "suffixes": "suffixes",
+            "district": "district",
+            "active": "active",
+            "chamber": "chamber",
+            "party": "party",
+            "email": "email",
+            "url": "url",
+            "photo_url": "photo_url",
+        }
+
+        for key, value in props.items():
+            setattr(self, value, source.get(key, None))
+
+        self.save()
 
     class Meta:
         abstract = False
