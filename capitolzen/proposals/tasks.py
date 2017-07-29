@@ -1,4 +1,5 @@
-from collections import namedtuple
+from datetime import datetime
+from pytz import UTC
 from requests import get
 from celery import shared_task
 from django.conf import settings
@@ -28,7 +29,7 @@ def update_state_bills(state):
         for b in bills:
             try:
                 bill = Bill.objects.get(remote_id=b['id'])
-                if bill.modified < b['updated_at']:
+                if bill.modified < _time_convert(b['updated_at']):
                     update_bill.delay(localid=bill.id, sourceid=b['id'])
             except ObjectDoesNotExist:
                 new_bill = Bill.objects.create(remote_id=b['id'], state=state)
@@ -49,7 +50,7 @@ def update_state_legislators(state):
     for human in humans:
         try:
             l = Legislator.objects.get(remote_id=human['id'])
-            if l.modified < human['updated_at']:
+            if l.modified < _time_convert(human['updated_at']):
                 update_legislator.delay(localid=l.id, remoteid=human['id'])
         except ObjectDoesNotExist:
             new_leg = Legislator.objects.create(remote_id=human['id'])
@@ -71,7 +72,7 @@ def update_committees(state):
         try:
             c = Committee.objects.get(remote_id=cm['id'])
 
-            if c.modified < cm['updated_at']:
+            if c.modified < _time_convert(cm['updated_at']):
                 c.name = cm['committee']
                 c.subcommittee = cm.get('subcommittee', None)
                 c.save()
@@ -122,6 +123,11 @@ def _get_committees(state):
     return r.json()
 
 
+def _time_convert(time):
+    utc = UTC
+    return utc.localize(datetime.strptime(time, '%Y-%m-%d %I:%M:%S'))
+
+
 def bootstrap(state):
     print('updating committees')
     update_committees(state)
@@ -132,7 +138,7 @@ def bootstrap(state):
         for b in bills:
             new_bill = Bill.objects.create(remote_id=b['id'], state=state)
             new_bill.save()
-            update_bill(new_bill.id, b.id)
+            update_bill(new_bill.id, b['id'])
 
 
 def import_leg(state):

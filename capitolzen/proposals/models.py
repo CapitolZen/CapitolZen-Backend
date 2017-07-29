@@ -3,6 +3,7 @@ from datetime import datetime
 from django.db import models
 from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser, authenticated_users
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.postgres.fields import ArrayField, JSONField
 from capitolzen.meta.states import AvailableStateChoices, AVAILABLE_STATES
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
@@ -21,8 +22,8 @@ class Bill(AbstractBaseModel, MixinExternalData):
     type = models.CharField(max_length=255, null=True)
     status = models.TextField(null=True)
     current_committee = models.ForeignKey('proposals.Committee', null=True)
-    sponsor = models.ForeignKey('proposals.Legislator')
-    cosponsors = JSONField(default=dict, blank=True)
+    sponsor = models.ForeignKey('proposals.Legislator', null=True)
+    cosponsors = JSONField(default=list, null=True)
     title = models.TextField()
     companions = ArrayField(blank=True, default=list, base_field=models.TextField(blank=True))
     categories = ArrayField(
@@ -68,11 +69,26 @@ class Bill(AbstractBaseModel, MixinExternalData):
         for key, value in props.items():
             setattr(self, value, source.get(key, None))
 
-        # TODO SPonsors
-        # TODO Committee
+        for sponsor in source['sponsors']:
+            if sponsor.get('leg_id', False):
+                q = {"remote_id": sponsor['leg_id']}
+            else:
+                parts = sponsor['name'].split(' ', 1)
 
-        self.type = next(source.get('type', ['bill']))
-        for cat in source.categories:
+                q = {"first_name": parts[0], "last_name": parts[1]}
+
+            try:
+                leg = Legislator.objects.get(**q)
+                if sponsor['type'] == "primary":
+                    self.sponsor = leg
+                else:
+                    self.cosponsors.append(str(leg.id))
+            except ObjectDoesNotExist:
+                continue
+
+        self.type = source.get('type', ['bill'])[0]
+
+        for cat in source.get('categories', []):
             self.categories.append(cat)
 
         self.save()
