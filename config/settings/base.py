@@ -354,14 +354,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Detroit'
 
 CELERYBEAT_SCHEDULE = {
-    'data_update': {
-        'task': 'capitolzen.proposals.tasks.update_all_bills',
-        'schedule': crontab(minute=0, hour='*/3')
-    },
-    'data_import': {
-        'task': 'capitolzen.proposals.tasks.get_new_bills',
-        'schedule': crontab(minute=0, hour='*/3')
-    }
+
 }
 
 # LOGGING CONFIGURATION
