@@ -365,7 +365,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'import_bills': {
         'task': 'capitolzen.proposals.tasks.update_all_bills',
-        'schedule': crontab(minute=0, hour='*/3')
+        'schedule': crontab(minute=0, hour='*/6')
     }
 }
 
