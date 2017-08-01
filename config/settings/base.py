@@ -322,7 +322,8 @@ JSON_API_FILTER_KEYWORD = 'filter\[(?P<field>\w+)\]'
 CORS_ORIGIN_WHITELIST = (
     'app.capitolzen.com',
     'capitolzen.com',
-    'localhost:4200'
+    'localhost:4200',
+    'localhost:3000',
 )
 
 # Some really nice defaults
@@ -354,7 +355,18 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Detroit'
 
 CELERYBEAT_SCHEDULE = {
-
+    'import_committee': {
+        'task': 'capitolzen.proposals.tasks.update_state_committees',
+        'schedule': crontab(minute=0, hour=0, day_of_week='sun')
+    },
+    'import_legislators': {
+        'task': 'capitolzen.proposals.tasks.update_state_legislators',
+        'schedule': crontab(minute=0, hour=3, day_of_week='sat')
+    },
+    'import_bills': {
+        'task': 'capitolzen.proposals.tasks.update_all_bills',
+        'schedule': crontab(minute=0, hour='*/3')
+    }
 }
 
 # LOGGING CONFIGURATION

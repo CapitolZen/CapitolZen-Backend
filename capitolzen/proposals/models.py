@@ -12,7 +12,7 @@ from .mixins import MixinExternalData
 
 class Bill(AbstractBaseModel, MixinExternalData):
     # External Data
-    state = models.TextField(choices=AvailableStateChoices)
+    state = models.TextField(max_length=255, null=True)
     state_id = models.CharField(max_length=255, null=True)
     remote_id = models.CharField(max_length=255, null=True)
     session = models.CharField(max_length=255, null=True)
@@ -30,7 +30,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
         models.TextField(blank=True),
         default=list
     )
-    versions = JSONField(default=dict, blank=True),
+    versions = JSONField(default=dict, blank=True, null=True),
     votes = JSONField(default=dict, blank=True)
     summary = models.TextField(blank=True, null=True)
     sources = JSONField(default=dict, blank=True)
@@ -49,7 +49,10 @@ class Bill(AbstractBaseModel, MixinExternalData):
 
     @property
     def remote_url(self):
-        return self.sources.get('url', False)
+        source = next((l for l in self.sources if l.get('url') is not False), None)
+        if not source:
+            return False
+        return source.get('url', False)
 
     def update_from_source(self, source):
         props = {
@@ -64,6 +67,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
             "state": "state",
             "action_dates": "action_dates",
             "bill_id": "state_id",
+            "chamber": "chamber"
         }
 
         for key, value in props.items():

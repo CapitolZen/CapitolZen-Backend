@@ -16,25 +16,28 @@ HEADERS = {
 
 
 @shared_task
-def update_bills():
+def update_all_bills():
     for state in AVAILABLE_STATES:
-        update_state_bills.delay(state)
+        update_state_bills(state.name)
 
 
 @shared_task
 def update_state_bills(state):
+    print('////////////////////////////////')
+    print(state)
     chambers = ['upper', 'lower']
     for chamber in chambers:
         bills = _list_state_bills(state, chamber)
         for b in bills:
+            print(b['bill_id'])
             try:
                 bill = Bill.objects.get(remote_id=b['id'])
                 if bill.modified < _time_convert(b['updated_at']):
-                    update_bill.delay(localid=bill.id, sourceid=b['id'])
+                    update_bill.delay(localid=str(bill.id), sourceid=b['id'])
             except ObjectDoesNotExist:
                 new_bill = Bill.objects.create(remote_id=b['id'], state=state)
                 new_bill.save()
-                update_bill.delay(localid=new_bill.id, sourceid=b['id'])
+                update_bill.delay(localid=str(new_bill.id), sourceid=b['id'])
 
 
 @shared_task
@@ -66,7 +69,7 @@ def update_legislator(localid, remoteid):
 
 
 @shared_task
-def update_committees(state):
+def update_state_committees(state):
     cmtes = _get_committees(state)
     for cm in cmtes:
         try:
@@ -130,15 +133,20 @@ def _time_convert(time):
 
 def bootstrap(state):
     print('updating committees')
-    update_committees(state)
+    update_state_committees(state)
     chambers = ['upper', 'lower']
     for chamber in chambers:
         print('getting bills for chamber')
         bills = _list_state_bills(state, chamber)
         for b in bills:
-            new_bill = Bill.objects.create(remote_id=b['id'], state=state)
-            new_bill.save()
-            update_bill(new_bill.id, b['id'])
+            try:
+                bill = Bill.objects.get(remote_id=b['id'])
+                if bill.modified < _time_convert(b['updated_at']):
+                    update_bill(localid=bill.id, sourceid=b['id'])
+            except ObjectDoesNotExist:
+                new_bill = Bill.objects.create(remote_id=b['id'], state=state)
+                new_bill.save()
+                update_bill(localid=new_bill.id, sourceid=b['id'])
 
 
 def import_leg(state):

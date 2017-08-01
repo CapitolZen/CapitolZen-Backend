@@ -8,19 +8,22 @@ from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
 class BillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bill
-        fields = '__all__'
+        fields = ('state', 'state_id', 'id', 'type', 'session', 'chamber', 'remote_id', 'status',
+                  'history', 'current_committee', 'sponsor', 'title', 'categories', 'remote_url',
+                  'affected_section', 'sources', 'action_dates', 'documents', 'cosponsors', 'votes',
+                  'last_action_date', 'companions')
 
-
-class LegilsatorSerializer(serializers.ModelSerializer):
+class LegislatorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Legislator
-        fields = '__all__'
+        fields = ('remote_id', 'state', 'active', 'chamber', 'party', 'district', 'email', 'url',
+                  'photo_url', 'first_name', 'middle_name', 'last_name', 'suffixes', 'full_name')
 
 
 class CommitteeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Committee
-        fields = '__all__'
+        fields = ('name', 'state', 'chamber', 'remote_id', 'parent_id', 'subcommittee')
 
 
 class WrapperSerializer(serializers.ModelSerializer):
