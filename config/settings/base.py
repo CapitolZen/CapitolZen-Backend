@@ -416,7 +416,14 @@ AWS_REGION = env("AWS_REGION", default='us-east-1')
 AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
 # Location of root django.contrib.admin URL, use {% url 'admin:index' %}
 ADMIN_URL = r'^admin/'
+INDEX_LAMBDA = env("capitolzen_search_bills", default="capitolzen_search_bills")
 
 # Open States
 OPEN_STATES_KEY = env("OPEN_STATES_KEY", default='')
 OPEN_STATES_URL = env("OPEN_STATES_URL", default='https://openstates.org/api/v1/')
+
+# Elastic Search
+ELASTIC_SEARCH_URL = env("ELASTIC_SEARCH_URL", default='')
+
+# Sparkpost email
+SPARKPOST_KEY = env("SPARKPOST_KEY", default='')

@@ -3,12 +3,15 @@ from pytz import UTC
 from requests import get
 from celery import shared_task
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist
+from capitolzen.meta.clients import aws_client
 from capitolzen.proposals.models import Bill, Legislator, Committee
+from capitolzen.proposals.api.app.serializers import BillSerializer
 from capitolzen.meta.states import AVAILABLE_STATES
 
 OPEN_STATES_KEY = settings.OPEN_STATES_KEY
 OPEN_STATES_URL = settings.OPEN_STATES_URL
+INDEX_LAMBDA = settings.INDEX_LAMBDA
 
 HEADERS = {
     "X-API-KEY": OPEN_STATES_KEY
@@ -23,8 +26,6 @@ def update_all_bills():
 
 @shared_task
 def update_state_bills(state):
-    print('////////////////////////////////')
-    print(state)
     chambers = ['upper', 'lower']
     for chamber in chambers:
         bills = _list_state_bills(state, chamber)
@@ -45,6 +46,19 @@ def update_bill(localid, sourceid):
     bill = Bill.objects.get(id=localid)
     source = _get_state_bill(sourceid)
     bill.update_from_source(source)
+    serializer = BillSerializer(bill)
+    c = aws_client()
+    payload = {
+        "url": bill.bill_versions__0__url,
+        "state": bill.state,
+        "bill": serializer.data
+    }
+    c.invoke(
+        FunctionName=INDEX_LAMBDA,
+        InvocationType='Event',
+        Payload=payload
+    )
+
 
 
 @shared_task

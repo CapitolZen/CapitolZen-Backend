@@ -1,8 +1,7 @@
 from __future__ import unicode_literals
-from datetime import datetime
+from json import dumps
 from django.db import models
 from config.models import AbstractBaseModel
-from dry_rest_permissions.generics import allow_staff_or_superuser, authenticated_users
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.postgres.fields import ArrayField, JSONField
 from capitolzen.meta.states import AvailableStateChoices, AVAILABLE_STATES
@@ -30,11 +29,11 @@ class Bill(AbstractBaseModel, MixinExternalData):
         models.TextField(blank=True),
         default=list
     )
-    versions = JSONField(default=dict, blank=True, null=True),
     votes = JSONField(default=dict, blank=True)
     summary = models.TextField(blank=True, null=True)
     sources = JSONField(default=dict, blank=True)
     documents = JSONField(default=dict, blank=True)
+    bill_versions = JSONField(default=dict, blank=True)
 
     # Properties
     @property
@@ -61,13 +60,13 @@ class Bill(AbstractBaseModel, MixinExternalData):
             "session": "session",
             "id": "remote_id",
             "votes": "votes",
-            "versions": "versions",
             "documents": "documents",
             "title": "title",
             "state": "state",
             "action_dates": "action_dates",
             "bill_id": "state_id",
-            "chamber": "chamber"
+            "chamber": "chamber",
+            "versions": "bill_versions"
         }
 
         for key, value in props.items():
