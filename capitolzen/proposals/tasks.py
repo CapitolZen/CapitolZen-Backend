@@ -1,5 +1,6 @@
 from datetime import datetime
 from pytz import UTC
+from json import dumps
 from requests import get
 from celery import shared_task
 from django.conf import settings
@@ -48,16 +49,22 @@ def update_bill(localid, sourceid):
     bill.update_from_source(source)
     serializer = BillSerializer(bill)
     c = aws_client()
-    payload = {
-        "url": bill.bill_versions__0__url,
-        "state": bill.state,
-        "bill": serializer.data
-    }
-    c.invoke(
-        FunctionName=INDEX_LAMBDA,
-        InvocationType='Event',
-        Payload=payload
-    )
+
+    versions = bill.bill_versions
+
+    if len(versions):
+        v = versions[-1]
+        payload = {
+            "url": v["url"],
+            "state": bill.state,
+            "bill": serializer.data
+        }
+        payload = dumps(payload)
+        c.invoke(
+            FunctionName=INDEX_LAMBDA,
+            InvocationType='Event',
+            Payload=payload
+        )
 
 
 
