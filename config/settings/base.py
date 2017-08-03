@@ -322,7 +322,8 @@ JSON_API_FILTER_KEYWORD = 'filter\[(?P<field>\w+)\]'
 CORS_ORIGIN_WHITELIST = (
     'app.capitolzen.com',
     'capitolzen.com',
-    'localhost:4200'
+    'localhost:4200',
+    'localhost:3000',
 )
 
 # Some really nice defaults
@@ -354,7 +355,18 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Detroit'
 
 CELERYBEAT_SCHEDULE = {
-
+    'import_committee': {
+        'task': 'capitolzen.proposals.tasks.update_state_committees',
+        'schedule': crontab(minute=0, hour=0, day_of_week='sun')
+    },
+    'import_legislators': {
+        'task': 'capitolzen.proposals.tasks.update_state_legislators',
+        'schedule': crontab(minute=0, hour=3, day_of_week='sat')
+    },
+    'import_bills': {
+        'task': 'capitolzen.proposals.tasks.update_all_bills',
+        'schedule': crontab(minute=0, hour='*/6')
+    }
 }
 
 # LOGGING CONFIGURATION
@@ -404,3 +416,14 @@ AWS_REGION = env("AWS_REGION", default='us-east-1')
 AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
 # Location of root django.contrib.admin URL, use {% url 'admin:index' %}
 ADMIN_URL = r'^admin/'
+INDEX_LAMBDA = env("capitolzen_search_bills", default="capitolzen_search_bills")
+
+# Open States
+OPEN_STATES_KEY = env("OPEN_STATES_KEY", default='')
+OPEN_STATES_URL = env("OPEN_STATES_URL", default='https://openstates.org/api/v1/')
+
+# Elastic Search
+ELASTIC_SEARCH_URL = env("ELASTIC_SEARCH_URL", default='')
+
+# Sparkpost email
+SPARKPOST_KEY = env("SPARKPOST_KEY", default='')

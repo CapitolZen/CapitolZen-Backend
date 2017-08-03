@@ -4,7 +4,7 @@ from config.admin import BaseModelAdmin
 
 
 class BillAdmin(BaseModelAdmin):
-    list_display = ['state', 'status', 'current_committee', 'sponsor', 'title', 'state_id', 'categories']
+    list_display = ['state', 'status', 'current_committee', 'sponsor', 'title', 'state_id', 'categories', 'id']
 
 
 class WrapperAdmin(BaseModelAdmin):

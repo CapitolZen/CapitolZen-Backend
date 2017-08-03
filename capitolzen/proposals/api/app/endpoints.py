@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from dry_rest_permissions.generics import (DRYPermissions,
                                            DRYPermissionFiltersBase)
-from capitolzen.proposals.models import Bill, Wrapper
-from .serializers import BillSerializer, WrapperSerializer
+from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
+from .serializers import BillSerializer, WrapperSerializer, LegislatorSerializer, CommitteeSerializer
 
 
 class BillViewSet(viewsets.ReadOnlyModelViewSet):
@@ -17,8 +17,26 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = BillSerializer
     queryset = Bill.objects.all().order_by('state', 'state_id')
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    search_fields = ('sponsor', 'title', 'state_id', 'summary', 'last_action_date',
-                     'categories', 'status', 'state', 'current_committee', 'affected_section')
+    search_fields = ('title', 'sponsor__last_name', 'sponsor__first_name', 'state_id')
+
+
+class LegislatorViewSet(viewsets.ReadOnlyModelViewSet):
+    class Meta:
+        ordering = ['state', 'last_name']
+
+    permission_classes = (IsAuthenticated, )
+    serializer_class = LegislatorSerializer
+    queryset = Legislator.objects.all().order_by('state', 'last_name')
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+
+
+class CommitteeViewSet(viewsets.ReadOnlyModelViewSet):
+    class Meta:
+        ordering = ['state', 'last_name']
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CommitteeSerializer
+    queryset = Committee.objects.all()
 
 
 class WrapperFilter(filters.FilterSet):

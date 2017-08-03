@@ -1,140 +1,172 @@
-from collections import namedtuple
-from json import dumps, loads
+from datetime import datetime
+from pytz import UTC
+from requests import get
 from celery import shared_task
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from capitolzen.meta.states import AVAILABLE_STATES
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from capitolzen.meta.clients import aws_client
-from .models import Bill
+from capitolzen.proposals.models import Bill, Legislator, Committee
+from capitolzen.proposals.api.app.serializers import BillSerializer
+from capitolzen.meta.states import AVAILABLE_STATES
 
+OPEN_STATES_KEY = settings.OPEN_STATES_KEY
+OPEN_STATES_URL = settings.OPEN_STATES_URL
+INDEX_LAMBDA = settings.INDEX_LAMBDA
 
-SEARCH_FUNCTION = 'capitolzen_search_bills'
+HEADERS = {
+    "X-API-KEY": OPEN_STATES_KEY
+}
 
 
 @shared_task
 def update_all_bills():
     for state in AVAILABLE_STATES:
-        bills = Bill.objects.filter(state=state.name)
-        for bill in bills:
-            update_bill_from_source(state=state.name, bill_id=bill.state_id)
+        update_state_bills(state.name)
 
 
 @shared_task
-def get_new_bills():
-
-    BillStruct = namedtuple('BillStruct', 'state_id')
-
-    for state in AVAILABLE_STATES:
-        lower_bills = Bill.objects \
-            .filter(state=state.name, state_id__startswith=state.lower_bill_prefix) \
-            .order_by('state_id')\
-            .reverse()
-
-        if not lower_bills.count():
-            lower_start = "%s-%s" % (state.lower_bill_prefix, state.lower_bill_start)
-            lower_bills = BillStruct(state_id=lower_start)
-        else:
-            lower_bills = lower_bills[0]
-
-        upper_bills = Bill.objects \
-            .filter(state=state.name, state_id__startswith=state.upper_bill_prefix) \
-            .order_by('state_id')\
-            .reverse()
-
-        if not upper_bills.count():
-            upper_start = "%s-%s" % (state.upper_bill_prefix, state.upper_bill_start)
-            upper_bills = BillStruct(state_id=upper_start)
-        else:
-            upper_bills = upper_bills[0]
-
-        billies = [lower_bills, upper_bills]
-        for bill in billies:
-            res = fetch_data(state.name, bill.state_id)
-            data = res.get('data', None)
-            if not data:
-                continue
-
-            create_bill_from_source(state.name, bill.state_id, data)
-
-            next_bill = res.get('nextBill', False)
-            if next_bill:
-                new_res = fetch_data(state.name, next_bill)
-                data = new_res.get('data', False)
-                if data:
-                    create_bill_from_source(data['state'], data['state_id'], data)
+def update_state_bills(state):
+    chambers = ['upper', 'lower']
+    for chamber in chambers:
+        bills = _list_state_bills(state, chamber)
+        for b in bills:
+            print(b['bill_id'])
+            try:
+                bill = Bill.objects.get(remote_id=b['id'])
+                if bill.modified < _time_convert(b['updated_at']):
+                    update_bill.delay(localid=str(bill.id), sourceid=b['id'])
+            except ObjectDoesNotExist:
+                new_bill = Bill.objects.create(remote_id=b['id'], state=state)
+                new_bill.save()
+                update_bill.delay(localid=str(new_bill.id), sourceid=b['id'])
 
 
-def create_bill_from_source(state, state_id, data):
-    exists = bill_exists(state, state_id,)
-    if exists:
-        update_bill(state, state_id, data)
-    else:
-        new_bill = Bill.objects.create()
-
-        setattr(new_bill, 'state_id', data['state_id'])
-        setattr(new_bill, 'state', data['state'])
-        setattr(new_bill, 'title', data['title'])
-        setattr(new_bill, 'sponsor', data['sponsor'])
-        setattr(new_bill, 'summary', data['summary'])
-        setattr(new_bill, 'status', data['status'])
-        setattr(new_bill, 'current_committee', data['current_committee'])
-        setattr(new_bill, 'versions', data['versions'])
-        setattr(new_bill, 'history', data['history'])
-        setattr(new_bill, 'last_action_date', data['last_action_date'])
-        setattr(new_bill, 'remote_url', data['remote_url'])
-        # new_bill.serialize_categories(data.categories)
-        new_bill.save()
+@shared_task
+def update_bill(localid, sourceid):
+    bill = Bill.objects.get(id=localid)
+    source = _get_state_bill(sourceid)
+    bill.update_from_source(source)
+    serializer = BillSerializer(bill)
+    c = aws_client()
+    payload = {
+        "url": bill.bill_versions__0__url,
+        "state": bill.state,
+        "bill": serializer.data
+    }
+    c.invoke(
+        FunctionName=INDEX_LAMBDA,
+        InvocationType='Event',
+        Payload=payload
+    )
 
 
-def update_bill_from_source(state, bill_id):
-    response = fetch_data(state=state, bill_id=bill_id)
-    data = response.get('data', False)
-    if not data:
-        return None
-    output = {'next_bill': False}
-    try:
-        bill = Bill.objects.get(state_id=data['stateId'], state=data['state'])
-        bill.update_from_source(data)
-        output['outcome'] = "Bill %s %s Updated" % (state, bill_id)
-    except Exception:
-        output['outcome'] = "Bill not found"
 
-    return output
-
-
-def bulk_import(state_id):
-    state = AVAILABLE_STATES[state_id]
-    lower_start = "%s-%s" % (state['lower_bill_prefix'], state['lower_bill_start'])
-    upper_start = "%s-%s" % (state['upper_bill_prefix'], state['upper_bill_start'])
-    update_bill_from_source(state['id'], lower_start)
-    update_bill_from_source(state['id'], upper_start)
+@shared_task
+def update_state_legislators(state):
+    humans = _list_state_legislators(state)
+    for human in humans:
+        try:
+            l = Legislator.objects.get(remote_id=human['id'])
+            if l.modified < _time_convert(human['updated_at']):
+                update_legislator.delay(localid=l.id, remoteid=human['id'])
+        except ObjectDoesNotExist:
+            new_leg = Legislator.objects.create(remote_id=human['id'])
+            new_leg.save()
+            update_legislator.delay(localid=new_leg.id, remoteid=human['id'])
 
 
-def fetch_data(state, bill_id):
-    event = dumps({"state": state, "billId": bill_id})
-    func = aws_client('lambda')
-    res = func.invoke(FunctionName=SEARCH_FUNCTION,
-                      InvocationType="RequestResponse",
-                      Payload=event,
-                      )
-    status = res.get('StatusCode', False)
-    if status != 200:
-        return None
-
-    response = res['Payload'].read()
-    return loads(response)
+@shared_task
+def update_legislator(localid, remoteid):
+    leg = Legislator.objects.get(id=localid)
+    source = _get_legislator(remoteid)
+    leg.update_from_source(source)
 
 
-def update_bill(state, state_id, data):
-    bill = Bill.objects.get(state=state, state_id=state_id)
-    bill.update_from_source(data)
+@shared_task
+def update_state_committees(state):
+    cmtes = _get_committees(state)
+    for cm in cmtes:
+        try:
+            c = Committee.objects.get(remote_id=cm['id'])
+
+            if c.modified < _time_convert(cm['updated_at']):
+                c.name = cm['committee']
+                c.subcommittee = cm.get('subcommittee', None)
+                c.save()
+
+        except ObjectDoesNotExist:
+            c = Committee.objects.create(
+                remote_id=cm['id'],
+                state=cm['state'],
+                chamber=cm['chamber'],
+                name=cm['committee'],
+                subcommittee=cm.get('subcommittee', None),
+                parent_id=cm['parent_id'],
+            )
+            c.save()
 
 
-def bill_exists(state, state_id):
-    try:
-        Bill.objects.get(state=state, state_id=state_id)
-        return True
-    except MultipleObjectsReturned:
-        # TODO: add logging/error reporting here
-        return True
-    except ObjectDoesNotExist:
-        return False
+def _list_state_bills(state, chamber):
+    url = "%s/bills/" % OPEN_STATES_URL
+
+    r = get(url,
+            params={"state": state, "chamber": chamber, "search_window": "session"},
+            headers=HEADERS
+            )
+    return r.json()
+
+
+def _get_state_bill(bill):
+    url = "%s/bills/%s/" % (OPEN_STATES_URL, bill)
+    r = get(url, headers=HEADERS)
+    return r.json()
+
+
+def _list_state_legislators(state):
+    url = "%s/legislators/" % OPEN_STATES_URL
+    r = get(url, params={"state": state, "active": True}, headers=HEADERS)
+    return r.json()
+
+
+def _get_legislator(remoteid):
+    url = "%s/legislators/%s/" % (OPEN_STATES_URL, remoteid)
+    r = get(url, headers=HEADERS)
+    return r.json()
+
+
+def _get_committees(state):
+    url = "%s/committees/" % OPEN_STATES_URL
+    r = get(url, headers=HEADERS, params={"state": state})
+    return r.json()
+
+
+def _time_convert(time):
+    utc = UTC
+    return utc.localize(datetime.strptime(time, '%Y-%m-%d %I:%M:%S'))
+
+
+def bootstrap(state):
+    print('updating committees')
+    update_state_committees(state)
+    chambers = ['upper', 'lower']
+    for chamber in chambers:
+        print('getting bills for chamber')
+        bills = _list_state_bills(state, chamber)
+        for b in bills:
+            try:
+                bill = Bill.objects.get(remote_id=b['id'])
+                if bill.modified < _time_convert(b['updated_at']):
+                    update_bill(localid=bill.id, sourceid=b['id'])
+            except ObjectDoesNotExist:
+                new_bill = Bill.objects.create(remote_id=b['id'], state=state)
+                new_bill.save()
+                update_bill(localid=new_bill.id, sourceid=b['id'])
+
+
+def import_leg(state):
+    humans = _list_state_legislators(state)
+    for human in humans:
+        l = Legislator.objects.create(remote_id=human['id'])
+        l.save()
+        update_legislator(l.id, human['id'])
+
