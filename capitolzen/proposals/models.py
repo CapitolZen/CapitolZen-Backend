@@ -2,10 +2,11 @@ from __future__ import unicode_literals
 from json import dumps
 from django.db import models
 from config.models import AbstractBaseModel
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.postgres.fields import ArrayField, JSONField
 from capitolzen.meta.states import AvailableStateChoices, AVAILABLE_STATES
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
+from capitolzen.meta.notifications import admin_email
 from .mixins import MixinExternalData
 
 
@@ -86,7 +87,9 @@ class Bill(AbstractBaseModel, MixinExternalData):
                     self.sponsor = leg
                 else:
                     self.cosponsors.append(str(leg.id))
-            except ObjectDoesNotExist:
+            except (ObjectDoesNotExist, MultipleObjectsReturned):
+                msg = "id: %s does not match sponsor" % self.id
+                admin_email(msg)
                 continue
 
         self.type = source.get('type', ['bill'])[0]
