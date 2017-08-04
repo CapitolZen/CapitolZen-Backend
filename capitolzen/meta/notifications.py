@@ -19,7 +19,10 @@ def admin_slack(message):
     data = {
         "text": message
     }
-    post(settings.SLACK_URL, data=data)
+    try:
+        post(settings.SLACK_URL, data=data)
+    except Exception:
+        pass
 
 
 @shared_task
@@ -28,10 +31,13 @@ def admin_email(message, subject=False):
     html = "<p>%s<p>" % message
     if not subject:
         subject = "Admin Alert"
-    sp.transmissions.send(
-        recpients=recipients,
-        html=html,
-        from_email='donald@capitolzen.com',
-        subject=subject
-    )
+    try:
+        sp.transmissions.send(
+            recpients=recipients,
+            html=html,
+            from_email='donald@capitolzen.com',
+            subject=subject
+        )
+    except Exception:
+        pass
 
