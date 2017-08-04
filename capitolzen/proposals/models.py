@@ -89,7 +89,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
                     self.cosponsors.append(str(leg.id))
             except (ObjectDoesNotExist, MultipleObjectsReturned):
                 msg = "id: %s does not match sponsor" % self.id
-                admin_email(msg)
+                admin_email.delay(msg)
                 continue
 
         self.type = source.get('type', ['bill'])[0]
