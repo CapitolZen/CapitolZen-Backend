@@ -20,7 +20,7 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     attachments = JSONField(blank=True, null=True)
     saved_filters = JSONField(default=dict)
     active = models.BooleanField(default=True)
-    
+
     organization = models.ForeignKey(
         'organizations.Organization',
         on_delete=models.CASCADE,
