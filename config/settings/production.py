@@ -165,6 +165,10 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'opbeat': {
+            'level': 'WARNING',
+            'class': 'opbeat.contrib.django.handlers.OpbeatHandler',
+        },
     },
     'loggers': {
         'django.request': {
@@ -176,7 +180,12 @@ LOGGING = {
             'level': 'ERROR',
             'handlers': ['console', 'mail_admins', ],
             'propagate': True
-        }
+        },
+        'opbeat.errors': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': False,
+        },
     }
 }
 
@@ -184,12 +193,9 @@ LOGGING = {
 ADMIN_URL = env('DJANGO_ADMIN_URL')
 
 INSTALLED_APPS += ['opbeat.contrib.django', ]
-MIDDLEWARE = ['opbeat.contrib.django.middleware.OpbeatAPMMiddleware', ] + MIDDLEWARE
-
+MIDDLEWARE.insert(0, 'opbeat.contrib.django.middleware.OpbeatAPMMiddleware')
 OPBEAT = {
     'ORGANIZATION_ID': env('OPBEAT_ORGANIZATION_ID', default=''),
     'APP_ID': env('OPBEAT_APP_ID', default=''),
     'SECRET_TOKEN': env('OPBEAT_SECRET_TOKEN', default=''),
 }
-
-MIDDLEWARE = ['opbeat.contrib.django.middleware.OpbeatAPMMiddleware', ] + MIDDLEWARE

@@ -3,7 +3,9 @@ from celery import shared_task
 from django.conf import settings
 from requests import post
 
-sp = SparkPost(settings.SPARKPOST_KEY)
+SP_API = settings.SPARKPOST_KEY
+
+sp = SparkPost( )
 
 
 @shared_task

@@ -426,7 +426,7 @@ OPEN_STATES_URL = env("OPEN_STATES_URL", default='https://openstates.org/api/v1/
 ELASTIC_SEARCH_URL = env("ELASTIC_SEARCH_URL", default='')
 
 # Sparkpost email
-SPARKPOST_KEY = env("SPARK_POST_KEY", default='')
+SPARKPOST_KEY = env("SPARKPOST_API_KEY", default='')
 
 # Slack Incomming Webhook
 SLACK_URL = env("UPDRAFT_SLACK_URL", default='')
