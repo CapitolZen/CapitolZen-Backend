@@ -5,7 +5,6 @@ from requests import post
 
 SP_API = settings.SPARKPOST_KEY
 
-sp = SparkPost(api_key=SP_API)
 
 
 @shared_task
@@ -31,6 +30,7 @@ def admin_slack(message):
 def admin_email(message, subject=False):
     recipients = ['dwasserman@capitolzen.com']
     html = "<p>%s<p>" % message
+    sp = client()
     if not subject:
         subject = "Admin Alert"
     try:
@@ -43,3 +43,9 @@ def admin_email(message, subject=False):
     except Exception:
         pass
 
+
+def client():
+    if not settings.CI:
+        return SparkPost(api_key=SP_API)
+    else:
+        return False
