@@ -5,7 +5,7 @@ from requests import post
 
 SP_API = settings.SPARKPOST_KEY
 
-sp = SparkPost( )
+sp = SparkPost(api_key=SP_API)
 
 
 @shared_task
