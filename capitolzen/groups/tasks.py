@@ -5,7 +5,7 @@ from capitolzen.meta.clients import aws_client
 from capitolzen.meta.notifications import send_report
 from capitolzen.proposals.models import Wrapper
 from capitolzen.users.models import User
-from capitolzen.groups.models import Report
+from .models import Report
 
 REPORT_FUNCTION = "capitolzen_search_reportify"
 
