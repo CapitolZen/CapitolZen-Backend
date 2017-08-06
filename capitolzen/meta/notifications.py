@@ -27,6 +27,19 @@ def admin_slack(message):
 
 
 @shared_task
+def send_report(user, url):
+    recipients = [user.username]
+    html = "<p>Your report is now available.<p><p><a href='%s'>Download</a><p>Or copy this link</p><p>%s</p>" % \
+           (url, url)
+    sp = client()
+    sp.transmissions.send(
+        recipients=recipients,
+        html=html,
+        from_email="donald@capitolzen.com",
+        subject="Your report"
+    )
+
+@shared_task
 def admin_email(message, subject=False):
     recipients = ['dwasserman@capitolzen.com']
     html = "<p>%s<p>" % message

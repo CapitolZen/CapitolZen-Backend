@@ -8,7 +8,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django_fsm import FSMField, transition
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
-from .tasks import async_generate_report
+from .tasks import generate_report
 
 
 class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
@@ -64,7 +64,7 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         verbose_name_plural = "reports"
 
     def generate(self):
-        async_generate_report(self)
+        generate_report.delay(self)
 
     @transition(field=status, source='draft', target='published')
     def publish(self):

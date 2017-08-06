@@ -212,8 +212,12 @@ class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     @property
     def display_summary(self):
         if not self.summary:
-            return self.bill.summary
+            return self.bill.title
         return self.summary
+
+    @property
+    def display_sponsor(self):
+        return self.bill.sponsor.full_name
 
     @staticmethod
     def valid_position(position):
