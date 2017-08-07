@@ -39,20 +39,20 @@ class User(AbstractUser):
     @staticmethod
     @allow_staff_or_superuser
     def has_write_permission(request):
-        return False
+        return True
 
     @staticmethod
     def has_create_permission(request):
         return True
 
     def has_object_read_permission(self, request):
-        return True
+        return request.user.id == self.id
 
     def has_object_write_permission(self, request):
-        return True
+        return request.user.id == self.id
 
     def has_object_create_permission(self, request):
-        return True
+        return request.user.id == self.id
 
 
 class Alerts(AbstractBaseModel):
@@ -75,14 +75,14 @@ class Alerts(AbstractBaseModel):
         null=True,
         blank=True
     )
-    
+
     # bill = models.ForeignKey(
     #    'proposals.Bill',
     #    on_delete=models.CASCADE,
     #    null=True,
     #    blank=True
     # )
-    
+
     is_read = models.BooleanField(default=False)
     message = models.TextField()
 

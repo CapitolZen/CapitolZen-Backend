@@ -62,7 +62,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     filter_backends = (UserFilterBackend, DjangoFilterBackend)
-    lookup_field = "username"
+    lookup_field = "id"
 
 
 class AlertsFilterBackend(DRYPermissionFiltersBase):

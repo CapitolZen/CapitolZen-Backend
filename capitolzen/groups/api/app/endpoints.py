@@ -8,7 +8,7 @@ from dry_rest_permissions.generics import (DRYPermissions,
 
 from capitolzen.proposals.models import Bill, Wrapper
 from capitolzen.groups.models import Group, Report
-from capitolzen.groups.tasks import generate_report, async_generate_report
+from capitolzen.groups.tasks import generate_report, email_report
 from .serializers import GroupSerializer, ReportSerializer
 
 
@@ -75,4 +75,14 @@ class ReportViewSet(viewsets.ModelViewSet):
     def url(self, request, pk):
         report = Report.objects.get(pk=pk)
         url = generate_report(report)
-        return Response({"uhoh": "hotdog", "url": url, "status_code": status.HTTP_200_OK})
+        if url:
+            return Response({"message": "report generated", "url": url, "status_code": status.HTTP_200_OK})
+        else:
+            return Response({"message": "error generating report", "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR})
+
+    @detail_route(methods=['GET'])
+    def send_report(self, request, pk):
+        email_report.delay(report=pk, user=request.user.id)
+        return Response({"status_code": status.HTTP_200_OK, "message": "Report hopefully emailed"})
+
+

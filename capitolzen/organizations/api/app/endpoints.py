@@ -95,9 +95,9 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         Create default group
         """
         g = Group.objects.create(
-            title="Default Group for %s" % org.name,
+            title=org.name,
             organization=org,
-            description="Default group for your account"
+            description="Your organization"
         )
 
         g.save()
