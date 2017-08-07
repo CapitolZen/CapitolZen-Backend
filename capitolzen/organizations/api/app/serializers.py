@@ -8,11 +8,6 @@ class OrganizationSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     is_active = serializers.ReadOnlyField()
 
-    # plan_type = serializers.ChoiceField(
-    #     choices=Organization.PLAN_CHOICES,
-    #     default='basic'
-    # )
-
     class Meta:
         model = Organization
         fields = (
