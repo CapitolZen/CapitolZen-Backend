@@ -19,13 +19,26 @@ from .base import *  # noqa
 # Raises ImproperlyConfigured exception if APPLICATION_SECRET_KEY not in os.environ
 SECRET_KEY = env('APPLICATION_SECRET_KEY')
 
-
 # This ensures that Django will be able to detect a secure connection
 # properly on Heroku.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Needed for APM management via Opbeat web interface https://opbeat.com
+MIDDLEWARE = ('opbeat.contrib.django.middleware.OpbeatAPMMiddleware', ) + \
+             MIDDLEWARE
+INSTALLED_APPS += ('gunicorn', 'opbeat.contrib.django',)
+
+# Ensure any opbeat logs get pumped to logging agent
+LOGGING['loggers']['opbeat.errors'] = {
+    'handlers': ['console'],
+    'propagate': True,
+    'format': '%(message)s',
+    'level': 'CRITICAL',
+}
+
 # Use Whitenoise to serve static files
 # See: https://whitenoise.readthedocs.io/
-WHITENOISE_MIDDLEWARE = ['whitenoise.middleware.WhiteNoiseMiddleware', ]
+WHITENOISE_MIDDLEWARE = ('whitenoise.middleware.WhiteNoiseMiddleware', )
 MIDDLEWARE = WHITENOISE_MIDDLEWARE + MIDDLEWARE
 
 
@@ -191,11 +204,3 @@ LOGGING = {
 
 # Custom Admin URL, use {% url 'admin:index' %}
 ADMIN_URL = env('DJANGO_ADMIN_URL')
-
-INSTALLED_APPS += ['opbeat.contrib.django', ]
-MIDDLEWARE.insert(0, 'opbeat.contrib.django.middleware.OpbeatAPMMiddleware')
-OPBEAT = {
-    'ORGANIZATION_ID': env('OPBEAT_ORGANIZATION_ID', default=''),
-    'APP_ID': env('OPBEAT_APP_ID', default=''),
-    'SECRET_TOKEN': env('OPBEAT_SECRET_TOKEN', default=''),
-}
