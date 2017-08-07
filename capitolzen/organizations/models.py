@@ -21,7 +21,7 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     """
     PLAN_CHOICES = PlanChoices
     PLAN_DEFAULT = BASIC
-    plan_type = models.CharField(max_length=256, blank=True, null=True, default=PLAN_DEFAULT),
+    plan_name = models.CharField(max_length=256, blank=True, null=True)
 
     stripe_customer_id = models.CharField(max_length=256, blank=True)
     stripe_subscription_id = models.CharField(max_length=256, blank=True)

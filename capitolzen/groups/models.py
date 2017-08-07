@@ -2,8 +2,7 @@ from __future__ import unicode_literals
 from json import dumps
 from django.db import models
 from config.models import AbstractBaseModel
-from dry_rest_permissions.generics import allow_staff_or_superuser
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import JSONField
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django_fsm import FSMField, transition
