@@ -24,9 +24,9 @@ SECRET_KEY = env('APPLICATION_SECRET_KEY')
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Needed for APM management via Opbeat web interface https://opbeat.com
-MIDDLEWARE = ('opbeat.contrib.django.middleware.OpbeatAPMMiddleware', ) + \
+MIDDLEWARE = ['opbeat.contrib.django.middleware.OpbeatAPMMiddleware', ] + \
              MIDDLEWARE
-INSTALLED_APPS += ('gunicorn', 'opbeat.contrib.django',)
+INSTALLED_APPS += ['gunicorn', 'opbeat.contrib.django', ]
 
 # Ensure any opbeat logs get pumped to logging agent
 LOGGING['loggers']['opbeat.errors'] = {
