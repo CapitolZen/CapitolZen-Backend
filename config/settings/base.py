@@ -51,8 +51,8 @@ THIRD_PARTY_APPS = [
     'health_check.cache',
     'asana',
     'stripe',
-    'anymail',
-    'sparkpost'
+    'sparkpost',
+    'django-anymail'
 ]
 
 ADMIN_APPS = [
