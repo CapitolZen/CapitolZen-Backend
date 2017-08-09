@@ -52,7 +52,6 @@ THIRD_PARTY_APPS = [
     'asana',
     'stripe',
     'sparkpost',
-    'django-anymail'
 ]
 
 ADMIN_APPS = [
@@ -101,12 +100,6 @@ FIXTURE_DIRS = (
 # ------------------------------------------------------------------------------
 # Sparkpost email
 SPARKPOST_KEY = env("SPARKPOST_API_KEY", default='')
-
-EMAIL_BACKEND = "anymail.backends.sparkpost.EmailBackend"
-ANYMAIL = {
-    "SPARKPOST_API_KEY": SPARKPOST_KEY,
-}
-DEFAULT_FROM_EMAIL = "donald@capitolzen.com"
 
 # MANAGER CONFIGURATION
 # ------------------------------------------------------------------------------
