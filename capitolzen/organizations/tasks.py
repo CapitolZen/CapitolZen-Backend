@@ -3,8 +3,8 @@ from celery import shared_task
 from capitolzen.users.utils import get_intercom_client
 from capitolzen.organizations.models import Organization
 from intercom.errors import ResourceNotFound
-
-
+from .utils import get_stripe_client
+from stripe.error import StripeError
 @shared_task()
 def intercom_manage_organization(organization_id, op):
     """
@@ -73,6 +73,74 @@ def intercom_manage_organization(organization_id, op):
             return intercom_company.id
         except ResourceNotFound:
             pass
+
+    if op == "create":
+        _create()
+    elif op == "update":
+        _update()
+    elif op == "delete":
+        _delete()
+
+    return True
+
+@shared_task()
+def stripe_manage_customer(organization_id, op):
+    """
+    Create, Update, Delete customer in stripe...
+    Customer in stripe == Organization on our end.
+
+    :param organization_id:
+    :param op:
+    :return:
+    """
+
+    stripe = get_stripe_client()
+
+    if op != "delete":
+        organization = Organization.objects.get(id=organization_id)
+    else:
+        organization = None
+
+    def _populate_stripe_customer():
+        data = {
+            'description': organization.name,
+            'email': organization.owner_user_account().email,
+            'metadata': {
+                'id': organization.id
+            }
+        }
+
+        return data
+
+    def _create():
+
+        customer = stripe.Customer.create(**_populate_stripe_customer())
+
+        if customer:
+            organization.stripe_customer_id = customer.get('id')
+            organization.save()
+
+        return customer
+
+    def _update():
+        try:
+            cu = stripe.Customer.retrieve(organization.stripe_customer_id)
+            data = _populate_stripe_customer()
+
+            for key in data:
+                setattr(cu, key, data[key])
+
+            cu.save()
+        except StripeError:
+            pass
+
+    def _delete():
+        try:
+            cu = stripe.Customer.retrieve(organization.stripe_customer_id)
+            cu.delete()
+        except StripeError:
+            pass
+
 
     if op == "create":
         _create()

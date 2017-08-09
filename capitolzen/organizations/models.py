@@ -44,10 +44,13 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     billing_state = models.CharField(max_length=100, null=True, blank=True)
     billing_zip_code = models.CharField(max_length=10, null=True, blank=True)
 
-
     demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO, default='individual')
     logo = models.URLField(blank=True)
     contacts = JSONField(blank=True, default=dict)
+
+    def owner_user_account(self):
+        """Because I can never remember how to get this"""
+        return self.owner.organization_user.user
 
     @property
     def user_is_owner(self):
