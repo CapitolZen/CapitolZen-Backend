@@ -178,6 +178,13 @@ USE_TZ = True
 
 SECRET_KEY = env("APPLICATION_SECRET_KEY", default="")
 
+CI = env("CI", default=False)
+
+# Frontend Domain
+APP_FRONTEND = env("APP_FRONTEND", default='')
+
+
+
 # TEMPLATE CONFIGURATION
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#templates
@@ -213,9 +220,6 @@ TEMPLATES = [
         },
     },
 ]
-
-# See: http://django-crispy-forms.readthedocs.io/en/latest/install.html#template-packs
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # STATIC FILE CONFIGURATION
 # ------------------------------------------------------------------------------
@@ -346,6 +350,9 @@ LOGIN_URL = 'account_login'
 # SLUGLIFIER
 AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 
+# Location of root django.contrib.admin URL, use {% url 'admin:index' %}
+ADMIN_URL = r'^admin/'
+
 # CELERY
 # ------------------------------------------------------------------------------
 INSTALLED_APPS += ('capitolzen.tasks.celery.CeleryConfig',)
@@ -411,25 +418,30 @@ LOGGING = {
     },
 }
 
+
+# CONNECTIONS
+# ------------------------------------------------------------------------------
+
 # AWS
 AWS_ACCESS_ID = env("AWS_ACCESSID", default='')
 AWS_SECRET_KEY = env("AWS_SECRETKEY", default='')
 AWS_REGION = env("AWS_REGION", default='us-east-1')
 AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
-# Location of root django.contrib.admin URL, use {% url 'admin:index' %}
-ADMIN_URL = r'^admin/'
 INDEX_LAMBDA = env("capitolzen_search_bills", default="capitolzen_search_bills")
 
-# Open States
+# OPEN STATES
 OPEN_STATES_KEY = env("OPEN_STATES_KEY", default='')
 OPEN_STATES_URL = env("OPEN_STATES_URL", default='https://openstates.org/api/v1/')
 
-# Elastic Search
+# ELASTIC SEARCH
 ELASTIC_SEARCH_URL = env("ELASTIC_SEARCH_URL", default='')
 
-# Slack Incomming Webhook
+# SLACK
 SLACK_URL = env("UPDRAFT_SLACK_URL", default='')
-CI = env("CI", default=False)
 
-# Frontend Domain
-APP_FRONTEND = env("APP_FRONTEND", default='')
+# INTERCOM
+INTERCOM_ACCESS_TOKEN = env("INTERCOM_ACCESS_TOKEN", default="")
+
+# STRIPE
+STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY", default="")
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
