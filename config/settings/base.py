@@ -50,7 +50,9 @@ THIRD_PARTY_APPS = [
     'health_check.db',
     'health_check.cache',
     'asana',
-    'stripe'
+    'stripe',
+    'anymail',
+    'sparkpost'
 ]
 
 ADMIN_APPS = [
@@ -97,13 +99,20 @@ FIXTURE_DIRS = (
 
 # EMAIL CONFIGURATION
 # ------------------------------------------------------------------------------
-EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+# Sparkpost email
+SPARKPOST_KEY = env("SPARKPOST_API_KEY", default='')
+
+EMAIL_BACKEND = "anymail.backends.sparkpost.EmailBackend"
+ANYMAIL = {
+    "SPARKPOST_API_KEY": SPARKPOST_KEY,
+}
+DEFAULT_FROM_EMAIL = "donald@capitolzen.com"
 
 # MANAGER CONFIGURATION
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#admins
 ADMINS = [
-    ("""Donald and Matt""", 'djwasserman@gmail.com'),
+    ("""Donald and Matt""", 'donald@capitolzen.com'),
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#managers
@@ -424,9 +433,6 @@ OPEN_STATES_URL = env("OPEN_STATES_URL", default='https://openstates.org/api/v1/
 
 # Elastic Search
 ELASTIC_SEARCH_URL = env("ELASTIC_SEARCH_URL", default='')
-
-# Sparkpost email
-SPARKPOST_KEY = env("SPARKPOST_API_KEY", default='')
 
 # Slack Incomming Webhook
 SLACK_URL = env("UPDRAFT_SLACK_URL", default='')
