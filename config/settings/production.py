@@ -120,20 +120,12 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # EMAIL
 # ------------------------------------------------------------------------------
-"""
-DEFAULT_FROM_EMAIL = env('DJANGO_DEFAULT_FROM_EMAIL',
-                         default='capitolzen-web <noreply@example.com>')
-EMAIL_SUBJECT_PREFIX = env('DJANGO_EMAIL_SUBJECT_PREFIX', default='[capitolzen-web]')
-SERVER_EMAIL = env('DJANGO_SERVER_EMAIL', default=DEFAULT_FROM_EMAIL)
-
-# Anymail with Mailgun
 INSTALLED_APPS += ['anymail', ]
+EMAIL_BACKEND = "anymail.backends.sparkpost.EmailBackend"
 ANYMAIL = {
-    'MAILGUN_API_KEY': env('DJANGO_MAILGUN_API_KEY'),
-    'MAILGUN_SENDER_DOMAIN': env('MAILGUN_SENDER_DOMAIN')
+    "SPARKPOST_API_KEY": SPARKPOST_KEY,
 }
-EMAIL_BACKEND = 'anymail.backends.mailgun.MailgunBackend'
-"""
+DEFAULT_FROM_EMAIL = "donald@capitolzen.com"
 # TEMPLATE CONFIGURATION
 # ------------------------------------------------------------------------------
 # See:

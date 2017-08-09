@@ -69,7 +69,7 @@ class ReportViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save()
         report = serializer.instance
-        report.generate()
+        generate_report(report)
 
     @detail_route(methods=['GET'])
     def url(self, request, pk):
