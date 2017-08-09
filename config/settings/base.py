@@ -431,3 +431,6 @@ SPARKPOST_KEY = env("SPARKPOST_API_KEY", default='')
 # Slack Incomming Webhook
 SLACK_URL = env("UPDRAFT_SLACK_URL", default='')
 CI = env("CI", default=False)
+
+# Frontend Domain
+APP_FRONTEND = env("APP_FRONTEND", default='')

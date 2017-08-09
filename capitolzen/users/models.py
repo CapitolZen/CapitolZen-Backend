@@ -7,7 +7,6 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
-
 @python_2_unicode_compatible
 class User(AbstractUser):
 
@@ -57,20 +56,8 @@ class User(AbstractUser):
         return request.user.id == self.id
 
 
-class Alerts(AbstractBaseModel):
+class Alert(AbstractBaseModel):
 
-    organization = models.ForeignKey(
-        'organizations.Organization',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
-    group = models.ForeignKey(
-        'groups.Group',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
     user = models.ForeignKey(
         'users.User',
         on_delete=models.CASCADE,
@@ -78,15 +65,24 @@ class Alerts(AbstractBaseModel):
         blank=True
     )
 
-    # bill = models.ForeignKey(
-    #    'proposals.Bill',
-    #    on_delete=models.CASCADE,
-    #    null=True,
-    #    blank=True
-    # )
-
+    references = JSONField(default=dict, blank=True, null=True)
     is_read = models.BooleanField(default=False)
     message = models.TextField()
+
+    @property
+    def bill_id(self):
+        model = self.references.get("model", False)
+        if model is not "bill":
+            return False
+        return self.references.get("id")
+
+    def set_type(self, model):
+        t = type(model)
+        data = self.references
+        data["model"] = t
+        data["references"] = model.id
+        self.references = data
+        self.save()
 
     class Meta:
         abstract = False
@@ -109,16 +105,16 @@ class Alerts(AbstractBaseModel):
     @staticmethod
     @allow_staff_or_superuser
     def has_create_permission(request):
-        return True
+        return False
 
     @allow_staff_or_superuser
     def has_object_read_permission(self, request):
-        return True
+        return self.user == request.user
 
     @allow_staff_or_superuser
     def has_object_write_permission(self, request):
-        return True
+        return self.user == request.user
 
     @allow_staff_or_superuser
     def has_object_create_permission(self, request):
-        return True
+        return False

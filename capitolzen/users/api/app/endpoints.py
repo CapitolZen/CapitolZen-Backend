@@ -10,7 +10,7 @@ from capitolzen.organizations.models import Organization
 from capitolzen.users.api.app.serializers import UserSerializer
 from capitolzen.users.models import User
 from capitolzen.users.api.app.serializers import AlertsSerializer
-from capitolzen.users.models import Alerts
+from capitolzen.users.models import Alert
 from rest_framework import status
 
 
@@ -67,14 +67,14 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class AlertsFilterBackend(DRYPermissionFiltersBase):
     def filter_list_queryset(self, request, queryset, view):
-        queryset = Alerts.objects.filter(user=request.user)
+        queryset = Alert.objects.filter(user=request.user)
         return queryset
 
 
 class AlertsViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
-        return Alerts.objects.filter(user=user)
+        return Alert.objects.filter(user=user)
 
     @list_route(methods=['GET'])
     def current(self, request):
@@ -82,14 +82,14 @@ class AlertsViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['POST'])
     def dismiss(self, request, id):
-        alert = Alerts.objects.get(id=id)
+        alert = Alert.objects.get(id=id)
         alert.is_read = True
         alert.save()
         return Response(id, status=status.HTTP_200_OK)
 
     permission_classes = (DRYPermissions, )
     serializer_class = AlertsSerializer
-    queryset = Alerts.objects.get_queryset()
+    queryset = Alert.objects.get_queryset()
     filter_backends = (AlertsFilterBackend, DjangoFilterBackend)
     lookup_field = "id"
 

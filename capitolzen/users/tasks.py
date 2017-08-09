@@ -1,7 +1,6 @@
 from celery.utils.log import get_task_logger
 from celery import shared_task
-from .models import Alerts
-from capitolzen.users.models import User
+from capitolzen.users.models import Alert, User
 
 logger = get_task_logger(__name__)
 
@@ -13,7 +12,7 @@ def create_alert_task(title, categories, bill):
     users = User.objects.all()
 
     for user in users:
-        new_alert = Alerts.objects.create(
+        new_alert = Alert.objects.create(
             message='A new bill called ' + title + ' has been created.',
             user=user,
             # bill=bill
@@ -21,4 +20,14 @@ def create_alert_task(title, categories, bill):
             # organization='test'
         )
 
-    new_alert.save()
+        new_alert.save()
+
+
+@shared_task
+def create_user_alert(user_id, message, reference=False):
+    user = User.objects.get(pk=user_id)
+    a = Alert.objects.create(user=user, message=message)
+
+    if reference:
+        a.references = reference
+    a.save()
