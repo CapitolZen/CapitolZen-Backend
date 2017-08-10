@@ -14,7 +14,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
             'id', 'name', 'is_active', 'user_is_owner', 'billing_email', 'billing_phone',
             'user_is_admin', 'user_is_member', 'billing_address_one', 'billing_name',
             'billing_address_two', 'billing_city', 'billing_state', 'billing_zip_code',
-            'stripe_payment_tokens', 'plan_name'
+            'stripe_payment_tokens', 'plan_name', 'logo'
         )
 
     def create(self, validated_data):

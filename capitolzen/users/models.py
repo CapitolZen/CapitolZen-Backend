@@ -13,6 +13,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
+
 @python_2_unicode_compatible
 class User(AbstractUser, TimeStampedModel):
 
@@ -56,7 +57,6 @@ class User(AbstractUser, TimeStampedModel):
         msg = "<p>You requested to reset your password.</p>"
         msg += "<p><a href='%s'>Click here to reset</a></p>" % url
         msg += "<p>If you didn't request a new password, please respond to this email.</p>"
-        print(url)
         send_mail("Reset Capitol Zen Password", msg, 'donald@capitolzen.com', [self.username])
 
     @property

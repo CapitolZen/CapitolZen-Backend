@@ -72,15 +72,16 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         data = loads(request.body)
 
         acl = data.get('acl', False)
-        params = c.upload_asset(file=data['file_name'], group_id=data['group_id'], acl=acl)
+        group = data.get('group_id', False)
+        params = c.upload_asset(file=data['file_name'], group_id=group, acl=acl)
 
         return Response({"status": status.HTTP_200_OK, "params": params})
 
     @list_route(methods=['get'])
     def current(self, request):
-        user = User.objects.get(request.user)
-        orgs = Organization.objects.filter(user=user)
-        serializer = OrganizationSerializer(orgs, many=True)
+        org = Organization.objects.filter(users=request.user).last()
+        serializer = OrganizationSerializer(org)
+
         return Response(serializer.data)
 
     def perform_create(self, serializer):
