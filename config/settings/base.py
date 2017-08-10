@@ -432,4 +432,4 @@ SLACK_URL = env("UPDRAFT_SLACK_URL", default='')
 CI = env("CI", default=False)
 
 # Frontend Domain
-APP_FRONTEND = env("APP_FRONTEND", default='')
+APP_FRONTEND_URL = env("APP_FRONTEND", default='')
