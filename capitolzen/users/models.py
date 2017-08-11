@@ -20,8 +20,8 @@ class User(AbstractUser, TimeStampedModel):
     # First Name and Last Name do not cover name patterns
     # around the globe.
     name = models.CharField(_('Name of User'), blank=True, max_length=255)
-    meta = JSONField(default=dict, null=True, blank=True
-                     )
+    meta = JSONField(default=dict, null=True, blank=True)
+
     def __str__(self):
         return self.name
 

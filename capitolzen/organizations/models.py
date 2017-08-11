@@ -156,8 +156,11 @@ class OrganizationInvite(AbstractBaseModel):
         verbose_name_plural = _("invites")
 
     def send_user_invite(self):
+
+        url = "%s/claim/%s" % (settings.APP_FRONTEND_URL, self.id)
+
         msg = "<p>You've been invited to join %s on Capitol Zen.</p><p><a href='%s'>Click here</a> to accept</p>" % \
-              self.organization_name
+              (self.organization_name, url)
         author = self.user
         if not author:
             mail = "donald@capitolzen.com"

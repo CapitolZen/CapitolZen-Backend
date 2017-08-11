@@ -133,46 +133,18 @@ class OrganizationInviteFilterBackend(DRYPermissionFiltersBase):
 
 
 class OrganizationInviteViewSet(viewsets.ModelViewSet):
-    """
-    TODO:
-    -- We need to cleanup the permissions on this. Right now needs
-       to be set to AllowAny so that anon users can retrieve their own invites.
-    -- Fixup claim. Should only be able to claim unclaimed invites, send
-        back real error responses.
 
-    If the org is owned by staff, the first member to join claims it.
-    """
-
-    @detail_route(methods=['post'])
+    @detail_route(methods=['post'], authentication_classes=[AllowAny])
     def claim(self, request, pk=None):
         invite = self.get_object()
-        user = request.user
-        # Only add if not already in the org
-        if user.is_authenticated and not invite.organization.is_member(user):
+        if invite.status != "unclaimed":
+            return Response({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid invite"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-            # If the organization owner is a staff member it probably
-            # means the organization was created by an admin, not self-service.
-            """
-
-            if invite.organization.owner.organization_user.user.is_staff:
-                old_owner = invite.organization.owner.organization_user
-                new_owner = invite.organization.get_or_add_user(user)
-                invite.organization.save()
-                if old_owner != new_owner:
-                    # invite.organization.save()
-                    invite.organization.change_owner(new_owner)
-                    invite.organization.remove_user(old_owner.user)
-            else:
-            """
-            invite.organization.add_user(user)
-            invite.status = "claimed"
-            invite.save()
-            return Response({"status_code": status.HTTP_200_OK,
-                             "detail": "Invite claimed"},
-                            status=status.HTTP_200_OK)
-        return Response({"status_code": status.HTTP_400_BAD_REQUEST,
-                         "detail": "Invalid request"},
-                        status=status.HTTP_400_BAD_REQUEST)
+        org = invite.organization
+        org.add_user(request.user)
+        org.save()
+        return Response({"status": status.HTTP_200_OK, "message": "invite claimed"}, status=status.HTTP_200_OK)
 
     @detail_route(methods=['post'])
     def actions(self, request, pk=None):
@@ -202,6 +174,10 @@ class OrganizationInviteViewSet(viewsets.ModelViewSet):
 
         return Response({"status_code": status.HTTP_400_BAD_REQUEST,
                          "detail": "Invalid request"})
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        instance.send_user_invite()
 
     permission_classes = (AllowAny, )
     serializer_class = OrganizationInviteSerializer

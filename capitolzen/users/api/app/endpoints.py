@@ -36,29 +36,10 @@ class UserFilterBackend(DRYPermissionFiltersBase):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """
-    Override the various list and detail views to ensure that this endpoint
-    is being filtered by an organization and the user making the request is
-    an admin of the specific organization being filtered.
-    """
-
-    """
-    Override the list view for now to filter users down by org.
-
-    TODO:
-    -- Figure out a better way to do this.
-    -- Require an organization filter to exist. There is no reason people
-        should be attempting to view all the users.
-    """
-    def list(self, request, *args, **kwargs):
-        if "organization" in request._request.GET:
-            organization_id = request._request.GET['organization']
-            organization = Organization.objects.get(pk=organization_id)
-            users = organization.users.all()
-            serializer = UserSerializer(users, many=True)
-            return Response(serializer.data)
-        else:
-            return super(UserViewSet, self).list(self, request, *args, **kwargs)
+    def get_queryset(self):
+        org = Organization.objects.filter(users=self.request.user).last()
+        users = org.users.all()
+        return users
 
     @list_route(methods=['GET'])
     def current(self, request):
