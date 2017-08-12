@@ -1,9 +1,10 @@
 from __future__ import unicode_literals
 
 from crum import get_current_user
-
+from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.core.mail import send_mail
 from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser
 from django.contrib.postgres.fields import ArrayField, JSONField
@@ -148,6 +149,7 @@ class OrganizationInvite(AbstractBaseModel):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     email = models.EmailField(max_length=254)
     status = models.CharField(max_length=254, choices=STATUS_CHOICES)
+    user = models.ForeignKey('users.User', blank=True, null=True)
 
     @property
     def organization_name(self):
@@ -157,9 +159,24 @@ class OrganizationInvite(AbstractBaseModel):
         verbose_name = _("invite")
         verbose_name_plural = _("invites")
 
-    # TODO: Actually send emails and such
     def send_user_invite(self):
-        return True
+
+        url = "%s/claim/%s" % (settings.APP_FRONTEND_URL, self.id)
+
+        msg = "<p>You've been invited to join %s on Capitol Zen.</p><p><a href='%s'>Click here</a> to accept</p>" % \
+              (self.organization_name, url)
+        author = self.user
+        if not author:
+            mail = "donald@capitolzen.com"
+        else:
+            mail = author.username
+
+        send_mail(
+            subject="You've been invited to Capitol Zen",
+            recipient_list=[self.email],
+            from_email=mail,
+            message=msg
+        )
 
     class JSONAPIMeta:
         resource_name = "invites"

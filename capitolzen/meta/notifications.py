@@ -6,7 +6,6 @@ from requests import post
 SP_API = settings.SPARKPOST_KEY
 
 
-
 @shared_task
 def alert_admin(message, priority=0):
     if priority > 1:
@@ -39,6 +38,7 @@ def send_report(user, url):
         subject="Your report"
     )
 
+
 @shared_task
 def admin_email(message, subject=False):
     recipients = ['dwasserman@capitolzen.com']
@@ -56,6 +56,16 @@ def admin_email(message, subject=False):
     except Exception:
         pass
 
+
+@shared_task
+def api_email(recpients, subject, message):
+    sp = client()
+    sp.transmission.send(
+        recpients=recpients,
+        html=message,
+        subject=subject,
+        from_email='donald@capitolzen.com'
+    )
 
 def client():
     if not settings.CI:

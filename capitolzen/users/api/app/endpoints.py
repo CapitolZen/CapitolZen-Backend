@@ -1,3 +1,6 @@
+from django.core.mail import send_mail
+from base64 import b64decode
+from json import loads
 from django_filters.rest_framework import DjangoFilterBackend
 from dry_rest_permissions.generics import DRYPermissionFiltersBase
 from dry_rest_permissions.generics import DRYPermissions
@@ -5,6 +8,9 @@ from rest_framework import viewsets
 from rest_framework.decorators import list_route, detail_route
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+
 
 from capitolzen.organizations.models import Organization
 from capitolzen.users.api.app.serializers import UserSerializer
@@ -30,29 +36,10 @@ class UserFilterBackend(DRYPermissionFiltersBase):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """
-    Override the various list and detail views to ensure that this endpoint
-    is being filtered by an organization and the user making the request is
-    an admin of the specific organization being filtered.
-    """
-
-    """
-    Override the list view for now to filter users down by org.
-
-    TODO:
-    -- Figure out a better way to do this.
-    -- Require an organization filter to exist. There is no reason people
-        should be attempting to view all the users.
-    """
-    def list(self, request, *args, **kwargs):
-        if "organization" in request._request.GET:
-            organization_id = request._request.GET['organization']
-            organization = Organization.objects.get(pk=organization_id)
-            users = organization.users.all()
-            serializer = UserSerializer(users, many=True)
-            return Response(serializer.data)
-        else:
-            return super(UserViewSet, self).list(self, request, *args, **kwargs)
+    def get_queryset(self):
+        org = Organization.objects.filter(users=self.request.user).last()
+        users = org.users.all()
+        return users
 
     @list_route(methods=['GET'])
     def current(self, request):
@@ -93,3 +80,46 @@ class AlertsViewSet(viewsets.ModelViewSet):
     filter_backends = (AlertsFilterBackend, DjangoFilterBackend)
     lookup_field = "id"
 
+
+class PasswordResetViewSet(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        params = request.GET
+        email = params.get("email", False)
+        if not email:
+            return Response({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid request"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(username=params.get('email', False))
+            user.reset_password()
+        except Exception:
+            pass
+        return Response({"status": status.HTTP_200_OK, "message": "password reset email sent"})
+
+    def post(self, request):
+        params = loads(request.body)
+        password = params.get("password", False)
+        token = params.get("hash", False)
+        if not token or not password:
+            return Response({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid request"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        decoded = b64decode(token)
+        decoded = decoded.decode('utf-8')
+        parts = decoded.split('|')
+        try:
+            user = User.objects.get(id=parts[2])
+            valid = user.compare_reset_hash(token)
+            if not valid:
+                return Response({"status": status.HTTP_403_FORBIDDEN, "message": "Invalid token"},
+                                status=status.HTTP_403_FORBIDDEN)
+            user.set_password(password)
+            user.save()
+            return Response({"status": status.HTTP_200_OK, "email": user.username, "message": "password reset"},
+                            status=status.HTTP_200_OK)
+
+        except Exception:
+            return Response({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid request aaaa"},
+                            status=status.HTTP_400_BAD_REQUEST)
