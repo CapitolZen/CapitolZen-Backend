@@ -20,6 +20,10 @@ def generate_report(report):
         "summary": report.description,
         "bills": bill_list
     }
+    logo_path = report.preferences.get("logo", False)
+
+    if logo_path:
+        data["logo"] = getattr(report, logo_path)
 
     event = {
         "data": data,
