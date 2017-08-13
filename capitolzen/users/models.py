@@ -9,13 +9,14 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.contrib.postgres.fields import JSONField
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
 
-@python_2_unicode_compatible
 class User(AbstractUser, TimeStampedModel):
+    first_name = None
+    last_name = None
+
     name = models.CharField(_('Name of User'), blank=True, max_length=255)
     metadata = JSONField(default=dict, null=True, blank=True)
 

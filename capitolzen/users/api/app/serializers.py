@@ -16,13 +16,15 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id',
+                  'created',
+                  'modified',
+                  'metadata',
                   'name',
+                  'email',
                   'username',
                   'user_is_staff',
                   'user_is_admin',
-                  'metadata',
                   'organizations',
-                  'password',
                   'date_joined')
         read_only_fields = ('id',
                             'user_is_staff',
