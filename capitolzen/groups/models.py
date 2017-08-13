@@ -52,6 +52,7 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     template = JSONField(default=dict)
     recurring = models.BooleanField(default=False)
     update_frequency = models.CharField(blank=True, max_length=255, null=True)
+    preferences = JSONField(default=dict)
 
     class JSONAPIMeta:
         resource_name = "reports"
