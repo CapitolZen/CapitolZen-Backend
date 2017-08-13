@@ -36,10 +36,17 @@ class UserFilterBackend(DRYPermissionFiltersBase):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """
+
+    """
+
+    """
+
     def get_queryset(self):
         org = Organization.objects.filter(users=self.request.user).last()
         users = org.users.all()
         return users
+    """
 
     @list_route(methods=['GET'])
     def current(self, request):
