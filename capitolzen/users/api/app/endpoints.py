@@ -14,9 +14,7 @@ from rest_framework.permissions import AllowAny
 
 from capitolzen.organizations.models import Organization
 from capitolzen.users.api.app.serializers import UserSerializer
-from capitolzen.users.models import User
-from capitolzen.users.api.app.serializers import AlertsSerializer
-from capitolzen.users.models import Alert
+from capitolzen.users.models import User, Notification
 from rest_framework import status
 
 
@@ -47,39 +45,17 @@ class UserViewSet(viewsets.ModelViewSet):
 
     permission_classes = (DRYPermissions, )
     serializer_class = UserSerializer
-    queryset = User.objects.all()
     filter_backends = (UserFilterBackend, DjangoFilterBackend)
     lookup_field = "id"
 
 
-class AlertsFilterBackend(DRYPermissionFiltersBase):
-    def filter_list_queryset(self, request, queryset, view):
-        queryset = Alert.objects.filter(user=request.user)
-        return queryset
-
-
-class AlertsViewSet(viewsets.ModelViewSet):
+class NotificationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
-        user = self.request.user
-        return Alert.objects.filter(user=user)
-
-    @list_route(methods=['GET'])
-    def current(self, request):
-        return Response(AlertsSerializer(request.user).data)
-
-    @detail_route(methods=['POST'])
-    def dismiss(self, request, id):
-        alert = Alert.objects.get(id=id)
-        alert.is_read = True
-        alert.save()
-        return Response(id, status=status.HTTP_200_OK)
+        return Notification.objects.filter(user=self.request.user)
 
     permission_classes = (DRYPermissions, )
-    serializer_class = AlertsSerializer
-    queryset = Alert.objects.get_queryset()
-    filter_backends = (AlertsFilterBackend, DjangoFilterBackend)
+    filter_backends = (DjangoFilterBackend, )
     lookup_field = "id"
-
 
 class PasswordResetViewSet(APIView):
     permission_classes = (AllowAny,)
