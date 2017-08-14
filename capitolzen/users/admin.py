@@ -4,6 +4,7 @@ from config.admin import BaseModelAdmin
 from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from .models import User, Alert
+from django.utils.translation import ugettext, ugettext_lazy as _
 
 
 class MyUserChangeForm(UserChangeForm):
@@ -34,10 +35,13 @@ class MyUserAdmin(AuthUserAdmin):
     form = MyUserChangeForm
     add_form = MyUserCreationForm
     fieldsets = (
-            ('User Profile', {'fields': ('name',)}),
-    ) + AuthUserAdmin.fieldsets
-    list_display = ('username', 'name', 'is_superuser')
-    search_fields = ['name']
+        (None, {'fields': ('username', 'password')}),
+        (_('Personal info'), {'fields': ('name', 'email')}),
+        (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser')}),
+        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+    )
+    list_display = ('username', 'name', 'email', 'is_active', 'is_superuser')
+    search_fields = ['name', 'email']
 
 
 class AlertsAdmin(BaseModelAdmin):

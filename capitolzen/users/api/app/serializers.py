@@ -22,13 +22,13 @@ class UserSerializer(serializers.ModelSerializer):
                   'name',
                   'email',
                   'username',
-                  'user_is_staff',
-                  'user_is_admin',
+                  'is_staff',
+                  'is_superuser',
                   'organizations',
                   'date_joined')
         read_only_fields = ('id',
-                            'user_is_staff',
-                            'user_is_admin',
+                            'is_staff',
+                            'is_superuser',
                             'organizations',
                             'date_joined')
         lookup_field = 'id'

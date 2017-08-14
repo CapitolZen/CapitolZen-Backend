@@ -23,9 +23,6 @@ class User(AbstractUser, TimeStampedModel):
     def __str__(self):
         return self.name
 
-    def get_absolute_url(self):
-        return reverse('users:detail', kwargs={'username': self.username})
-
     def generate_reset_hash(self):
         if self.user_is_admin:
             raise Exception("cannot reset admin password via client")
@@ -56,14 +53,6 @@ class User(AbstractUser, TimeStampedModel):
         msg += "<p><a href='%s'>Click here to reset</a></p>" % url
         msg += "<p>If you didn't request a new password, please respond to this email.</p>"
         send_mail("Reset Capitol Zen Password", msg, 'donald@capitolzen.com', [self.username])
-
-    @property
-    def user_is_admin(self):
-        return self.is_superuser
-
-    @property
-    def user_is_staff(self):
-        return self.is_staff
 
     class JSONAPIMeta:
         resource_name = "users"
