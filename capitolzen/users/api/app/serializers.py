@@ -1,7 +1,7 @@
 from rest_framework_json_api import serializers
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework.validators import UniqueValidator
-from capitolzen.users.models import User, Alert
+from capitolzen.users.models import User, Notification
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -40,11 +40,14 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class AlertsSerializer(serializers.ModelSerializer):
+class NotificationSerializer(serializers.ModelSerializer):
+    user = ResourceRelatedField(
+        many=False,
+        read_only=True,
+        source="users_user"
+    )
 
     class Meta:
-        model = Alert
-        fields = ('id', 'message', 'is_read', 'created', 'user', 'reference', 'bill_id')
-
-    id = serializers.ReadOnlyField()
-    message = serializers.ReadOnlyField(required=False)
+        model = Notification
+        fields = ('id', 'message', 'user', 'is_read', 'created')
+        read_only_fields = ('id', 'message', 'user', 'created')

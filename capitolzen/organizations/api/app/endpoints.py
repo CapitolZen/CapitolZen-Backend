@@ -12,7 +12,7 @@ from capitolzen.meta.clients import DocManager
 from capitolzen.groups.models import Group
 from capitolzen.users.api.app.serializers import UserSerializer
 from capitolzen.users.models import User
-from capitolzen.users.tasks import create_user_alert
+from capitolzen.users.tasks import create_user_notification
 from capitolzen.organizations.models import (Organization, OrganizationInvite)
 from .serializers import (OrganizationSerializer, OrganizationInviteSerializer)
 
@@ -106,8 +106,8 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         """
         Create some default alerts
         """
-        create_user_alert.delay(user.id, message="Add a few team members to join you!")
-        create_user_alert.delay(user.id, message="Add your first client to get started!")
+        create_user_notification.delay(user.id, message="Add a few team members to join you!")
+        create_user_notification.delay(user.id, message="Add your first client to get started!")
 
     permission_classes = (DRYPermissions, )
     queryset = Organization.objects.all()

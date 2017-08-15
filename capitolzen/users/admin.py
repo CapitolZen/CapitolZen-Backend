@@ -3,8 +3,9 @@ from django.contrib import admin
 from config.admin import BaseModelAdmin
 from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
-from .models import User, Alert
+from .models import User, Notification
 from django.utils.translation import ugettext, ugettext_lazy as _
+
 
 
 class MyUserChangeForm(UserChangeForm):
@@ -44,7 +45,7 @@ class MyUserAdmin(AuthUserAdmin):
     search_fields = ['name', 'email']
 
 
-class AlertsAdmin(BaseModelAdmin):
-    list_display = ['message', 'is_read', 'created', 'user' ]
+class NotificationAdmin(BaseModelAdmin):
+    list_display = ['message', 'is_read', 'created', 'user']
 
-admin.site.register(Alert, AlertsAdmin)
+admin.site.register(Notification, NotificationAdmin)

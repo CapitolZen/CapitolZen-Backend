@@ -7,9 +7,3 @@ class UsersConfig(AppConfig):
 
     def ready(self):
         import capitolzen.users.signals  # noqa
-
-
-class AlertConfig(AppConfig):
-    name = 'capitolzen.alerts'
-    label = 'alerts'
-    verbose_name = 'Alerts'
