@@ -32,7 +32,6 @@ def update_state_bills(state):
     for chamber in chambers:
         bills = _list_state_bills(state, chamber)
         for b in bills:
-            print(b['bill_id'])
             try:
                 bill = Bill.objects.get(remote_id=b['id'])
                 if bill.modified < _time_convert(b['updated_at']):

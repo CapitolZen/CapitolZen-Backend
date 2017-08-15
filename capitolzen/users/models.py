@@ -94,41 +94,20 @@ class User(AbstractUser, TimeStampedModel):
         return request.user.id == self.id
 
 
-class Alert(AbstractBaseModel):
-
-    user = models.ForeignKey(
-        'users.User',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
-
-    references = JSONField(default=dict, blank=True, null=True)
+class Notification(AbstractBaseModel):
+    references: JSONField(default=list, blank=True, null=True)
     is_read = models.BooleanField(default=False)
     message = models.TextField()
-
-    @property
-    def bill_id(self):
-        model = self.references.get("model", False)
-        if model is not "bill":
-            return False
-        return self.references.get("id")
-
-    def set_type(self, model):
-        t = type(model)
-        data = self.references
-        data["model"] = t
-        data["references"] = model.id
-        self.references = data
-        self.save()
+    notification_type = models.CharField(max_length=255, default="user")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         abstract = False
-        verbose_name = "alert"
-        verbose_name_plural = "alert"
+        verbose_name = "notification"
+        verbose_name_plural = "notifications"
 
     class JSONAPIMeta:
-        resource_name = "alerts"
+        resource_name = "notification"
 
     @staticmethod
     @allow_staff_or_superuser
