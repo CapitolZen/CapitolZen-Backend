@@ -46,7 +46,7 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     )
 
     demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO, default='individual')
-    logo = models.URLField(blank=True)
+    logo = models.URLField(blank=True, null=True)
     contacts = JSONField(blank=True, default=dict)
 
     @property

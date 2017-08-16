@@ -1,5 +1,4 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from django_filters import filters as django_filter
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticated
 
@@ -9,30 +8,37 @@ from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
 from .serializers import BillSerializer, WrapperSerializer, LegislatorSerializer, CommitteeSerializer
 
 
+class BillFilterBackend(DRYPermissionFiltersBase):
+    def filter_list_queryset(self, request, queryset, view):
+        # TODO: Add in org/state availability filtering
+        return queryset
+
+
 class BillViewSet(viewsets.ReadOnlyModelViewSet):
     class Meta:
         ordering = ['state', 'state_id']
 
     permission_classes = (IsAuthenticated,)
     serializer_class = BillSerializer
-    queryset = Bill.objects.all().order_by('state', 'state_id')
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    queryset = Bill.objects.all()
+    filter_backends = (BillFilterBackend, DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
+    ordering_fields = ('last_action_date', 'state', 'state_id', 'sponsor__party')
     search_fields = ('title', 'sponsor__last_name', 'sponsor__first_name', 'state_id')
 
 
 class LegislatorViewSet(viewsets.ReadOnlyModelViewSet):
     class Meta:
-        ordering = ['state', 'last_name']
+        ordering = ['state', 'last_name', 'first_name']
 
     permission_classes = (IsAuthenticated, )
     serializer_class = LegislatorSerializer
-    queryset = Legislator.objects.all().order_by('state', 'last_name')
+    queryset = Legislator.objects.all()
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
 
 
 class CommitteeViewSet(viewsets.ReadOnlyModelViewSet):
     class Meta:
-        ordering = ['state', 'last_name']
+        ordering = ['state', 'name']
 
     permission_classes = (IsAuthenticated,)
     serializer_class = CommitteeSerializer
