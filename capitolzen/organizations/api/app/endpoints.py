@@ -103,11 +103,6 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         )
 
         g.save()
-        """
-        Create some default alerts
-        """
-        create_user_notification.delay(user.id, message="Add a few team members to join you!")
-        create_user_notification.delay(user.id, message="Add your first client to get started!")
 
     permission_classes = (DRYPermissions, )
     queryset = Organization.objects.all()
