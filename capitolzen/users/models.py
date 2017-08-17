@@ -9,24 +9,19 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.contrib.postgres.fields import JSONField
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
 
-@python_2_unicode_compatible
 class User(AbstractUser, TimeStampedModel):
+    first_name = None
+    last_name = None
 
-    # First Name and Last Name do not cover name patterns
-    # around the globe.
     name = models.CharField(_('Name of User'), blank=True, max_length=255)
-    meta = JSONField(default=dict, null=True, blank=True)
+    metadata = JSONField(default=dict, null=True, blank=True)
 
     def __str__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        return reverse('users:detail', kwargs={'username': self.username})
+        return self.name or self.username
 
     def generate_reset_hash(self):
         if self.user_is_admin:
@@ -58,14 +53,6 @@ class User(AbstractUser, TimeStampedModel):
         msg += "<p><a href='%s'>Click here to reset</a></p>" % url
         msg += "<p>If you didn't request a new password, please respond to this email.</p>"
         send_mail("Reset Capitol Zen Password", msg, 'donald@capitolzen.com', [self.username])
-
-    @property
-    def user_is_admin(self):
-        return self.is_superuser
-
-    @property
-    def user_is_staff(self):
-        return self.is_staff
 
     class JSONAPIMeta:
         resource_name = "users"

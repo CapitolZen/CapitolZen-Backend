@@ -9,7 +9,7 @@ class AbstractBaseModel(TimeStampedModel):
     An abstract model class used for all models.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    meta = JSONField(blank=True, null=True)
+    metadata = JSONField(blank=True, null=True)
 
     class Meta:
         abstract = True

@@ -20,6 +20,14 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     """
     Default Organization model.
     """
+    ORG_DEMO = (
+        ('association', 'Association'),
+        ('union', 'Labor Union'),
+        ('multi_client', 'Multi Client'),
+        ('corporate', 'Corporation'),
+        ('individual', 'Individual'),
+    )
+
     PLAN_CHOICES = PlanChoices
     PLAN_DEFAULT = BASIC
     plan_name = models.CharField(max_length=256, blank=True, null=True)
@@ -37,17 +45,13 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     billing_state = models.CharField(max_length=100, null=True, blank=True)
     billing_zip_code = models.CharField(max_length=10, null=True, blank=True)
 
-    ORG_DEMO = (
-        ('association', 'Association'),
-        ('union', 'Labor Union'),
-        ('multi_client', 'Multi Client'),
-        ('corporate', 'Corporation'),
-        ('individual', 'Individual'),
-    )
-
     demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO, default='individual')
     logo = models.URLField(blank=True, null=True)
     contacts = JSONField(blank=True, default=dict)
+
+    def owner_user_account(self):
+        """Because I can never remember how to get this"""
+        return self.owner.organization_user.user
 
     @property
     def user_is_owner(self):

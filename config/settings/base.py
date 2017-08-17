@@ -44,14 +44,12 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework_jwt',
     'dry_rest_permissions',
-    'rest_framework_docs',
     'annoying',
     'health_check',
     'health_check.db',
     'health_check.cache',
-    'asana',
-    'stripe',
-    'sparkpost',
+    'rest_auth',
+    'stream_django',
 ]
 
 ADMIN_APPS = [
@@ -178,6 +176,15 @@ USE_TZ = True
 
 SECRET_KEY = env("APPLICATION_SECRET_KEY", default="")
 
+CI = env("CI", default=False)
+
+# Frontend Domain
+APP_FRONTEND = env("APP_FRONTEND", default='')
+
+
+
+
+
 # TEMPLATE CONFIGURATION
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#templates
@@ -214,9 +221,6 @@ TEMPLATES = [
     },
 ]
 
-# See: http://django-crispy-forms.readthedocs.io/en/latest/install.html#template-packs
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
-
 # STATIC FILE CONFIGURATION
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
@@ -250,6 +254,47 @@ ROOT_URLCONF = 'config.urls'
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
 WSGI_APPLICATION = 'config.wsgi.application'
+
+
+# REST FRAMEWORK
+# ------------------------------------------------------------------------------
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 100,
+    'ORDERING_PARAM': 'sort',
+    'EXCEPTION_HANDLER': 'rest_framework_json_api.exceptions.exception_handler',
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework_json_api.pagination.PageNumberPagination',
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework_json_api.parsers.JSONParser',
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework_json_api.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+    'DEFAULT_METADATA_CLASS': 'rest_framework_json_api.metadata.JSONAPIMetadata',
+    'DEFAULT_MODEL_SERIALIZER_CLASS':
+        'rest_framework.serializers.HyperlinkedModelSerializer',
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=3),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+}
+
+JSON_API_FORMAT_KEYS = 'dasherize'
+JSON_API_FILTER_KEYWORD = 'filter\[(?P<field>\w+)\]'
+
+# I suppose technically this is some mix of auth + api
+REST_USE_JWT = True
+
 
 # PASSWORD STORAGE SETTINGS
 # ------------------------------------------------------------------------------
@@ -287,39 +332,6 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-REST_FRAMEWORK = {
-    'PAGE_SIZE': 100,
-    'ORDERING_PARAM': 'sort',
-    'EXCEPTION_HANDLER': 'rest_framework_json_api.exceptions.exception_handler',
-    'DEFAULT_PAGINATION_CLASS':
-        'rest_framework_json_api.pagination.PageNumberPagination',
-    'DEFAULT_PARSER_CLASSES': (
-        'rest_framework_json_api.parsers.JSONParser',
-        'rest_framework.parsers.JSONParser',
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser'
-    ),
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework_json_api.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
-    ),
-    'DEFAULT_METADATA_CLASS': 'rest_framework_json_api.metadata.JSONAPIMetadata',
-    'DEFAULT_MODEL_SERIALIZER_CLASS':
-        'rest_framework.serializers.HyperlinkedModelSerializer',
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ),
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=3),
-    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
-}
-
-JSON_API_FORMAT_KEYS = 'dasherize'
-JSON_API_FILTER_KEYWORD = 'filter\[(?P<field>\w+)\]'
 
 CORS_ORIGIN_WHITELIST = (
     'app.capitolzen.com',
@@ -345,6 +357,11 @@ LOGIN_URL = 'account_login'
 
 # SLUGLIFIER
 AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
+
+# Location of root django.contrib.admin URL, use {% url 'admin:index' %}
+ADMIN_URL = r'^admin/'
+
+
 
 # CELERY
 # ------------------------------------------------------------------------------
@@ -411,25 +428,34 @@ LOGGING = {
     },
 }
 
+
+# CONNECTIONS
+# ------------------------------------------------------------------------------
+
 # AWS
 AWS_ACCESS_ID = env("AWS_ACCESSID", default='')
 AWS_SECRET_KEY = env("AWS_SECRETKEY", default='')
 AWS_REGION = env("AWS_REGION", default='us-east-1')
 AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
-# Location of root django.contrib.admin URL, use {% url 'admin:index' %}
-ADMIN_URL = r'^admin/'
 INDEX_LAMBDA = env("capitolzen_search_bills", default="capitolzen_search_bills")
 
-# Open States
+# OPEN STATES
 OPEN_STATES_KEY = env("OPEN_STATES_KEY", default='')
 OPEN_STATES_URL = env("OPEN_STATES_URL", default='https://openstates.org/api/v1/')
 
-# Elastic Search
+# ELASTIC SEARCH
 ELASTIC_SEARCH_URL = env("ELASTIC_SEARCH_URL", default='')
 
-# Slack Incomming Webhook
+# SLACK
 SLACK_URL = env("UPDRAFT_SLACK_URL", default='')
-CI = env("CI", default=False)
 
-# Frontend Domain
-APP_FRONTEND_URL = env("APP_FRONTEND", default='')
+# INTERCOM
+INTERCOM_ACCESS_TOKEN = env("INTERCOM_ACCESS_TOKEN", default="")
+
+# STRIPE
+STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY", default="")
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
+
+# STREAM
+STREAM_API_KEY = env("STREAM_API_KEY", default="")
+STREAM_API_SECRET = env("STREAM_API_SECRET", default="")
