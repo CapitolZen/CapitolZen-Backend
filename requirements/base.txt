@@ -11,7 +11,7 @@ requests==2.18.4
 psycopg2==2.7.3
 celery[redis]==4.1.0
 boto3==1.4.6
-ipython
+ipython==6.1.0
 asana==0.6.5
 stripe==1.62.0
 python-intercom==3.1.0
