@@ -12,12 +12,14 @@ app_api_urls = [
 ]
 
 urlpatterns = [
+    url(r'', include('capitolzen.meta.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^docs/', include_docs_urls(title='API', patterns=app_api_urls)),
     url(r'^health/', include('health_check.urls')),
+
+    url(r'^auth/', include('rest_auth.urls')),
     url(r'^api-token-auth/', obtain_jwt_token),
     url(r'^api-token-refresh/', refresh_jwt_token),
-    url(r'', include('capitolzen.meta.urls')),
 ]
 
 urlpatterns += app_api_urls

@@ -50,6 +50,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def current(self, request):
         return Response(UserSerializer(request.user).data)
 
+    queryset = User.objects.all()
     permission_classes = (DRYPermissions, )
     serializer_class = UserSerializer
     filter_backends = (UserFilterBackend, DjangoFilterBackend)

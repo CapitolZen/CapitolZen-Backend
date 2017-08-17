@@ -44,14 +44,12 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework_jwt',
     'dry_rest_permissions',
-    'rest_framework_docs',
     'annoying',
     'health_check',
     'health_check.db',
     'health_check.cache',
-    'asana',
-    'stripe',
-    'sparkpost',
+    'rest_auth',
+    'stream_django',
 ]
 
 ADMIN_APPS = [
@@ -185,6 +183,8 @@ APP_FRONTEND = env("APP_FRONTEND", default='')
 
 
 
+
+
 # TEMPLATE CONFIGURATION
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#templates
@@ -255,6 +255,47 @@ ROOT_URLCONF = 'config.urls'
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
 WSGI_APPLICATION = 'config.wsgi.application'
 
+
+# REST FRAMEWORK
+# ------------------------------------------------------------------------------
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 100,
+    'ORDERING_PARAM': 'sort',
+    'EXCEPTION_HANDLER': 'rest_framework_json_api.exceptions.exception_handler',
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework_json_api.pagination.PageNumberPagination',
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework_json_api.parsers.JSONParser',
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework_json_api.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+    'DEFAULT_METADATA_CLASS': 'rest_framework_json_api.metadata.JSONAPIMetadata',
+    'DEFAULT_MODEL_SERIALIZER_CLASS':
+        'rest_framework.serializers.HyperlinkedModelSerializer',
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=3),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+}
+
+JSON_API_FORMAT_KEYS = 'dasherize'
+JSON_API_FILTER_KEYWORD = 'filter\[(?P<field>\w+)\]'
+
+# I suppose technically this is some mix of auth + api
+REST_USE_JWT = True
+
+
 # PASSWORD STORAGE SETTINGS
 # ------------------------------------------------------------------------------
 # See https://docs.djangoproject.com/en/dev/topics/auth/passwords/#using-argon2-with-django
@@ -291,39 +332,6 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-REST_FRAMEWORK = {
-    'PAGE_SIZE': 100,
-    'ORDERING_PARAM': 'sort',
-    'EXCEPTION_HANDLER': 'rest_framework_json_api.exceptions.exception_handler',
-    'DEFAULT_PAGINATION_CLASS':
-        'rest_framework_json_api.pagination.PageNumberPagination',
-    'DEFAULT_PARSER_CLASSES': (
-        'rest_framework_json_api.parsers.JSONParser',
-        'rest_framework.parsers.JSONParser',
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser'
-    ),
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework_json_api.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
-    ),
-    'DEFAULT_METADATA_CLASS': 'rest_framework_json_api.metadata.JSONAPIMetadata',
-    'DEFAULT_MODEL_SERIALIZER_CLASS':
-        'rest_framework.serializers.HyperlinkedModelSerializer',
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ),
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=3),
-    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
-}
-
-JSON_API_FORMAT_KEYS = 'dasherize'
-JSON_API_FILTER_KEYWORD = 'filter\[(?P<field>\w+)\]'
 
 CORS_ORIGIN_WHITELIST = (
     'app.capitolzen.com',
@@ -352,6 +360,8 @@ AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 
 # Location of root django.contrib.admin URL, use {% url 'admin:index' %}
 ADMIN_URL = r'^admin/'
+
+
 
 # CELERY
 # ------------------------------------------------------------------------------
@@ -446,5 +456,6 @@ INTERCOM_ACCESS_TOKEN = env("INTERCOM_ACCESS_TOKEN", default="")
 STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY", default="")
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
 
-# Frontend Domain
-APP_FRONTEND_URL = env("APP_FRONTEND", default='')
+# STREAM
+STREAM_API_KEY = env("STREAM_API_KEY", default="")
+STREAM_API_SECRET = env("STREAM_API_SECRET", default="")
