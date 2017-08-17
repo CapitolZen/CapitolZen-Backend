@@ -20,7 +20,6 @@ class UserSerializer(serializers.ModelSerializer):
                   'modified',
                   'metadata',
                   'name',
-                  'email',
                   'username',
                   'is_staff',
                   'is_superuser',
@@ -32,22 +31,3 @@ class UserSerializer(serializers.ModelSerializer):
                             'organizations',
                             'date_joined')
         lookup_field = 'id'
-
-    def create(self, validated_data):
-        user = super().create(validated_data)
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
-
-
-class NotificationSerializer(serializers.ModelSerializer):
-    user = ResourceRelatedField(
-        many=False,
-        read_only=True,
-        source="users_user"
-    )
-
-    class Meta:
-        model = Notification
-        fields = ('id', 'message', 'user', 'is_read', 'created')
-        read_only_fields = ('id', 'message', 'user', 'created')

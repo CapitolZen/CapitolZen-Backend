@@ -14,6 +14,7 @@ from rest_framework.permissions import AllowAny
 
 from capitolzen.organizations.models import Organization
 from capitolzen.users.api.app.serializers import UserSerializer
+from capitolzen.organizations.api.app.serializers import OrganizationSerializer
 from capitolzen.users.models import User, Notification
 from rest_framework import status
 
@@ -38,17 +39,49 @@ class UserViewSet(viewsets.ModelViewSet):
 
     """
 
-    """
-
-    def get_queryset(self):
-        org = Organization.objects.filter(users=self.request.user).last()
-        users = org.users.all()
-        return users
-    """
-
     @list_route(methods=['GET'])
     def current(self, request):
         return Response(UserSerializer(request.user).data)
+
+    @list_route(methods=['post'])
+    def register(self, request):
+        from pprint import pprint
+        pprint(request.data)
+
+        #
+        # We prepare both the organization and user models
+        # before saving either so that errors are raised prior
+        # to anything being created
+
+        userSerializer = UserSerializer(data=request.data)
+        userSerializer.is_valid(raise_exception=True)
+
+        orgData = {
+            'name': request.data['organizationName']
+        }
+
+        organizationSerializer = OrganizationSerializer(data=orgData)
+        organizationSerializer.is_valid(raise_exception=True)
+
+
+
+        #
+        # Make the user first
+        userSerializer.save()
+        user = userSerializer.instance
+        user.set_password(request.data['password'])
+        user.save()
+
+        #
+        # Do organization things
+        organizationSerializer.save()
+        organization = organizationSerializer.instance
+        organization.add_user(user)
+
+        pprint(user.__dict__)
+
+        return Response({"status": status.HTTP_200_OK})
+
 
     queryset = User.objects.all()
     permission_classes = (DRYPermissions, )
@@ -56,14 +89,6 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (UserFilterBackend, DjangoFilterBackend)
     lookup_field = "id"
 
-
-class NotificationViewSet(viewsets.ModelViewSet):
-    def get_queryset(self):
-        return Notification.objects.filter(user=self.request.user)
-
-    permission_classes = (DRYPermissions, )
-    filter_backends = (DjangoFilterBackend, )
-    lookup_field = "id"
 
 class PasswordResetViewSet(APIView):
     permission_classes = (AllowAny,)

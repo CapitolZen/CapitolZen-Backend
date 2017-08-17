@@ -21,7 +21,7 @@ class User(AbstractUser, TimeStampedModel):
     metadata = JSONField(default=dict, null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return self.name or self.username
 
     def generate_reset_hash(self):
         if self.user_is_admin:
