@@ -8,7 +8,7 @@ pytz==2017.2
 django-redis==4.8.0
 redis>=2.10.5
 requests==2.18.4
-psycopg2==2.7.1
+psycopg2==2.7.3
 celery[redis]==3.1.25
 boto3==1.4.4
 ipython
