@@ -82,7 +82,7 @@ class User(AbstractUser, TimeStampedModel):
 
 
 class Notification(AbstractBaseModel):
-    references: JSONField(default=list, blank=True, null=True)
+    references = JSONField(default=list, blank=True, null=True)
     is_read = models.BooleanField(default=False)
     message = models.TextField()
     notification_type = models.CharField(max_length=255, default="user")

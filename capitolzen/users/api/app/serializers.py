@@ -31,3 +31,15 @@ class UserSerializer(serializers.ModelSerializer):
                             'organizations',
                             'date_joined')
         lookup_field = 'id'
+
+
+class NotificationSerializer(serializers.Serializer):
+    actor = serializers.IntegerField()
+    verb = serializers.CharField()
+    id = serializers.CharField()
+    origin = serializers.CharField()
+    target = serializers.CharField()
+    to = serializers.ListField()
+    time = serializers.DateTimeField()
+
+

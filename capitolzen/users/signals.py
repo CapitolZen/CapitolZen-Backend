@@ -5,7 +5,11 @@ from .models import User
 from .tasks import (intercom_manage_user_companies,
                     intercom_manage_user
                     )
+from stream_django.feed_manager import feed_manager
 
+################################################################################################
+# INTERCOM
+################################################################################################
 
 @receiver(post_save, sender=User)
 def intercom_update_user(sender, **kwargs):
@@ -77,3 +81,34 @@ def user_removed_from_organization(sender, **kwargs):
     """
     user = kwargs.get('user')
     intercom_manage_user_companies.apply_async([user.id], countdown=10)
+
+################################################################################################
+# NOTIFICATIONS
+################################################################################################
+
+
+@receiver(post_save, sender=User)
+def notification_welcome(sender, **kwargs):
+    """
+
+    :param sender:
+    :param kwargs:
+    :return:
+    """
+
+    created = kwargs.get('created')
+    user = kwargs.get('instance')
+
+    notification_feed = feed_manager.get_notification_feed(user.id)
+
+    activity_data = {'actor': user.id, 'verb': 'joined', 'object': user.id}
+    activity_id = notification_feed.add_activity(activity_data)
+
+    from pprint import pprint
+    pprint(activity_id)
+    pprint(notification_feed)
+    pprint(notification_feed.__dict__)
+
+    if created:
+        pass
+
