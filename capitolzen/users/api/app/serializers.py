@@ -38,7 +38,7 @@ class NotificationSerializer(serializers.Serializer):
     verb = serializers.CharField()
     id = serializers.CharField()
     origin = serializers.CharField()
-    target = serializers.CharField()
+    object = serializers.CharField()
     to = serializers.ListField()
     time = serializers.DateTimeField()
 
