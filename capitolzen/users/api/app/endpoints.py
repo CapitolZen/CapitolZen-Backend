@@ -131,12 +131,11 @@ class PasswordResetViewSet(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-class FeedViewSet(viewsets.ViewSet):
+class ActivityViewSet(viewsets.ViewSet):
 
     renderer_classes = (BrowsableAPIRenderer, JSONRenderer, )
 
-    @list_route(methods=['get'])
-    def notifications(self, request):
+    def list(self, request):
         from pprint import pprint
         notification_feed = feed_manager.get_notification_feed(request.user.id)
         activity_data = {'actor': request.user.id, 'verb': 'joined', 'object': request.user.id}
