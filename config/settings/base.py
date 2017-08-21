@@ -374,8 +374,6 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Detroit'
 
 CELERYBEAT_SCHEDULE = {
-    """
-
     'import_committee': {
         'task': 'capitolzen.proposals.tasks.update_state_committees',
         'schedule': crontab(minute=0, hour=0, day_of_week='sun')
@@ -388,7 +386,6 @@ CELERYBEAT_SCHEDULE = {
         'task': 'capitolzen.proposals.tasks.update_all_bills',
         'schedule': crontab(minute=0, hour='*/6')
     }
-    """
 }
 
 # LOGGING CONFIGURATION

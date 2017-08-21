@@ -47,8 +47,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['post'])
     def register(self, request):
-        from pprint import pprint
-        pprint(request.data)
 
         #
         # We prepare both the organization and user models
@@ -136,7 +134,6 @@ class ActivityViewSet(viewsets.ViewSet):
     renderer_classes = (BrowsableAPIRenderer, JSONRenderer, )
 
     def list(self, request):
-        from pprint import pprint
         notification_feed = feed_manager.get_notification_feed(request.user.id)
         activity_data = {'actor': request.user.id, 'verb': 'joined', 'object': request.user.id}
         notification_feed.add_activity(activity_data)

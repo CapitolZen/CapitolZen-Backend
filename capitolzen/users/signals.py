@@ -102,12 +102,7 @@ def notification_welcome(sender, **kwargs):
     notification_feed = feed_manager.get_notification_feed(user.id)
 
     activity_data = {'actor': user.id, 'verb': 'joined', 'object': user.id}
-    activity_id = notification_feed.add_activity(activity_data)
-
-    from pprint import pprint
-    pprint(activity_id)
-    pprint(notification_feed)
-    pprint(notification_feed.__dict__)
+    notification_feed.add_activity(activity_data)
 
     if created:
         pass
