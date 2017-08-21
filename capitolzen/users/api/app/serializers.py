@@ -5,6 +5,9 @@ from capitolzen.users.models import User, Notification
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Generic user serializer
+    """
     organizations = ResourceRelatedField(
         many=True,
         read_only=True,
@@ -31,3 +34,19 @@ class UserSerializer(serializers.ModelSerializer):
                             'organizations',
                             'date_joined')
         lookup_field = 'id'
+
+
+class ActivitySerializer(serializers.Serializer):
+    """
+
+    """
+    actor = serializers.IntegerField()
+    verb = serializers.CharField()
+    id = serializers.CharField()
+    origin = serializers.CharField()
+    object = serializers.CharField()
+    target = serializers.CharField()
+    to = serializers.ListField()
+    time = serializers.DateTimeField()
+
+

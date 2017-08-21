@@ -10,13 +10,15 @@ from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
-
-
+from stream_django.feed_manager import feed_manager
 from capitolzen.organizations.models import Organization
 from capitolzen.users.api.app.serializers import UserSerializer
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
 from capitolzen.users.models import User, Notification
 from rest_framework import status
+from rest_framework.exceptions import NotFound
+from .serializers import ActivitySerializer
+from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 
 
 class UserFilterBackend(DRYPermissionFiltersBase):
@@ -45,8 +47,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['post'])
     def register(self, request):
-        from pprint import pprint
-        pprint(request.data)
 
         #
         # We prepare both the organization and user models
@@ -63,8 +63,6 @@ class UserViewSet(viewsets.ModelViewSet):
         organizationSerializer = OrganizationSerializer(data=orgData)
         organizationSerializer.is_valid(raise_exception=True)
 
-
-
         #
         # Make the user first
         userSerializer.save()
@@ -77,9 +75,6 @@ class UserViewSet(viewsets.ModelViewSet):
         organizationSerializer.save()
         organization = organizationSerializer.instance
         organization.add_user(user)
-
-        pprint(user.__dict__)
-
         return Response({"status": status.HTTP_200_OK})
 
 
@@ -132,3 +127,33 @@ class PasswordResetViewSet(APIView):
         except Exception:
             return Response({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid request aaaa"},
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+class ActivityViewSet(viewsets.ViewSet):
+
+    renderer_classes = (BrowsableAPIRenderer, JSONRenderer, )
+
+    def list(self, request):
+        notification_feed = feed_manager.get_notification_feed(request.user.id)
+        activity_data = {'actor': request.user.id, 'verb': 'joined', 'object': request.user.id}
+        notification_feed.add_activity(activity_data)
+        response = notification_feed.get(mark_seen=False, mark_read=False)
+        return Response(response)
+        """
+
+        pprint(response)
+
+        results = response.get('results', None)
+
+        if not results:
+            raise NotFound()
+
+        results = results[0]
+
+        activities = results.get('activities', None)
+
+        if not activities or not len(activities):
+            raise NotFound()
+
+        return Response(ActivitySerializer(activities, many=True).data)
+        """
