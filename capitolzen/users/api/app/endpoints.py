@@ -17,7 +17,7 @@ from capitolzen.organizations.api.app.serializers import OrganizationSerializer
 from capitolzen.users.models import User, Notification
 from rest_framework import status
 from rest_framework.exceptions import NotFound
-from .serializers import NotificationSerializer
+from .serializers import ActivitySerializer
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 
 
@@ -140,7 +140,12 @@ class ActivityViewSet(viewsets.ViewSet):
         notification_feed = feed_manager.get_notification_feed(request.user.id)
         activity_data = {'actor': request.user.id, 'verb': 'joined', 'object': request.user.id}
         notification_feed.add_activity(activity_data)
-        response = notification_feed.get()
+        response = notification_feed.get(mark_seen=False, mark_read=False)
+        return Response(response)
+        """
+
+        pprint(response)
+
         results = response.get('results', None)
 
         if not results:
@@ -153,6 +158,5 @@ class ActivityViewSet(viewsets.ViewSet):
         if not activities or not len(activities):
             raise NotFound()
 
-        pprint(activities)
-
-        return Response(NotificationSerializer(activities, many=True).data)
+        return Response(ActivitySerializer(activities, many=True).data)
+        """
