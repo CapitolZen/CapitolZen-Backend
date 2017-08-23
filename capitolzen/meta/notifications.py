@@ -67,6 +67,7 @@ def api_email(recpients, subject, message):
         from_email='donald@capitolzen.com'
     )
 
+
 def client():
     if not settings.CI:
         return SparkPost(api_key=SP_API)
