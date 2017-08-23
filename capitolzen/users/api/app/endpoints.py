@@ -77,7 +77,6 @@ class UserViewSet(viewsets.ModelViewSet):
         organization.add_user(user)
         return Response({"status": status.HTTP_200_OK})
 
-
     queryset = User.objects.all()
     permission_classes = (DRYPermissions, )
     serializer_class = UserSerializer
