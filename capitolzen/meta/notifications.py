@@ -3,9 +3,6 @@ from celery import shared_task
 from django.conf import settings
 from requests import post
 
-STREAM_API_KEY = settings.STREAM_API_KEY
-STREAM_SECRET = settings.STREAM_API_SECRET
-
 SP_API = settings.SPARKPOST_KEY
 
 
