@@ -133,10 +133,14 @@ class ActivityViewSet(viewsets.ViewSet):
     renderer_classes = (BrowsableAPIRenderer, JSONRenderer, )
 
     def list(self, request):
+        limit = request.query_params.get('limit', None)
         notification_feed = feed_manager.get_notification_feed(request.user.id)
         activity_data = {'actor': request.user.id, 'verb': 'joined', 'object': request.user.id}
         notification_feed.add_activity(activity_data)
-        response = notification_feed.get(mark_seen=False, mark_read=False)
+
+        activity_data = {'actor': request.user.id, 'verb': 'created', 'object': request.user.id}
+        notification_feed.add_activity(activity_data)
+        response = notification_feed.get(mark_seen=False, mark_read=False, limit=limit)
         return Response(response)
         """
 
