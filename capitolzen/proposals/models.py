@@ -217,7 +217,10 @@ class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
 
     @property
     def display_sponsor(self):
-        return self.bill.sponsor.full_name
+        if self.bill.sponsor:
+            return self.bill.sponsor.full_name
+        else:
+            return None
 
     @staticmethod
     def valid_position(position):
