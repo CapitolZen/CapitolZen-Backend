@@ -84,26 +84,6 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
-    def perform_create(self, serializer):
-        """
-        Override the perform_create to add the owner in automatically.
-        """
-        user = self.request.user
-        org = serializer.save()
-        org.is_active = True
-        org.add_user(user, is_admin=True)
-        org.save()
-        """
-        Create default group
-        """
-        g = Group.objects.create(
-            title=org.name,
-            organization=org,
-            description="Your organization"
-        )
-
-        g.save()
-
     permission_classes = (DRYPermissions, )
     queryset = Organization.objects.all()
     filter_backends = (OrganizationFilterBackend, DjangoFilterBackend)
