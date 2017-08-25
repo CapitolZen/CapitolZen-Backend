@@ -15,6 +15,7 @@ from capitolzen.organizations.models import Organization
 from capitolzen.users.api.app.serializers import UserSerializer
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
 from capitolzen.users.models import User, Notification
+from capitolzen.groups.models import Group
 from rest_framework import status
 from rest_framework.exceptions import NotFound
 from .serializers import ActivitySerializer
@@ -75,6 +76,18 @@ class UserViewSet(viewsets.ModelViewSet):
         organizationSerializer.save()
         organization = organizationSerializer.instance
         organization.add_user(user)
+
+        #
+        # This is temporary until matt rewrites it
+        # Create default group
+        group = Group.objects.create(
+            title=organization.name,
+            organization=organization,
+            description="Your organization"
+        )
+
+        group.save()
+
         return Response({"status": status.HTTP_200_OK})
 
     queryset = User.objects.all()
