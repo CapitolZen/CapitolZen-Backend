@@ -48,6 +48,10 @@ class Bill(AbstractBaseModel, MixinExternalData):
         return self.action_dates.get('last', False)
 
     @property
+    def introduced_date(self):
+        return self.action_dates.get('first', False)
+
+    @property
     def remote_url(self):
         source = next((l for l in self.sources if l.get('url') is not False), None)
         if not source:

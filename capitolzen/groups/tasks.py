@@ -40,7 +40,6 @@ def generate_report(report):
         "group": str(report.group.id),
     }
     event = dumps(event)
-    print(event)
     func = aws_client("lambda")
     res = func.invoke(FunctionName=REPORT_FUNCTION,
                       InvocationType="RequestResponse",
