@@ -11,7 +11,7 @@ class BillSerializer(serializers.ModelSerializer):
         fields = ('state', 'state_id', 'id', 'type', 'session', 'chamber', 'remote_id', 'status',
                   'history', 'current_committee', 'sponsor', 'title', 'categories', 'remote_url',
                   'affected_section', 'sources', 'action_dates', 'documents', 'cosponsors', 'votes',
-                  'last_action_date', 'companions', 'bill_versions')
+                  'last_action_date', 'companions', 'bill_versions', 'introduced_date')
 
 
 class LegislatorSerializer(serializers.ModelSerializer):
