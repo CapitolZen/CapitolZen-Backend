@@ -11,7 +11,7 @@
             {{ message }}
           </mj-text>
 
-          <mj-button background-color="#F45E43" href="{{url}}">Learn more</mj-button>
+          <mj-button background-color="#F45E43" href="{{action_url}}">{{action_cta}}</mj-button>
 
         </mj-column>
       </mj-section>
