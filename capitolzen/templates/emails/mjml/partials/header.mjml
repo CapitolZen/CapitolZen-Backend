@@ -1,0 +1,8 @@
+<!-- Company Header -->
+<mj-section background-color="#f0f0f0">
+    <mj-column>
+        <mj-text font-style="italic" font-size="20" color="#626262">
+            Capitol Zen
+        </mj-text>
+    </mj-column>
+</mj-section>

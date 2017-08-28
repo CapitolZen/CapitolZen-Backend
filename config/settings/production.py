@@ -126,6 +126,8 @@ ANYMAIL = {
     "SPARKPOST_API_KEY": SPARKPOST_KEY,
 }
 DEFAULT_FROM_EMAIL = "donald@capitolzen.com"
+
+
 # TEMPLATE CONFIGURATION
 # ------------------------------------------------------------------------------
 # See:

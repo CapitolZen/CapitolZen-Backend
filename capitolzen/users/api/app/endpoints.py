@@ -202,7 +202,9 @@ class ActivityViewSet(viewsets.ViewSet):
             template_name='welcome',
             from_email='from@example.com',
             recipient_list=['to@example.com'],
-            context={},
+            context={
+                "url": "https://www.google.com",
+            },
         )
 
         return Response(response)
