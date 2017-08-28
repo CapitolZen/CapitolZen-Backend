@@ -19,6 +19,8 @@ from rest_framework import status
 from rest_framework.exceptions import NotFound
 from .serializers import ActivitySerializer
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
+from stream_django.client import stream_client
+import random
 
 
 class UserFilterBackend(DRYPermissionFiltersBase):
@@ -125,7 +127,7 @@ class PasswordResetViewSet(APIView):
                             status=status.HTTP_200_OK)
 
         except Exception:
-            return Response({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid request aaaa"},
+            return Response({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid request"},
                             status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -134,30 +136,22 @@ class ActivityViewSet(viewsets.ViewSet):
     renderer_classes = (BrowsableAPIRenderer, JSONRenderer, )
 
     def list(self, request):
+        verbs = [
+            'join',
+            'welcome',
+            'provide',
+            'like',
+        ]
+        actors = [
+            1,
+            2,
+            3,
+            4,
+            5,
+        ]
         limit = request.query_params.get('limit', None)
         notification_feed = feed_manager.get_notification_feed(request.user.id)
-        activity_data = {'actor': request.user.id, 'verb': 'joined', 'object': request.user.id}
+        activity_data = {'actor':  random.choice(actors), 'verb': random.choice(verbs), 'object': request.user.id}
         notification_feed.add_activity(activity_data)
-
-        activity_data = {'actor': request.user.id, 'verb': 'created', 'object': request.user.id}
-        notification_feed.add_activity(activity_data)
-        response = notification_feed.get(mark_seen=False, mark_read=False, limit=limit)
+        response = notification_feed.get(limit=limit)
         return Response(response)
-        """
-
-        pprint(response)
-
-        results = response.get('results', None)
-
-        if not results:
-            raise NotFound()
-
-        results = results[0]
-
-        activities = results.get('activities', None)
-
-        if not activities or not len(activities):
-            raise NotFound()
-
-        return Response(ActivitySerializer(activities, many=True).data)
-        """
