@@ -6,7 +6,8 @@ from .tasks import (intercom_manage_user_companies,
                     intercom_manage_user
                     )
 from stream_django.feed_manager import feed_manager
-
+from templated_email import send_templated_mail
+from django.conf import settings
 ################################################################################################
 # INTERCOM
 ################################################################################################
@@ -87,8 +88,8 @@ def user_removed_from_organization(sender, **kwargs):
 ################################################################################################
 
 
-@receiver(post_save, sender=User)
-def notification_welcome(sender, **kwargs):
+@receiver(user_added)
+def send_welcome_email(sender, **kwargs):
     """
 
     :param sender:
@@ -96,14 +97,16 @@ def notification_welcome(sender, **kwargs):
     :return:
     """
 
-    created = kwargs.get('created')
-    user = kwargs.get('instance')
+    user = kwargs.get('user')
+    if sender.is_owner(user):
+        send_templated_mail(
+            template_name='welcome',
+            from_email='hello@capitolzen.com',
+            recipient_list=[user.username],
+            context={
+                "name": user.name,
+                "url": settings.APP_FRONTEND,
+            },
+        )
 
-    notification_feed = feed_manager.get_notification_feed(user.id)
-
-    activity_data = {'actor': user.id, 'verb': 'joined', 'object': user.id}
-    notification_feed.add_activity(activity_data)
-
-    if created:
-        pass
 

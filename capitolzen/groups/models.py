@@ -10,7 +10,7 @@ from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
 from stream_django.activity import Activity
 
 
-class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization, Activity):
+class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     title = models.CharField(blank=False, max_length=225)
     description = models.TextField(blank=True, null=True)
     contacts = JSONField(blank=True, null=True)
@@ -24,10 +24,6 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization, Activity):
         'organizations.Organization',
         on_delete=models.CASCADE,
     )
-
-    @property
-    def activity_actor_attr(self):
-        return self.organization
 
     class JSONAPIMeta:
         resource_name = "groups"
