@@ -3,10 +3,15 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from dry_rest_permissions.generics import (DRYPermissions,
                                            DRYPermissionFiltersBase)
+
+from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.exceptions import NotAuthenticated, NotFound
 
 from capitolzen.meta.clients import DocManager
 from capitolzen.groups.models import Group
@@ -17,44 +22,48 @@ from capitolzen.organizations.models import (Organization, OrganizationInvite)
 from .serializers import (OrganizationSerializer, OrganizationInviteSerializer)
 
 
+class OrganizationFilter(filters.FilterSet):
+
+    class Meta:
+        model = Organization
+        ordering = ['name']
+        fields = {
+            'id': ['exact'],
+            'created': ['lt', 'gt'],
+            'modified': ['lt', 'gt'],
+            'name': ['icontains'],
+        }
+
+
 class OrganizationFilterBackend(DRYPermissionFiltersBase):
     """
 
     """
-
     def filter_list_queryset(self, request, queryset, view):
         """
         Limits all list requests to only show orgs that the user is part of.
         """
+        if request.user.is_authenticated():
+            return queryset.filter(users=request.user)
 
-        if request.user.is_anonymous():
-            return queryset.filter(pk=0)
         else:
-            if request.user.is_superuser:
-                # Return all orgs if superuser status
-                return queryset
-            elif request.user.is_staff:
-                # Allow for staff users to use user_is_member filtering.
-                if request.GET.get('user_is_member'):
-                    return queryset.filter(users=request.user)
-                else:
-                    return queryset
-            else:
-                return queryset.filter(users=request.user)
-        return queryset
+            if not request.GET.get('email'):
+                raise NotAuthenticated()
+
+            if not request.GET.get('id'):
+                raise NotAuthenticated()
+
+            # id and email filters are handled automatically via DjangoFilter
+            email = request.GET.get('email')
+            return queryset.filter(owner__organization_user__user__email=email)
 
 
 class OrganizationViewSet(viewsets.ModelViewSet):
-
-    def get_serializer_class(self):
-        return OrganizationSerializer
-
-    @detail_route(methods=['get'])
-    def users(self, request, pk=None):
-        organization = self.get_object()
-        users = organization.users.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
+    serializer_class = OrganizationSerializer
+    permission_classes = (DRYPermissions, )
+    queryset = Organization.objects.all()
+    filter_backends = (OrganizationFilterBackend, DjangoFilterBackend)
+    filter_class = OrganizationFilter
 
     @detail_route(methods=['get'])
     def logo_upload(self):
@@ -84,78 +93,132 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
-    permission_classes = (DRYPermissions, )
-    queryset = Organization.objects.all()
-    filter_backends = (OrganizationFilterBackend, DjangoFilterBackend)
-    filter_fields = ('is_active',)
+
+class InviteFilter(filters.FilterSet):
+
+    class Meta:
+        model = OrganizationInvite
+
+        fields = {
+            'id': ['exact'],
+            'created': ['lt', 'gt'],
+            'modified': ['lt', 'gt'],
+            'organization': ['exact'],
+            'status': ['exact'],
+            'email': ['exact'],
+        }
 
 
 class OrganizationInviteFilterBackend(DRYPermissionFiltersBase):
+
+    def _get_org_by_consumer_id(self, consumer_id):
+        return Organization.objects.get(consumer_id=consumer_id)
 
     def filter_list_queryset(self, request, queryset, view):
         """
         Limits all list requests to only show orgs that the user is part of.
         """
         if request.user.is_authenticated():
-            if request.GET.get('email'):
-                return queryset.filter(Q(organization__users=request.user) |
-                                       Q(email=request.GET.get('email')))
-            else:
-                return queryset.filter(Q(organization__users=request.user))
-
+            return queryset.filter(Q(organization__users=request.user))
         else:
-            return queryset
+            if not request.GET.get('email'):
+                raise NotFound()
+
+            if not request.GET.get('id'):
+                raise NotFound()
+
+            # id and email filters are handled automatically via DjangoFilter
+            return queryset.filter(status="unclaimed")
 
 
 class OrganizationInviteViewSet(viewsets.ModelViewSet):
+    permission_classes = (DRYPermissions, )
+    serializer_class = OrganizationInviteSerializer
+    queryset = OrganizationInvite.objects.all().order_by('created')
+    filter_backends = (OrganizationInviteFilterBackend, DjangoFilterBackend)
+    filter_class = InviteFilter
 
-    @detail_route(methods=['post'], authentication_classes=[AllowAny])
-    def claim(self, request, pk=None):
-        invite = self.get_object()
-        if invite.status != "unclaimed":
-            return Response({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid invite"},
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.status != "unclaimed":
+            response = {'detail': "Can only delete unclaimed invites"}
+            return Response(data=response,
                             status=status.HTTP_400_BAD_REQUEST)
+        self.perform_destroy(obj)
 
-        org = invite.organization
-        org.add_user(request.user)
-        org.save()
-        return Response({"status": status.HTTP_200_OK, "message": "invite claimed"}, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        user = instance.user
+        if user:
+            user.delete()  # delete cascades
+        else:
+            instance.delete()
+
+    def perform_create(self, serializer):
+        """
+        Send email and create user for the invite.
+        """
+
+        instance = serializer.save(status="unclaimed")
+        user = instance.create_user_for_invite()
+        instance.user = user
+
+        # Double save is a little rough here...
+        instance.save()
+        instance.send_user_invite()
+
+    @detail_route(methods=['post'], permission_classes=(AllowAny,))
+    def claim(self, request, pk=None):
+        if request.user and request.user.is_authenticated:
+            return Response({"detail": "Cannot claim invite"},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        invite = self.get_object()
+
+        if invite.status != "unclaimed":
+            return Response({"detail": "Cannot claim invite"},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        # Setup the user's password.
+        password = request.data.get('password')
+        invite.user.update_provider({'password': password})
+
+        # Add user to organization.
+        organization_role = invite.meta_data.get('organization_role', "Member")
+
+        if organization_role == "Admin":
+            is_admin = True
+        else:
+            is_admin = False
+
+        invite.organization.add_user(invite.user, is_admin=is_admin)
+        invite.status = "claimed"
+        invite.save()
+
+        return Response({"detail": "Invite claimed"},
+                        status=status.HTTP_200_OK)
 
     @detail_route(methods=['post'])
     def actions(self, request, pk=None):
         invite = self.get_object()
-        # Can't revoke invite that has been accepted for whatever reason
-        if invite.status != 'pending':
+        if invite.status != 'unclaimed':
             return Response({"status_code": status.HTTP_400_BAD_REQUEST,
                              "detail":
-                            "You may only take actions on pending invites"})
+                             "You may only take actions on pending invites"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        if request.data['actions'] == 'revoke':
-            invite.status = "revoked"
-            invite.save()
-            return Response({"status_code": status.HTTP_200_OK,
-                             "detail": "Invite revoked"})
+        action = request.data.get('actions', False)
 
-        if request.data['actions'] == 'resend':
+        if not action:
+            return Response({"detail":
+                             "Please provide an action."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if action == 'resend':
             invite.send_user_invite()
             return Response({"status_code": status.HTTP_200_OK,
                              "detail": "Invite resent"})
 
-        if request.data['actions'] == 'update':
-            invite.email = request.data['email']
-            invite.save()
-            return Response({"status_code": status.HTTP_200_OK,
-                             "detail": "Invite updated"})
-
         return Response({"status_code": status.HTTP_400_BAD_REQUEST,
                          "detail": "Invalid request"})
-
-    def perform_create(self, serializer):
-        instance = serializer.save()
-        instance.send_user_invite()
-
-    permission_classes = (AllowAny, )
-    serializer_class = OrganizationInviteSerializer
-    queryset = OrganizationInvite.objects.all()
-    filter_backends = (OrganizationInviteFilterBackend, DjangoFilterBackend)
-    filter_fields = ('status', 'organization', 'email')

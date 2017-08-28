@@ -16,10 +16,18 @@ from capitolzen.meta.billing import BASIC, PlanChoices
 import stripe
 
 
+class OrganizationManager(models.Manager):
+    def for_user(self, user):
+        return self.get_queryset().filter(users=user)
+
+
 class Organization(AbstractOrganization, AbstractBaseModel):
     """
     Default Organization model.
     """
+    objects = OrganizationManager()
+
+
     ORG_DEMO = (
         ('association', 'Association'),
         ('union', 'Labor Union'),

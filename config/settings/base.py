@@ -99,6 +99,12 @@ FIXTURE_DIRS = (
 # Sparkpost email
 SPARKPOST_KEY = env("SPARKPOST_API_KEY", default='')
 
+TEMPLATED_EMAIL_BACKEND = 'templated_email.backends.vanilla_django'
+TEMPLATED_EMAIL_TEMPLATE_DIR = 'emails/'
+TEMPLATED_EMAIL_FILE_EXTENSION = 'html'
+
+
+
 # MANAGER CONFIGURATION
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#admins
@@ -459,3 +465,4 @@ STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
 # STREAM
 STREAM_API_KEY = env("STREAM_API_KEY", default="")
 STREAM_API_SECRET = env("STREAM_API_SECRET", default="")
+STREAM_FEED_MANAGER_CLASS = 'capitolzen.meta.stream.FeedManager'

@@ -7,6 +7,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django_fsm import FSMField, transition
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
+from stream_django.activity import Activity
 
 
 class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):

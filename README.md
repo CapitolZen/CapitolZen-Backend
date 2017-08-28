@@ -47,6 +47,16 @@ docker-compose -f dev.yml run pycharm coverage run --source='/app' manage.py tes
 docker-compose -f dev.yml run pycharm flake8 /app/downdraft. --ignore C901
 ```
 
+**Email Stuff**
+```bash
+npm install -g mjml
+```
+
+```bash
+cd capitolzen/templates/emails
+mjml mjml/welcome.mjml -o content/welcome.html
+```
+
 **Connecting To Pycharm**
 For docker-machine instructions see: https://github.com/pydanny/cookiecutter-django/blob/master/%7B%7Bcookiecutter.project_slug%7D%7D/docs/pycharm/configuration.rst
 From there the instructions for setting up the python remote interrupters are the same for both docker for mac and docker-machine.
@@ -67,10 +77,6 @@ docker volume rm --force $(docker volume ls -f dangling=true -q)
 - [X] Pycharm + Docker isn't always able to create project skeletons. However it seems to work okay if you've already got pycharm setup, have it closed, start docker, then start pycharm.
 - [X] At this point in time Pycharm does not work with Docker For Mac Beta due to being unable to connect. Until it is resolved it is recommended to use docker-machine for local development.
 - [X] If you're running a version of pycharm less than 2017.1, you need to run this command along with a different api path:
-```bash
-socat TCP-LISTEN:6999,range=127.0.0.1/32,reuseaddr,fork UNIX-CLIENT:/var/run/docker.sock
-```
-api path:  `tcp://localhost:6999`
 
 
 ### References

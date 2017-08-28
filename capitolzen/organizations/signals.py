@@ -4,7 +4,7 @@ from .models import Organization
 from .tasks import intercom_manage_organization, stripe_manage_customer
 from organizations.signals import user_added, user_removed
 from cacheops import invalidate_obj
-
+from capitolzen.groups.models import Group
 ################################################################################################
 # INTERCOM
 ################################################################################################
@@ -94,4 +94,33 @@ def stripe_delete_organization(sender, **kwargs):
 @receiver(user_removed)
 @receiver(user_added)
 def invalidate_organization_cache(sender, **kwargs):
+    """
+    Invalidate org cache when users are added and removed.
+    Done w/ special methods so the m2m isn't detected. (I think)
+    either way this fixes some bugs.
+    :param sender:
+    :param kwargs:
+    :return:
+    """
     invalidate_obj(sender)
+
+
+@receiver(post_save, sender=Organization)
+def create_group_for_new_organization(sender, **kwargs):
+    """
+    Automatically create a group for the new organization.
+
+    :param sender:
+    :param kwargs:
+    :return:
+    """
+
+    created = kwargs.get('created')
+    organization = kwargs.get('instance')
+
+    if created:
+        Group.objects.create(
+            title=organization.name,
+            organization=organization,
+            description="Your organization"
+        )
