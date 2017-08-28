@@ -46,6 +46,7 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     filter = JSONField(blank=True, default=dict)
     scheduled = models.BooleanField(default=False)
     status = FSMField(default='draft')
+    static = models.BooleanField(default=False)
     publish_date = models.DateTimeField(blank=True, null=True)
     publish_output = models.CharField(blank=True, max_length=255)
     title = models.CharField(default="Generated Report", max_length=255)

@@ -48,6 +48,10 @@ class Bill(AbstractBaseModel, MixinExternalData):
         return self.action_dates.get('last', False)
 
     @property
+    def introduced_date(self):
+        return self.action_dates.get('first', False)
+
+    @property
     def remote_url(self):
         source = next((l for l in self.sources if l.get('url') is not False), None)
         if not source:
@@ -217,7 +221,10 @@ class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
 
     @property
     def display_sponsor(self):
-        return self.bill.sponsor.full_name
+        if self.bill.sponsor:
+            return self.bill.sponsor.full_name
+        else:
+            return None
 
     @staticmethod
     def valid_position(position):
