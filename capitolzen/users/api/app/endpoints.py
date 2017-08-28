@@ -188,10 +188,6 @@ class ActivityViewSet(viewsets.ViewSet):
         if feed is None:
             raise NotFound(detail="Unable to load feed for: %s" % request.query_params.get('feed', None))
 
-
-        from pprint import pprint
-        pprint(feed)
-
         activity_data = {
             'actor': random.choice(actors),
             'verb': random.choice(verbs),
