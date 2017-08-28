@@ -50,6 +50,7 @@ THIRD_PARTY_APPS = [
     'health_check.cache',
     'rest_auth',
     'stream_django',
+    'templated_email',
 ]
 
 ADMIN_APPS = [
@@ -98,6 +99,12 @@ FIXTURE_DIRS = (
 # ------------------------------------------------------------------------------
 # Sparkpost email
 SPARKPOST_KEY = env("SPARKPOST_API_KEY", default='')
+
+TEMPLATED_EMAIL_BACKEND = 'templated_email.backends.vanilla_django'
+TEMPLATED_EMAIL_TEMPLATE_DIR = 'emails/'
+TEMPLATED_EMAIL_FILE_EXTENSION = 'html'
+
+
 
 # MANAGER CONFIGURATION
 # ------------------------------------------------------------------------------

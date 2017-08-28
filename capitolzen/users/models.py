@@ -69,7 +69,7 @@ class User(AbstractUser, TimeStampedModel):
 
     @staticmethod
     def has_create_permission(request):
-        return True
+        return False
 
     def has_object_read_permission(self, request):
         return request.user.id == self.id
@@ -78,7 +78,7 @@ class User(AbstractUser, TimeStampedModel):
         return request.user.id == self.id
 
     def has_object_create_permission(self, request):
-        return request.user.id == self.id
+        return False
 
 
 class Notification(AbstractBaseModel):

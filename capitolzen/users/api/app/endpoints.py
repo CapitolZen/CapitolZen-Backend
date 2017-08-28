@@ -20,21 +20,25 @@ from .serializers import ActivitySerializer
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from stream_django.client import stream_client
 import random
+from templated_email import send_templated_mail
+
 
 
 class UserFilterBackend(DRYPermissionFiltersBase):
     """
-    Filters the users to ensure users are now shown to other users who
-    shouldn't see them.
+    -- Don't show any users to anon
+    -- Only show users to users who are in the current organization.
+
+
     """
 
     def filter_list_queryset(self, request, queryset, view):
 
         if request.user.is_anonymous():
-            # Return nothing if the user isn't authed
             raise NotAuthenticated()
 
-        return queryset
+        current_user_organizations = Organization.objects.for_user(request.user)
+        return queryset.filter(organizations_organization=current_user_organizations)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -52,32 +56,31 @@ class UserViewSet(viewsets.ModelViewSet):
         #
         # We prepare both the organization and user models
         # before saving either so that errors are raised prior
-        # to anything being created
+        # to anything being created.
 
-        userSerializer = UserSerializer(data=request.data)
-        userSerializer.is_valid(raise_exception=True)
+        user_serializer = UserSerializer(data=request.data)
+        user_serializer.is_valid(raise_exception=True)
 
         orgData = {
             'name': request.data['organizationName']
         }
 
-        organizationSerializer = OrganizationSerializer(data=orgData)
-        organizationSerializer.is_valid(raise_exception=True)
+        organization_serializer = OrganizationSerializer(data=orgData)
+        organization_serializer.is_valid(raise_exception=True)
 
         #
         # Make the user first
-        userSerializer.save()
-        user = userSerializer.instance
+        user_serializer.save()
+        user = user_serializer.instance
         user.set_password(request.data['password'])
         user.save()
 
         #
         # Do organization things
-        organizationSerializer.save()
-        organization = organizationSerializer.instance
+        organization_serializer.save()
+        organization = organization_serializer.instance
         organization.add_user(user)
         return Response({"status": status.HTTP_200_OK})
-
 
     queryset = User.objects.all()
     permission_classes = (DRYPermissions, )
@@ -166,7 +169,6 @@ class ActivityViewSet(viewsets.ViewSet):
 
         return None
 
-
     def list(self, request):
         verbs = [
             'join',
@@ -195,4 +197,12 @@ class ActivityViewSet(viewsets.ViewSet):
 
         feed.add_activity(activity_data)
         response = feed.get(limit=limit)
+
+        send_templated_mail(
+            template_name='welcome',
+            from_email='from@example.com',
+            recipient_list=['to@example.com'],
+            context={},
+        )
+
         return Response(response)
