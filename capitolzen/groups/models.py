@@ -7,9 +7,10 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django_fsm import FSMField, transition
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
+from stream_django.activity import Activity
 
 
-class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization, Activity):
     title = models.CharField(blank=False, max_length=225)
     description = models.TextField(blank=True, null=True)
     contacts = JSONField(blank=True, null=True)
@@ -23,6 +24,10 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         'organizations.Organization',
         on_delete=models.CASCADE,
     )
+
+    @property
+    def activity_actor_attr(self):
+        return self.organization
 
     class JSONAPIMeta:
         resource_name = "groups"

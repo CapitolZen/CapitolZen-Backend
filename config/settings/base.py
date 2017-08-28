@@ -459,3 +459,4 @@ STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
 # STREAM
 STREAM_API_KEY = env("STREAM_API_KEY", default="")
 STREAM_API_SECRET = env("STREAM_API_SECRET", default="")
+STREAM_FEED_MANAGER_CLASS = 'capitolzen.meta.stream.FeedManager'
