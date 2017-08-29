@@ -48,7 +48,7 @@ class User(AbstractUser, TimeStampedModel):
         h = self.generate_reset_hash()
         s = "%s|%s|%s" % (h, time(), self.id)
         token = b64encode((s.encode()))
-        url = "%s/reset/%s" % (settings.APP_FRONTEND_URL, token.decode('utf-8'))
+        url = "%s/reset/%s" % (settings.APP_FRONTEND, token.decode('utf-8'))
         msg = "<p>You requested to reset your password.</p>"
         msg += "<p><a href='%s'>Click here to reset</a></p>" % url
         msg += "<p>If you didn't request a new password, please respond to this email.</p>"

@@ -1,7 +1,7 @@
 from rest_framework_json_api import serializers
 from dry_rest_permissions.generics import DRYPermissionsField
 from capitolzen.organizations.models import (Organization, OrganizationInvite)
-
+from capitolzen.users.models import User
 
 class OrganizationSerializer(serializers.ModelSerializer):
     user_is_member = serializers.ReadOnlyField()
@@ -39,13 +39,28 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
 class OrganizationInviteSerializer(serializers.ModelSerializer):
 
+    def validate_username(self, value):
+        """
+        Check if email is currently in use
+        :return:
+        """
+        try:
+            user = User.objects.get(username=value)
+            raise serializers.ValidationError("Email Already In Use")
+
+        except User.DoesNotExist:
+            pass
+
+        return value
+
     class Meta:
         model = OrganizationInvite
         fields = ('id',
-                  'organization',
-                  'organization_name',
+                  'metadata',
                   'created',
                   'modified',
+                  'organization',
+                  'organization_name',
                   'email',
-                  'status',
-                  )
+                  'status')
+
