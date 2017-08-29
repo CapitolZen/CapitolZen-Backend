@@ -14,6 +14,7 @@ from organizations.abstract import (AbstractOrganization,
                                     AbstractOrganizationOwner)
 from capitolzen.meta.billing import BASIC, PlanChoices
 import stripe
+from templated_email import send_templated_mail
 
 
 class OrganizationManager(models.Manager):
@@ -184,19 +185,19 @@ class OrganizationInvite(AbstractBaseModel):
 
         url = "%s/claim/%s" % (settings.APP_FRONTEND, self.id)
 
-        msg = "<p>You've been invited to join %s on Capitol Zen.</p><p><a href='%s'>Click here</a> to accept</p>" % \
-              (self.organization_name, url)
-        author = self.user
-        if not author:
-            mail = "donald@capitolzen.com"
-        else:
-            mail = author.username
+        msg = "<p>You've been invited to join %s on Capitol Zen.</p>" % self.organization_name
 
-        send_mail(
-            subject="You've been invited to Capitol Zen",
+        send_templated_mail(
+            template_name='simple_action',
+            from_email='hello@capitolzen.com',
             recipient_list=[self.email],
-            from_email=mail,
-            message=msg
+            context={
+                "name": self.user.name,
+                "message": msg,
+                "subject": "You've been invited to Capitol Zen",
+                "action_url": url,
+                "action_cta": "Accept Invite"
+            },
         )
 
     class JSONAPIMeta:

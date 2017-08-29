@@ -12,6 +12,7 @@ from django.conf import settings
 # INTERCOM
 ################################################################################################
 
+
 @receiver(post_save, sender=User)
 def intercom_update_user(sender, **kwargs):
     """
