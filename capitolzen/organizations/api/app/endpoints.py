@@ -161,7 +161,7 @@ class OrganizationInviteViewSet(viewsets.ModelViewSet):
         """
 
         instance = serializer.save(status="unclaimed")
-        user = instance.create_user_for_invite()
+        user = User.objects.create(username=instance.email)
         instance.user = user
 
         # Double save is a little rough here...

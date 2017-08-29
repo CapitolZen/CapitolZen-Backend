@@ -38,15 +38,14 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
 
 class OrganizationInviteSerializer(serializers.ModelSerializer):
-    permissions = DRYPermissionsField()
 
-    def validate_email(self, value):
+    def validate_username(self, value):
         """
         Check if email is currently in use
         :return:
         """
         try:
-            user = User.objects.get(email=value)
+            user = User.objects.get(username=value)
             raise serializers.ValidationError("Email Already In Use")
 
         except User.DoesNotExist:
@@ -57,12 +56,11 @@ class OrganizationInviteSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrganizationInvite
         fields = ('id',
-                  'meta_data',
+                  'metadata',
                   'created',
                   'modified',
                   'organization',
                   'organization_name',
                   'email',
-                  'status',
-                  'permissions')
+                  'status')
 
