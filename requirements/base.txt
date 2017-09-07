@@ -10,7 +10,7 @@ redis>=2.10.5
 requests==2.18.1
 psycopg2==2.7.1
 celery[redis]==3.1.25
-boto3==1.4.4
+boto3==1.4.7
 ipython
 asana==0.6.5
 stripe==1.62.0
