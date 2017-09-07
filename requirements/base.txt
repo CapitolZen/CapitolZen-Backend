@@ -13,7 +13,7 @@ celery[redis]==3.1.25
 boto3==1.4.4
 ipython
 asana==0.6.5
-stripe==1.62.0
+stripe==1.65.0
 python-intercom==3.1.0
 elasticsearch>=5.0.0,<6.0.0
 elasticsearch-dsl>=5.0.0,<6.0.0
