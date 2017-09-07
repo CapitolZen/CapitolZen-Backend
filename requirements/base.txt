@@ -48,7 +48,7 @@ django-templated-email==2.2.0
 
 #
 # DRF
-djangorestframework==3.6.3
+djangorestframework==3.6.4
 coreapi==2.3.0
 drfdocs==0.0.11
 djangorestframework-jwt==1.11.0
