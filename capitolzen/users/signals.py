@@ -5,6 +5,12 @@ from .models import User
 from .tasks import (intercom_manage_user_companies,
                     intercom_manage_user
                     )
+from stream_django.feed_manager import feed_manager
+from templated_email import send_templated_mail
+from django.conf import settings
+################################################################################################
+# INTERCOM
+################################################################################################
 
 
 @receiver(post_save, sender=User)
@@ -77,3 +83,31 @@ def user_removed_from_organization(sender, **kwargs):
     """
     user = kwargs.get('user')
     intercom_manage_user_companies.apply_async([user.id], countdown=10)
+
+################################################################################################
+# NOTIFICATIONS
+################################################################################################
+
+
+@receiver(user_added)
+def send_welcome_email(sender, **kwargs):
+    """
+
+    :param sender:
+    :param kwargs:
+    :return:
+    """
+
+    user = kwargs.get('user')
+    if sender.is_owner(user):
+        send_templated_mail(
+            template_name='welcome',
+            from_email='hello@capitolzen.com',
+            recipient_list=[user.username],
+            context={
+                "name": user.name,
+                "url": settings.APP_FRONTEND,
+            },
+        )
+
+

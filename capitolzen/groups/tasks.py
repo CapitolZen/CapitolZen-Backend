@@ -18,22 +18,28 @@ def generate_report(report):
         "title": report.title,
         "id": str(report.id),
         "summary": report.description,
-        "bills": bill_list
+        "bills": bill_list,
     }
+
     logo_path = report.preferences.get("logo", False)
 
-    if logo_path:
-        data["logo"] = getattr(report, logo_path)
+    if logo_path == 'organization':
+        data["logo"] = report.organization.logo
+
+    if logo_path == 'group':
+        data['logo'] = report.group.logo
+
+    layout = report.preferences.get('layout', False)
+    if layout:
+        data['layout'] = layout['value']
 
     event = {
         "data": data,
         "bucket": settings.AWS_BUCKET_NAME,
         "organization": str(report.organization.id),
-        "group": str(report.group.id)
+        "group": str(report.group.id),
     }
-
     event = dumps(event)
-
     func = aws_client("lambda")
     res = func.invoke(FunctionName=REPORT_FUNCTION,
                       InvocationType="RequestResponse",
@@ -91,7 +97,9 @@ def normalize_data(wrapper_list):
             "status": w.bill.status,
             "position": w.position,
             "position_detail": w.position_detail,
-            "last_action_date": w.bill.last_action_date
+            "last_action_date": w.bill.last_action_date,
+            "remote_url": w.bill.remote_url
         }
+
         output.append(data)
     return output

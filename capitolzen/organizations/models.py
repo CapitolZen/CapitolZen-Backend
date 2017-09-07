@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-
+from django.contrib.auth import get_user_model
 from crum import get_current_user
 from django.conf import settings
 from django.db import models
@@ -14,12 +14,21 @@ from organizations.abstract import (AbstractOrganization,
                                     AbstractOrganizationOwner)
 from capitolzen.meta.billing import BASIC, PlanChoices
 import stripe
+from templated_email import send_templated_mail
+
+
+class OrganizationManager(models.Manager):
+    def for_user(self, user):
+        return self.get_queryset().filter(users=user)
 
 
 class Organization(AbstractOrganization, AbstractBaseModel):
     """
     Default Organization model.
     """
+    objects = OrganizationManager()
+
+
     ORG_DEMO = (
         ('association', 'Association'),
         ('union', 'Labor Union'),
@@ -159,23 +168,36 @@ class OrganizationInvite(AbstractBaseModel):
         verbose_name = _("invite")
         verbose_name_plural = _("invites")
 
+    def create_user_for_invite(self):
+        """
+        Note: Maybe we should handle this logic during
+        pre_save automatically.
+
+        :return:
+        """
+
+        User = get_user_model()
+        name = self.metadata.get('name', None)
+        user = User.objects.create_user_with_auth0(self.email, name=name)
+        return user
+
     def send_user_invite(self):
 
-        url = "%s/claim/%s" % (settings.APP_FRONTEND_URL, self.id)
+        url = "%s/claim/%s" % (settings.APP_FRONTEND, self.id)
 
-        msg = "<p>You've been invited to join %s on Capitol Zen.</p><p><a href='%s'>Click here</a> to accept</p>" % \
-              (self.organization_name, url)
-        author = self.user
-        if not author:
-            mail = "donald@capitolzen.com"
-        else:
-            mail = author.username
+        msg = "<p>You've been invited to join %s on Capitol Zen.</p>" % self.organization_name
 
-        send_mail(
-            subject="You've been invited to Capitol Zen",
+        send_templated_mail(
+            template_name='simple_action',
+            from_email='hello@capitolzen.com',
             recipient_list=[self.email],
-            from_email=mail,
-            message=msg
+            context={
+                "name": self.user.name,
+                "message": msg,
+                "subject": "You've been invited to Capitol Zen",
+                "action_url": url,
+                "action_cta": "Accept Invite"
+            },
         )
 
     class JSONAPIMeta:

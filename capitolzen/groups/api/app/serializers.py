@@ -36,7 +36,7 @@ class ReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
         fields = ('id', 'created', 'modified', 'organization', 'group', 'filter', 'title', 'description',
-                  'attachments', 'status', 'scheduled', 'publish_date', 'user')
+                  'attachments', 'status', 'scheduled', 'publish_date', 'user', 'preferences')
 
 
 class CommentSerializer(serializers.ModelSerializer):

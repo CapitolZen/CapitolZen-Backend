@@ -4,7 +4,7 @@ from .endpoints import GroupViewSet, ReportViewSet
 
 router = routers.SimpleRouter()
 
-router.register(r'groups', GroupViewSet, base_name="organization")
+router.register(r'groups', GroupViewSet, base_name="groups")
 router.register(r'reports', ReportViewSet, base_name="report")
 
 urlpatterns = [

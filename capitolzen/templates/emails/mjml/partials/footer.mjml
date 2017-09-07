@@ -1,0 +1,9 @@
+<mj-section background-color="#e7e7e7">
+    <mj-column>
+
+        <mj-text color="#525252" align="center">
+            Copyright 2017 - Capitol Zen | 616 Rickett Rd | 231 225 1102
+        </mj-text>
+
+    </mj-column>
+</mj-section>

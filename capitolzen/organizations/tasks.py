@@ -104,7 +104,7 @@ def stripe_manage_customer(organization_id, op):
     def _populate_stripe_customer():
         data = {
             'description': organization.name,
-            'email': organization.owner_user_account().email,
+            'email': organization.owner_user_account().username,
             'metadata': {
                 'id': organization.id
             }

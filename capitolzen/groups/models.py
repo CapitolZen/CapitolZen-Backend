@@ -7,6 +7,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django_fsm import FSMField, transition
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
+from stream_django.activity import Activity
 
 
 class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
@@ -45,6 +46,7 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     filter = JSONField(blank=True, default=dict)
     scheduled = models.BooleanField(default=False)
     status = FSMField(default='draft')
+    static = models.BooleanField(default=False)
     publish_date = models.DateTimeField(blank=True, null=True)
     publish_output = models.CharField(blank=True, max_length=255)
     title = models.CharField(default="Generated Report", max_length=255)
