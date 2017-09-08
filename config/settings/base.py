@@ -11,7 +11,8 @@ import environ
 import datetime
 from celery.schedules import crontab
 
-ROOT_DIR = environ.Path(__file__) - 3  # (capitolzen/config/settings/base.py - 3 = capitolzen/)
+# (capitolzen/config/settings/base.py - 3 = capitolzen/)
+ROOT_DIR = environ.Path(__file__) - 3
 APPS_DIR = ROOT_DIR.path('capitolzen')
 
 # LOCATION VARS
@@ -43,6 +44,7 @@ THIRD_PARTY_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_jwt',
+    'rest_framework_swagger',
     'dry_rest_permissions',
     'annoying',
     'health_check',
@@ -50,6 +52,7 @@ THIRD_PARTY_APPS = [
     'health_check.cache',
     'rest_auth',
     'stream_django',
+    'thorn.django',
 ]
 
 ADMIN_APPS = [
@@ -186,9 +189,6 @@ CI = env("CI", default=False)
 
 # Frontend Domain
 APP_FRONTEND = env("APP_FRONTEND", default='')
-
-
-
 
 
 # TEMPLATE CONFIGURATION
@@ -372,14 +372,16 @@ ADMIN_URL = r'^admin/'
 # CELERY
 # ------------------------------------------------------------------------------
 INSTALLED_APPS += ('capitolzen.tasks.celery.CeleryConfig',)
-BROKER_URL = '{0}/{1}'.format(env('REDIS_URL', default='redis://127.0.0.1:6379'), 1)
-CELERY_RESULT_BACKEND = '{0}/{1}'.format(env('REDIS_URL', default='redis://127.0.0.1:6379'), 1)
+CELERY_BROKER_URL = '{0}/{1}'.format(
+    env('REDIS_URL', default='redis://127.0.0.1:6379'), 1)
+CELERY_RESULT_BACKEND = '{0}/{1}'.format(
+    env('REDIS_URL', default='redis://127.0.0.1:6379'), 1)
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Detroit'
 
-CELERYBEAT_SCHEDULE = {
+CELERY_BEAT_SCHEDULE = {
     'import_committee': {
         'task': 'capitolzen.proposals.tasks.update_state_committees',
         'schedule': crontab(minute=0, hour=0, day_of_week='sun')
@@ -443,14 +445,20 @@ AWS_ACCESS_ID = env("AWS_ACCESSID", default='')
 AWS_SECRET_KEY = env("AWS_SECRETKEY", default='')
 AWS_REGION = env("AWS_REGION", default='us-east-1')
 AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
-INDEX_LAMBDA = env("capitolzen_search_bills", default="capitolzen_search_bills")
+INDEX_LAMBDA = env(
+    "capitolzen_search_bills", default="capitolzen_search_bills")
 
 # OPEN STATES
 OPEN_STATES_KEY = env("OPEN_STATES_KEY", default='')
-OPEN_STATES_URL = env("OPEN_STATES_URL", default='https://openstates.org/api/v1/')
+OPEN_STATES_URL = env(
+    "OPEN_STATES_URL", default='https://openstates.org/api/v1/')
 
 # ELASTIC SEARCH
-ELASTIC_SEARCH_URL = env("ELASTIC_SEARCH_URL", default='')
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': env("ELASTIC_SEARCH_URL", default='')
+    },
+}
 
 # SLACK
 SLACK_URL = env("UPDRAFT_SLACK_URL", default='')

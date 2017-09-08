@@ -54,4 +54,7 @@ drfdocs==0.0.11
 djangorestframework-jwt==1.11.0
 djangorestframework-jsonapi==2.2.0
 dry-rest-permissions==0.1.9
-
+django-rest-elasticsearch==0.3.2
+django-elasticsearch-dsl==0.2.0
+django-rest-swagger==2.1.2
+thorn==1.5.0

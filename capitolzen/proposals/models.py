@@ -1,13 +1,15 @@
 from __future__ import unicode_literals
-from json import dumps
+
 from django.db import models
-from config.models import AbstractBaseModel
+
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.postgres.fields import ArrayField, JSONField
-from capitolzen.meta.states import AvailableStateChoices, AVAILABLE_STATES
+
+from config.models import AbstractBaseModel
+
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
 from capitolzen.meta.notifications import admin_email
-from .mixins import MixinExternalData
+from capitolzen.proposals.mixins import MixinExternalData
 
 
 class Bill(AbstractBaseModel, MixinExternalData):
@@ -25,7 +27,10 @@ class Bill(AbstractBaseModel, MixinExternalData):
     sponsor = models.ForeignKey('proposals.Legislator', null=True)
     cosponsors = JSONField(default=list, null=True)
     title = models.TextField()
-    companions = ArrayField(blank=True, default=list, base_field=models.TextField(blank=True))
+    companions = ArrayField(
+        blank=True, default=list,
+        base_field=models.TextField(blank=True)
+    )
     categories = ArrayField(
         models.TextField(blank=True),
         default=list

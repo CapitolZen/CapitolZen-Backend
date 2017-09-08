@@ -1,11 +1,24 @@
+from elasticsearch import Elasticsearch, RequestsHttpConnection
+
+
+from django.conf import settings
+
 from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_elasticsearch import es_views, es_pagination, es_filters
 
-from dry_rest_permissions.generics import (DRYPermissions,
-                                           DRYPermissionFiltersBase)
+from dry_rest_permissions.generics import (
+    DRYPermissions, DRYPermissionFiltersBase
+)
+
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
-from .serializers import BillSerializer, WrapperSerializer, LegislatorSerializer, CommitteeSerializer
+from capitolzen.proposals.documents import BillDocument
+from capitolzen.proposals.api.app.serializers import (
+    BillSerializer, WrapperSerializer, LegislatorSerializer,
+    CommitteeSerializer
+)
 
 
 class BillFilterBackend(DRYPermissionFiltersBase):
@@ -21,9 +34,47 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = BillSerializer
     queryset = Bill.objects.all()
-    filter_backends = (BillFilterBackend, DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
-    ordering_fields = ('last_action_date', 'state', 'state_id', 'sponsor__party')
-    search_fields = ('title', 'sponsor__last_name', 'sponsor__first_name', 'state_id')
+    filter_backends = (
+        BillFilterBackend,
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+        filters.SearchFilter
+    )
+    ordering_fields = (
+        'last_action_date',
+        'state',
+        'state_id',
+        'sponsor__party'
+    )
+    search_fields = (
+        'title',
+        'sponsor__last_name',
+        'sponsor__first_name',
+        'state_id'
+    )
+
+
+class BillSearchView(es_views.ListElasticAPIView):
+    es_client = Elasticsearch(
+        hosts=settings.ELASTICSEARCH_DSL['default']['hosts'],
+        connection_class=RequestsHttpConnection
+    )
+    es_model = BillDocument
+    es_paginator_class = es_pagination.ElasticLimitOffsetPagination
+    es_filter_backends = (
+        es_filters.ElasticFieldsFilter,
+        es_filters.ElasticSearchFilter
+    )
+    es_filter_fields = (
+        es_filters.ESFieldFilter('state', 'states'),
+    )
+    es_search_fields = (
+        'states',
+        'status',
+        'title',
+        'summary',
+        'created'
+    )
 
 
 class LegislatorViewSet(viewsets.ReadOnlyModelViewSet):

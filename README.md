@@ -36,6 +36,12 @@ docker-compose -f dev.yml run pycharm python manage.py
 docker-compose -f dev.yml run pycharm python manage.py test --noinput
 ```
 
+**Rebuilding Search Index**:
+```bash
+docker-compose -f dev.yml run pycharm python manage.py search_index --rebuild
+```
+
+
 **Connecting To DB w/ CLI**
 ```bash
 docker-compose -f dev.yml run postgres psql -h postgres -U downdraft
