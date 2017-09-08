@@ -1,4 +1,4 @@
-from mcs.users.filters import ResourceOwnerFilterBackend
+from capitolzen.users.filters import ResourceOwnerFilterBackend
 from dry_rest_permissions.generics import DRYPermissions
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
