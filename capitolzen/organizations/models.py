@@ -1,20 +1,25 @@
 from __future__ import unicode_literals
+import stripe
+from templated_email import send_templated_mail
+
 from django.contrib.auth import get_user_model
-from crum import get_current_user
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.core.mail import send_mail
-from config.models import AbstractBaseModel
-from dry_rest_permissions.generics import allow_staff_or_superuser
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import JSONField
 
-from organizations.abstract import (AbstractOrganization,
-                                    AbstractOrganizationUser,
-                                    AbstractOrganizationOwner)
+from dry_rest_permissions.generics import allow_staff_or_superuser
+
+from crum import get_current_user
+
+from config.models import AbstractBaseModel
+
+from organizations.abstract import (
+    AbstractOrganization, AbstractOrganizationUser,
+    AbstractOrganizationOwner
+)
+
 from capitolzen.meta.billing import BASIC, PlanChoices
-import stripe
-from templated_email import send_templated_mail
 
 
 class OrganizationManager(models.Manager):
@@ -27,7 +32,6 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     Default Organization model.
     """
     objects = OrganizationManager()
-
 
     ORG_DEMO = (
         ('association', 'Association'),

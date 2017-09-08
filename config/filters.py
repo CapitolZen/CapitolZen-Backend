@@ -16,18 +16,6 @@ class BaseModelFilter(filters.FilterSet):
 
 
 class OrganizationFilter(BaseModelFilter):
-    """
-    Filter Set
-    Filtering for models that are owned by a user.
-    """
-    organization = filters.CharFilter(
-        name='organization',
-        label='Organization',
-        method='filter_organization',
-    )
-
-    def filter_organization(self, queryset, name, value):
-        return queryset.filter(owner__username=value)
 
     class Meta(BaseModelFilter.Meta):
         fields = {

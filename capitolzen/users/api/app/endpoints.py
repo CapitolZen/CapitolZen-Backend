@@ -1,19 +1,23 @@
 from base64 import b64decode
 from json import loads
+
 from django_filters.rest_framework import DjangoFilterBackend
+
 from dry_rest_permissions.generics import DRYPermissionFiltersBase
 from dry_rest_permissions.generics import DRYPermissions
+
 from rest_framework import viewsets
-from rest_framework.decorators import list_route, detail_route
-from rest_framework.exceptions import NotAuthenticated, NotFound
+from rest_framework.decorators import list_route
+from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
-from capitolzen.organizations.models import Organization
-from capitolzen.users.api.app.serializers import UserSerializer
-from capitolzen.organizations.api.app.serializers import OrganizationSerializer
-from capitolzen.users.models import User, Notification
 from rest_framework import status
+
+from capitolzen.organizations.models import Organization
+from capitolzen.organizations.api.app.serializers import OrganizationSerializer
+from capitolzen.users.api.app.serializers import UserSerializer
+from capitolzen.users.models import User
 
 
 class UserFilterBackend(DRYPermissionFiltersBase):
@@ -30,7 +34,9 @@ class UserFilterBackend(DRYPermissionFiltersBase):
             raise NotAuthenticated()
 
         current_user_organizations = Organization.objects.for_user(request.user)
-        return queryset.filter(organizations_organization=current_user_organizations)
+        return queryset.filter(
+            organizations_organization=current_user_organizations
+        )
 
 
 class UserViewSet(viewsets.ModelViewSet):

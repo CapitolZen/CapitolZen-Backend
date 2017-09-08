@@ -1,18 +1,12 @@
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 
-
 from django.conf import settings
-
-from django_filters.rest_framework import DjangoFilterBackend
-
-from rest_framework import viewsets, filters
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import mixins
 from rest_framework_elasticsearch import es_views, es_pagination, es_filters
 
-from dry_rest_permissions.generics import (
-    DRYPermissions, DRYPermissionFiltersBase
-)
 
+from config.viewsets import OwnerBasedViewSet, GenericBaseViewSet
+from config.filters import OrganizationFilter, BaseModelFilter
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
 from capitolzen.proposals.documents import BillDocument
 from capitolzen.proposals.api.app.serializers import (
@@ -21,25 +15,23 @@ from capitolzen.proposals.api.app.serializers import (
 )
 
 
-class BillFilterBackend(DRYPermissionFiltersBase):
-    def filter_list_queryset(self, request, queryset, view):
-        # TODO: Add in org/state availability filtering
-        return queryset
+class BillFilter(BaseModelFilter):
+
+    class Meta(BaseModelFilter.Meta):
+        model = Bill
+
+        fields = {
+            **BaseModelFilter.Meta.fields,
+            'state': ['exact'],
+        }
 
 
-class BillViewSet(viewsets.ReadOnlyModelViewSet):
-    class Meta:
-        ordering = ['state', 'state_id']
-
-    permission_classes = (IsAuthenticated,)
+class BillViewSet(mixins.RetrieveModelMixin,
+                  mixins.ListModelMixin,
+                  GenericBaseViewSet):
     serializer_class = BillSerializer
     queryset = Bill.objects.all()
-    filter_backends = (
-        BillFilterBackend,
-        DjangoFilterBackend,
-        filters.OrderingFilter,
-        filters.SearchFilter
-    )
+    filter_class = BillFilter
     ordering_fields = (
         'last_action_date',
         'state',
@@ -52,6 +44,7 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
         'sponsor__first_name',
         'state_id'
     )
+    ordering = ('state', 'state_id', )
 
 
 class BillSearchView(es_views.ListElasticAPIView):
@@ -77,40 +70,36 @@ class BillSearchView(es_views.ListElasticAPIView):
     )
 
 
-class LegislatorViewSet(viewsets.ReadOnlyModelViewSet):
-    class Meta:
-        ordering = ['state', 'last_name', 'first_name']
-
-    permission_classes = (IsAuthenticated, )
+class LegislatorViewSet(mixins.RetrieveModelMixin,
+                        mixins.ListModelMixin,
+                        GenericBaseViewSet):
     serializer_class = LegislatorSerializer
     queryset = Legislator.objects.all()
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    ordering = ('state', 'last_name', 'first_name')
 
 
-class CommitteeViewSet(viewsets.ReadOnlyModelViewSet):
-    class Meta:
-        ordering = ['state', 'name']
-
-    permission_classes = (IsAuthenticated,)
+class CommitteeViewSet(mixins.RetrieveModelMixin,
+                       mixins.ListModelMixin,
+                       GenericBaseViewSet):
     serializer_class = CommitteeSerializer
     queryset = Committee.objects.all()
+    ordering = ('state', 'name')
 
 
-class WrapperFilter(filters.FilterSet):
-    class Meta:
+class WrapperFilter(OrganizationFilter):
+    class Meta(OrganizationFilter.Meta):
         model = Wrapper
-        fields = ['bill__state', 'bill__state_id', 'bill__id', 'organization', 'group']
+        fields = {
+            **OrganizationFilter.Meta.fields,
+            'bill__state': ['exact'],
+            'bill__state_id': ['exact'],
+            'bill__id': ['exact'],
+            'group': ['exact']
+        }
 
 
-class WrapperViewSet(viewsets.ModelViewSet):
-    class Meta:
-        ordering = ['bill__state', 'bill__state_id']
-
-    permission_classes = (DRYPermissions,)
+class WrapperViewSet(OwnerBasedViewSet):
     serializer_class = WrapperSerializer
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filter_class = WrapperFilter
-
-    def get_queryset(self):
-        return Wrapper.objects.filter(organization__users=self.request.user)
-
+    queryset = Wrapper.objects.all()
+    ordering = ('bill__state', 'bill__state_id')

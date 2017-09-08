@@ -7,4 +7,4 @@ class ResourceOwnerFilterBackend(DRYPermissionFiltersBase):
         if request.user.is_anonymous():
             raise NotAuthenticated()
         else:
-            return queryset.filter(owner=request.user)
+            return queryset.filter(organization__users=request.user)
