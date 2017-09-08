@@ -22,7 +22,7 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = BillSerializer
     queryset = Bill.objects.all()
     filter_backends = (BillFilterBackend, DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
-    ordering_fields = ('last_action_date', 'state', 'state_id', 'sponsor__party')
+    ordering_fields = ('last_action_date', 'state', 'state_id',)
     search_fields = ('title', 'sponsor__last_name', 'sponsor__first_name', 'state_id')
 
 

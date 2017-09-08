@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 from json import dumps
 from django.db import models
 from config.models import AbstractBaseModel
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, ArrayField
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django_fsm import FSMField, transition
@@ -55,6 +55,7 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     recurring = models.BooleanField(default=False)
     update_frequency = models.CharField(blank=True, max_length=255, null=True)
     preferences = JSONField(default=dict)
+    static_list = ArrayField(models.TextField(), blank=True, null=True)
 
     class JSONAPIMeta:
         resource_name = "reports"

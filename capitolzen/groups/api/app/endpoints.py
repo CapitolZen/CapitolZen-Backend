@@ -8,6 +8,7 @@ from dry_rest_permissions.generics import (DRYPermissions,
 
 from capitolzen.proposals.models import Bill, Wrapper
 from capitolzen.groups.models import Group, Report
+from capitolzen.proposals.api.app.serializers import WrapperSerializer
 from capitolzen.groups.tasks import generate_report, email_report
 from .serializers import GroupSerializer, ReportSerializer
 
@@ -69,7 +70,24 @@ class ReportViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save()
         report = serializer.instance
-        generate_report(report)
+        try:
+            generate_report(report)
+        except Exception:
+            pass
+
+    @detail_route(methods=['GET'])
+    def bills(self, request, pk):
+        report = self.get_object()
+        wrappers = Wrapper.objects.filter(group=report.group)
+        if not report.static:
+            try:
+                user_filters = loads(report.filters)
+                wrappers = wrappers.filter(**user_filters)
+                serializer = WrapperSerializer(wrappers)
+                return Response(serializer.data)
+            except Exception:
+                serializer = WrapperSerializer(wrappers)
+                return Response(serializer.data)
 
     @detail_route(methods=['GET'])
     def url(self, request, pk):
