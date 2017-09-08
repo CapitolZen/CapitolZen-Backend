@@ -28,6 +28,7 @@ class BillFilter(BaseModelFilter):
 
 class BillViewSet(mixins.RetrieveModelMixin,
                   mixins.ListModelMixin,
+                  mixins.CreateModelMixin,
                   GenericBaseViewSet):
     serializer_class = BillSerializer
     queryset = Bill.objects.all()
@@ -62,6 +63,7 @@ class BillSearchView(es_views.ListElasticAPIView):
         es_filters.ESFieldFilter('state', 'states'),
     )
     es_search_fields = (
+        'id',
         'states',
         'status',
         'title',

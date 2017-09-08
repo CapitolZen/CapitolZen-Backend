@@ -1,10 +1,13 @@
 from rest_framework_json_api import serializers
 from rest_framework_json_api.relations import ResourceRelatedField
+
 from rest_framework.validators import UniqueValidator
-from capitolzen.users.models import User, Notification
+
+from config.serializers import BaseInternalModelSerializer
+from capitolzen.users.models import User
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(BaseInternalModelSerializer):
     """
     Generic user serializer
     """
@@ -14,25 +17,27 @@ class UserSerializer(serializers.ModelSerializer):
         source='organizations_organization'
     )
 
-    username = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all())])
+    username = serializers.EmailField(
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
 
     class Meta:
         model = User
-        fields = ('id',
-                  'created',
-                  'modified',
-                  'metadata',
-                  'name',
-                  'username',
-                  'is_staff',
-                  'is_superuser',
-                  'organizations',
-                  'date_joined')
-        read_only_fields = ('id',
-                            'is_staff',
-                            'is_superuser',
-                            'organizations',
-                            'date_joined')
+        fields = (
+            'name',
+            'username',
+            'is_staff',
+            'is_superuser',
+            'organizations',
+            'date_joined'
+        )
+        read_only_fields = (
+            'id',
+            'is_staff',
+            'is_superuser',
+            'organizations',
+            'date_joined'
+        )
         lookup_field = 'id'
 
 

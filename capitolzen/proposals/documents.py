@@ -1,6 +1,4 @@
-from django_elasticsearch_dsl import Index, fields
-
-from config.documents import BaseIndex
+from django_elasticsearch_dsl import Index, fields, DocType
 
 from capitolzen.proposals.models import Bill
 
@@ -14,7 +12,8 @@ bill.settings(
 
 
 @bill.doc_type
-class BillDocument(BaseIndex):
+class BillDocument(DocType):
+    id = fields.String()
     current_committee = fields.ObjectField(properties={
         'name': fields.StringField(),
         'state': fields.StringField(),
@@ -38,31 +37,36 @@ class BillDocument(BaseIndex):
         'last_name': fields.StringField(),
         'suffixes': fields.StringField()
     })
+    history = fields.ObjectField()
+    action_dates = fields.ObjectField()
+    cosponsors = fields.ObjectField()
+    companions = fields.NestedField()
+    categories = fields.NestedField()
+    votes = fields.ObjectField()
+    sources = fields.ObjectField()
+    documents = fields.ObjectField()
+    bill_version = fields.ObjectField()
 
-    class Meta(BaseIndex.Meta):
+    class Meta:
         model = Bill
 
-        fields = BaseIndex.Meta.fields + [
+        fields = [
+            'created',
+            'modified',
             'state',
             'state_id',
             'remote_id',
             'session',
-            'history',
-            'action_dates',
             'chamber',
             'type',
             'status',
-            'cosponsors',
             'title',
-            'companions',
-            'categories',
-            'votes',
             'summary',
-            'sources',
-            'documents',
-            'bill_versions'
         ]
+
+    def prepare_id(self, instance):
+        return str(instance.id)
 
     def prepare_summary(self, instance):
         # do something here to generate a human readable summary
-        return instance
+        return instance.summary

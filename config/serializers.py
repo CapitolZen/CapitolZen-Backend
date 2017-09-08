@@ -1,16 +1,18 @@
-from rest_framework import serializers
+from rest_framework_json_api import serializers
 
 
-class BaseSerializer(serializers.ModelSerializer):
-    """
-    Deprecated: new serializers should use BaseModelMetaSerializer
-    """
-
+class BaseModelSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(
         read_only=True,
         help_text="Unique UUID based identifier that can be used to access "
                   "the resource."
     )
+
+    class Meta:
+        abstract = True
+
+
+class BaseInternalModelSerializer(BaseModelSerializer):
     created = serializers.DateTimeField(
         format='iso-8601',
         read_only=True,

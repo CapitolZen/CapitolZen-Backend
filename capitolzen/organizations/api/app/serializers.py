@@ -1,9 +1,12 @@
 from rest_framework_json_api import serializers
-from dry_rest_permissions.generics import DRYPermissionsField
+
+from config.serializers import BaseInternalModelSerializer
+
 from capitolzen.organizations.models import (Organization, OrganizationInvite)
 from capitolzen.users.models import User
 
-class OrganizationSerializer(serializers.ModelSerializer):
+
+class OrganizationSerializer(BaseInternalModelSerializer):
     user_is_member = serializers.ReadOnlyField()
     id = serializers.ReadOnlyField()
     is_active = serializers.ReadOnlyField()
@@ -11,7 +14,6 @@ class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = (
-            'id',
             'name',
             'is_active',
             'user_is_owner',
@@ -37,7 +39,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         return org
 
 
-class OrganizationInviteSerializer(serializers.ModelSerializer):
+class OrganizationInviteSerializer(BaseInternalModelSerializer):
 
     def validate_username(self, value):
         """
@@ -45,9 +47,8 @@ class OrganizationInviteSerializer(serializers.ModelSerializer):
         :return:
         """
         try:
-            user = User.objects.get(username=value)
+            User.objects.get(username=value)
             raise serializers.ValidationError("Email Already In Use")
-
         except User.DoesNotExist:
             pass
 
@@ -55,12 +56,10 @@ class OrganizationInviteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrganizationInvite
-        fields = ('id',
-                  'metadata',
-                  'created',
-                  'modified',
-                  'organization',
-                  'organization_name',
-                  'email',
-                  'status')
+        fields = (
+            'organization',
+            'organization_name',
+            'email',
+            'status'
+        )
 

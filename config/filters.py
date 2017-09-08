@@ -1,5 +1,4 @@
 from django_filters import rest_framework as filters
-from django_filters import Filter, fields
 
 
 class BaseModelFilter(filters.FilterSet):
@@ -16,7 +15,6 @@ class BaseModelFilter(filters.FilterSet):
 
 
 class OrganizationFilter(BaseModelFilter):
-
     class Meta(BaseModelFilter.Meta):
         fields = {
             **BaseModelFilter.Meta.fields,

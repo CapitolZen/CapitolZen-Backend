@@ -54,6 +54,7 @@ services:
     links:
       - postgres
       - redis
+      - elasticsearch1
 
   #
   # Local Development utility for running commands.
@@ -73,6 +74,7 @@ services:
     links:
       - postgres
       - redis
+      - elasticsearch1
 
   #
   # Workers
@@ -90,6 +92,7 @@ services:
     links:
       - postgres
       - redis
+      - elasticsearch1
     command: ["./utilities/wait-for-it.sh -t 90", "postgres:5432", "--", celery, -A, capitolzen.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
     volumes:
       - .:/app

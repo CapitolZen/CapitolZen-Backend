@@ -284,7 +284,7 @@ REST_FRAMEWORK = {
     'DEFAULT_MODEL_SERIALIZER_CLASS':
         'rest_framework.serializers.HyperlinkedModelSerializer',
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
@@ -456,7 +456,7 @@ OPEN_STATES_URL = env(
 # ELASTIC SEARCH
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': env("ELASTIC_SEARCH_URL", default='')
+        'hosts': env("ELASTIC_SEARCH_URL", default='elasticsearch1')
     },
 }
 

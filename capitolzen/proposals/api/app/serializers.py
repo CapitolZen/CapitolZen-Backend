@@ -1,17 +1,19 @@
-from rest_framework_json_api import serializers
 from rest_framework_json_api.relations import ResourceRelatedField
+
+from config.serializers import BaseModelSerializer, BaseInternalModelSerializer
+
 from capitolzen.organizations.models import Organization
 from capitolzen.groups.models import Group
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
 
 
-class BillSerializer(serializers.ModelSerializer):
+class BillSerializer(BaseModelSerializer):
     class Meta:
         model = Bill
         fields = (
             'state',
             'state_id',
-            'id', 'type',
+            'type',
             'session',
             'chamber',
             'remote_id',
@@ -35,7 +37,7 @@ class BillSerializer(serializers.ModelSerializer):
         )
 
 
-class LegislatorSerializer(serializers.ModelSerializer):
+class LegislatorSerializer(BaseModelSerializer):
     class Meta:
         model = Legislator
         fields = (
@@ -56,7 +58,7 @@ class LegislatorSerializer(serializers.ModelSerializer):
         )
 
 
-class CommitteeSerializer(serializers.ModelSerializer):
+class CommitteeSerializer(BaseModelSerializer):
     class Meta:
         model = Committee
         fields = (
@@ -69,11 +71,16 @@ class CommitteeSerializer(serializers.ModelSerializer):
         )
 
 
-class WrapperSerializer(serializers.ModelSerializer):
+class WrapperSerializer(BaseInternalModelSerializer):
+    bill = ResourceRelatedField(many=False, queryset=Bill.objects)
+    organization = ResourceRelatedField(
+        many=False, queryset=Organization.objects
+    )
+    group = ResourceRelatedField(many=False, queryset=Group.objects)
+
     class Meta:
         model = Wrapper
         fields = (
-            'id',
             'bill',
             'group',
             'organization',
@@ -82,11 +89,3 @@ class WrapperSerializer(serializers.ModelSerializer):
             'summary',
             'position_detail'
         )
-
-    bill = ResourceRelatedField(many=False, queryset=Bill.objects)
-    organization = ResourceRelatedField(
-        many=False, queryset=Organization.objects
-    )
-    group = ResourceRelatedField(many=False, queryset=Group.objects)
-    id = serializers.ReadOnlyField()
-
