@@ -45,7 +45,6 @@ class BillDocument(DocType):
     votes = fields.ObjectField()
     sources = fields.ObjectField()
     documents = fields.ObjectField()
-    bill_version = fields.ObjectField()
 
     class Meta:
         model = Bill

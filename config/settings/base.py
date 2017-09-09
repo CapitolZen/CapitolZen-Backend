@@ -53,6 +53,7 @@ THIRD_PARTY_APPS = [
     'rest_auth',
     'stream_django',
     'thorn.django',
+    'django_elasticsearch_dsl'
 ]
 
 ADMIN_APPS = [
@@ -456,7 +457,8 @@ OPEN_STATES_URL = env(
 # ELASTIC SEARCH
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': env("ELASTIC_SEARCH_URL", default='elasticsearch1')
+        'hosts':
+            env("ELASTIC_SEARCH_URL", default='elastic:changeme@elasticsearch1')
     },
 }
 

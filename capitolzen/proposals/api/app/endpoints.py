@@ -63,12 +63,7 @@ class BillSearchView(es_views.ListElasticAPIView):
         es_filters.ESFieldFilter('state', 'states'),
     )
     es_search_fields = (
-        'id',
-        'states',
-        'status',
-        'title',
-        'summary',
-        'created'
+        '^title',
     )
 
 

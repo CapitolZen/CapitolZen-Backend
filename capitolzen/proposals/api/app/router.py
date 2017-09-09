@@ -15,8 +15,9 @@ router.register(r'committees', CommitteeViewSet, base_name="committees")
 router.register(r'wrappers', WrapperViewSet, base_name="wrappers")
 
 urlpatterns = [
+    url(r'^bills/search/$', BillSearchView.as_view(), name='bill-search'),
     url(r'^', include(router.urls)),
-    url(r'^search/$', BillSearchView.as_view(), name='bill_search')
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
