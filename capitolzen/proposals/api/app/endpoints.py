@@ -1,15 +1,13 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticated
-import rest_framework_filters as drffilter
 from dry_rest_permissions.generics import (DRYPermissions,
                                            DRYPermissionFiltersBase)
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
 from .serializers import BillSerializer, WrapperSerializer, LegislatorSerializer, CommitteeSerializer
 
 
-class BillFilter(drffilter.FilterSet):
-    # sponsor = drffilter.RelatedFilter(LegislatorFilter, name='sponsor', queryset=Legislator.objects.all())
+class BillFilter(filters.FilterSet):
 
     class Meta:
         model = Bill
@@ -33,7 +31,7 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ('title', 'sponsor__last_name', 'sponsor__first_name', 'state_id')
 
 
-class LegislatorFilter(drffilter.FilterSet):
+class LegislatorFilter(filters.FilterSet):
     class Meta:
         model = Legislator
         fields = {
@@ -63,8 +61,8 @@ class CommitteeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Committee.objects.all()
 
 
-class WrapperFilter(drffilter.FilterSet):
-    bill = drffilter.RelatedFilter(BillFilter, name='bill', queryset=Bill.objects.all())
+class WrapperFilter(filters.FilterSet):
+    bill = filters.RelatedFilter(BillFilter, name='bill', queryset=Bill.objects.all())
 
     class Meta:
         model = Wrapper
