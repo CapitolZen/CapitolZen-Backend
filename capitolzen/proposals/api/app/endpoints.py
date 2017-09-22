@@ -1,13 +1,21 @@
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, filters
+from json import loads
+from django.db.models import Q
+from rest_framework import viewsets, filters, status
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet, CharFilter
 from rest_framework.permissions import IsAuthenticated
-from dry_rest_permissions.generics import (DRYPermissions,
-                                           DRYPermissionFiltersBase)
+from rest_framework.decorators import list_route
+from rest_framework.response import Response
+from dry_rest_permissions.generics import (DRYPermissions, )
+from capitolzen.groups.models import Group
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
 from .serializers import BillSerializer, WrapperSerializer, LegislatorSerializer, CommitteeSerializer
 
 
-class BillFilter(filters.FilterSet):
+class BillFilter(FilterSet):
+    sponsor_name = CharFilter(name='sponsor__name', method='sponsor_full_name')
+
+    def sponsor_full_name(self, queryset, name, value):
+        return queryset.filter(Q(sponsor__first_name__contains=value) | Q(sponsor__last_name__contains=value))
 
     class Meta:
         model = Bill
@@ -31,7 +39,7 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ('title', 'sponsor__last_name', 'sponsor__first_name', 'state_id')
 
 
-class LegislatorFilter(filters.FilterSet):
+class LegislatorFilter(FilterSet):
     class Meta:
         model = Legislator
         fields = {
@@ -61,8 +69,7 @@ class CommitteeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Committee.objects.all()
 
 
-class WrapperFilter(filters.FilterSet):
-    bill = filters.RelatedFilter(BillFilter, name='bill', queryset=Bill.objects.all())
+class WrapperFilter(FilterSet):
 
     class Meta:
         model = Wrapper
@@ -87,3 +94,18 @@ class WrapperViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Wrapper.objects.filter(organization__users=self.request.user)
 
+    @list_route(methods=['POST'])
+    def filter_wrappers(self, request):
+        data = loads(request.body)
+        group = data.get('group', False)
+        if not group:
+            return Response({"message": "group required", "status_code": status.HTTP_400_BAD_REQUEST},
+                            status=status.HTTP_400_BAD_REQUEST)
+        group = Group.objects.get(pk=data['group'])
+        wrappers = Wrapper.objects.filter(group=group)
+        wrapper_filters = data.get('filters', False)
+        if wrapper_filters:
+            wrappers = wrappers.filter(**wrapper_filters)
+
+        serialized = WrapperSerializer(wrappers, many=True)
+        return Response(serialized.data)

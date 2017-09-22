@@ -50,7 +50,7 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     publish_date = models.DateTimeField(blank=True, null=True)
     publish_output = models.CharField(blank=True, max_length=255)
     title = models.CharField(default="Generated Report", max_length=255)
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, null=True)
     template = JSONField(default=dict)
     recurring = models.BooleanField(default=False)
     update_frequency = models.CharField(blank=True, max_length=255, null=True)
