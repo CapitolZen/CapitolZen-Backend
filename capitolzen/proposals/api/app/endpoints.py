@@ -1,17 +1,29 @@
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, filters
+from json import loads
+from django.db.models import Q
+from rest_framework import viewsets, filters, status
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet, CharFilter
 from rest_framework.permissions import IsAuthenticated
-
-from dry_rest_permissions.generics import (DRYPermissions,
-                                           DRYPermissionFiltersBase)
+from rest_framework.decorators import list_route
+from rest_framework.response import Response
+from dry_rest_permissions.generics import (DRYPermissions, )
+from capitolzen.groups.models import Group
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
 from .serializers import BillSerializer, WrapperSerializer, LegislatorSerializer, CommitteeSerializer
 
 
-class BillFilterBackend(DRYPermissionFiltersBase):
-    def filter_list_queryset(self, request, queryset, view):
-        # TODO: Add in org/state availability filtering
-        return queryset
+class BillFilter(FilterSet):
+    sponsor_name = CharFilter(name='sponsor__name', method='sponsor_full_name')
+
+    def sponsor_full_name(self, queryset, name, value):
+        return queryset.filter(Q(sponsor__first_name__contains=value) | Q(sponsor__last_name__contains=value))
+
+    class Meta:
+        model = Bill
+        fields = {
+            'state': ['exact', 'contains'],
+            'state_id': ['exact', 'contains'],
+            'title': ['contains', 'exact'],
+        }
 
 
 class BillViewSet(viewsets.ReadOnlyModelViewSet):
@@ -21,9 +33,20 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = BillSerializer
     queryset = Bill.objects.all()
-    filter_backends = (BillFilterBackend, DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
-    ordering_fields = ('last_action_date', 'state', 'state_id', 'sponsor__party')
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
+    filter_class = BillFilter
+    ordering_fields = ('last_action_date', 'state', 'state_id',)
     search_fields = ('title', 'sponsor__last_name', 'sponsor__first_name', 'state_id')
+
+
+class LegislatorFilter(FilterSet):
+    class Meta:
+        model = Legislator
+        fields = {
+            'first_name': ['exact', 'contains'],
+            'last_name': ['exact', 'contains'],
+            'party': ['exact'],
+        }
 
 
 class LegislatorViewSet(viewsets.ReadOnlyModelViewSet):
@@ -33,6 +56,7 @@ class LegislatorViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated, )
     serializer_class = LegislatorSerializer
     queryset = Legislator.objects.all()
+    filter_class = LegislatorFilter
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
 
 
@@ -45,10 +69,17 @@ class CommitteeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Committee.objects.all()
 
 
-class WrapperFilter(filters.FilterSet):
+class WrapperFilter(FilterSet):
+
     class Meta:
         model = Wrapper
-        fields = ['bill__state', 'bill__state_id', 'bill__id', 'organization', 'group']
+        fields = {
+                    'organization': ['exact'],
+                    'group': ['in'],
+                    'position': ['exact'],
+                    'summary': ['in'],
+                    'starred': ['exact']
+                 }
 
 
 class WrapperViewSet(viewsets.ModelViewSet):
@@ -63,3 +94,18 @@ class WrapperViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Wrapper.objects.filter(organization__users=self.request.user)
 
+    @list_route(methods=['POST'])
+    def filter_wrappers(self, request):
+        data = loads(request.body)
+        group = data.get('group', False)
+        if not group:
+            return Response({"message": "group required", "status_code": status.HTTP_400_BAD_REQUEST},
+                            status=status.HTTP_400_BAD_REQUEST)
+        group = Group.objects.get(pk=data['group'])
+        wrappers = Wrapper.objects.filter(group=group)
+        wrapper_filters = data.get('filters', False)
+        if wrapper_filters:
+            wrappers = wrappers.filter(**wrapper_filters)
+
+        serialized = WrapperSerializer(wrappers, many=True)
+        return Response(serialized.data)
