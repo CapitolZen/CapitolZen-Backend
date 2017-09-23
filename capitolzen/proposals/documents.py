@@ -1,7 +1,15 @@
+from elasticsearch_dsl import analyzer, Keyword
 from django_elasticsearch_dsl import Index, fields, DocType
 
 from capitolzen.proposals.models import Bill
 
+
+html_strip = analyzer(
+    'html_strip',
+    tokenizer="standard",
+    filter=["standard", "lowercase", "stop", "snowball"],
+    char_filter=["html_strip"]
+)
 bill = Index('bills')
 
 # http://bit.ly/create-index
@@ -45,6 +53,10 @@ class BillDocument(DocType):
     votes = fields.ObjectField()
     sources = fields.ObjectField()
     documents = fields.ObjectField()
+    bill_text = fields.TextField(
+        analyzer=html_strip,
+        fields={'raw': Keyword()}
+    )
 
     class Meta:
         model = Bill

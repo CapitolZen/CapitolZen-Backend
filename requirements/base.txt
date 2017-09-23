@@ -55,6 +55,10 @@ djangorestframework-jwt==1.11.0
 djangorestframework-jsonapi==2.2.0
 dry-rest-permissions==0.1.9
 django-rest-elasticsearch==0.3.2
--e git://github.com:bleib1dj/django-elasticsearch-dsl.git#egg=django-elasticsearch-dsl
+django-elasticsearch-dsl==0.2.0
 django-rest-swagger==2.1.2
 thorn==1.5.0
+
+#
+# Other
+beautifulsoup4==4.6.0

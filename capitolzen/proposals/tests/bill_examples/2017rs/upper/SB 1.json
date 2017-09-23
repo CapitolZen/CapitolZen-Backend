@@ -1,0 +1,74 @@
+{
+  "actions": [
+    {
+      "date": "2017-02-07 05:00:00",
+      "action": "Read for the first time and referred to the Senate committee on Judiciary",
+      "type": [
+        "bill:reading:1",
+        "committee:referred"
+      ],
+      "related_entities": [
+        {
+          "type": "committee",
+          "name": "Judiciary",
+          "id": "ALC000042"
+        }
+      ],
+      "actor": "upper"
+    }
+  ],
+  "sources": [
+    {
+      "url": "http://alisondb.legislature.state.al.us/Alison/SESSBillsList.aspx?STATUSCODES=Had%20First%20Reading%20House%20of%20Origin&BODY=999999"
+    },
+    {
+      "url": "http://alisondb.legislature.state.al.us/Alison/SESSBillStatusResult.aspx?BILL=SB1"
+    }
+  ],
+  "session": "2017rs",
+  "id": "ALB00011541",
+  "votes": [],
+  "documents": [],
+  "title": "Civil Rights, privacy, public rest rooms gender appropriate, Alabama Privacy Act established",
+  "alternate_titles": [],
+  "companions": [],
+  "all_ids": [
+    "ALB00011541"
+  ],
+  "state": "al",
+  "subjects": [],
+  "type": [
+    "bill"
+  ],
+  "scraped_subjects": [
+    "Civil Rights"
+  ],
+  "sponsors": [
+    {
+      "leg_id": "ALL000035",
+      "type": "primary",
+      "name": "Williams"
+    }
+  ],
+  "updated_at": "2017-06-19 05:54:01",
+  "action_dates": {
+    "passed_upper": null,
+    "passed_lower": null,
+    "last": "2017-02-07 05:00:00",
+    "signed": null,
+    "first": "2017-02-07 05:00:00"
+  },
+  "created_at": "2017-01-02 06:37:53",
+  "versions": [
+    {
+      "mimetype": "application/pdf",
+      "url": "http://alisondb.legislature.state.al.us/ALISON/SearchableInstruments/2017rs/PrintFiles/SB1-int.pdf",
+      "+date": null,
+      "doc_id": "ALD00029384",
+      "name": "Introduced"
+    }
+  ],
+  "chamber": "upper",
+  "alternate_bill_ids": [],
+  "bill_id": "SB 1"
+}

@@ -40,6 +40,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
     sources = JSONField(default=dict, blank=True)
     documents = JSONField(default=dict, blank=True)
     bill_versions = JSONField(default=dict, blank=True)
+    bill_text = models.TextField(null=True)
 
     # Properties
     @property

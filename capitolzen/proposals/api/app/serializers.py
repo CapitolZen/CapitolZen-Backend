@@ -1,13 +1,13 @@
 from rest_framework_json_api.relations import ResourceRelatedField
 
-from config.serializers import BaseModelSerializer, BaseInternalModelSerializer
+from config.serializers import BaseModelMetaSerializer, BaseInternalModelSerializer
 
 from capitolzen.organizations.models import Organization
 from capitolzen.groups.models import Group
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
 
 
-class BillSerializer(BaseModelSerializer):
+class BillSerializer(BaseModelMetaSerializer):
     class Meta:
         model = Bill
         fields = (
@@ -37,7 +37,7 @@ class BillSerializer(BaseModelSerializer):
         )
 
 
-class LegislatorSerializer(BaseModelSerializer):
+class LegislatorSerializer(BaseModelMetaSerializer):
     class Meta:
         model = Legislator
         fields = (
@@ -58,7 +58,7 @@ class LegislatorSerializer(BaseModelSerializer):
         )
 
 
-class CommitteeSerializer(BaseModelSerializer):
+class CommitteeSerializer(BaseModelMetaSerializer):
     class Meta:
         model = Committee
         fields = (

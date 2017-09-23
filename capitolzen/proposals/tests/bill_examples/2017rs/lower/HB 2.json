@@ -1,0 +1,92 @@
+{
+  "actions": [
+    {
+      "date": "2017-02-07 05:00:00",
+      "action": "Read for the first time and referred to the House of Representatives committee on State Government",
+      "type": [
+        "bill:reading:1",
+        "committee:referred"
+      ],
+      "related_entities": [
+        {
+          "type": "committee",
+          "name": "State Government",
+          "id": "ALC000017"
+        }
+      ],
+      "actor": "lower"
+    },
+    {
+      "date": "2017-03-15 04:00:00",
+      "action": "Read for the second time and placed on the calendar",
+      "type": [
+        "bill:reading:2"
+      ],
+      "related_entities": [],
+      "actor": "lower"
+    },
+    {
+      "date": "2017-05-17 04:00:00",
+      "action": "Indefinitely Postponed",
+      "type": [
+        "bill:failed"
+      ],
+      "related_entities": [],
+      "actor": "lower"
+    }
+  ],
+  "sources": [
+    {
+      "url": "http://alisondb.legislature.state.al.us/Alison/SESSBillsList.aspx?STATUSCODES=Had%20First%20Reading%20House%20of%20Origin&BODY=999999"
+    },
+    {
+      "url": "http://alisondb.legislature.state.al.us/Alison/SESSBillStatusResult.aspx?BILL=HB2"
+    }
+  ],
+  "session": "2017rs",
+  "id": "ALB00011571",
+  "votes": [],
+  "documents": [],
+  "title": "Supplemental Nutritional Assistance Program benefits, waiver by status of work requirements to receive, prohibited",
+  "alternate_titles": [],
+  "companions": [],
+  "all_ids": [
+    "ALB00011571"
+  ],
+  "state": "al",
+  "subjects": [],
+  "type": [
+    "bill"
+  ],
+  "scraped_subjects": [
+    "Food Stamps"
+  ],
+  "sponsors": [
+    {
+      "leg_id": "ALL000177",
+      "type": "primary",
+      "name": "Hanes"
+    }
+  ],
+  "updated_at": "2017-05-23 05:54:49",
+  "action_dates": {
+    "passed_upper": null,
+    "passed_lower": null,
+    "last": "2017-05-17 04:00:00",
+    "signed": null,
+    "first": "2017-02-07 05:00:00"
+  },
+  "created_at": "2017-01-02 06:37:54",
+  "versions": [
+    {
+      "mimetype": "application/pdf",
+      "url": "http://alisondb.legislature.state.al.us/ALISON/SearchableInstruments/2017rs/PrintFiles/HB2-int.pdf",
+      "+date": null,
+      "doc_id": "ALD00030271",
+      "name": "Introduced"
+    }
+  ],
+  "chamber": "lower",
+  "alternate_bill_ids": [],
+  "bill_id": "HB 2"
+}

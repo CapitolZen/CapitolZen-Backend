@@ -1,0 +1,509 @@
+{
+  "actions": [
+    {
+      "date": "2017-02-07 05:00:00",
+      "action": "Read for the first time and referred to the Senate committee on Finance and Taxation Education",
+      "type": [
+        "bill:reading:1",
+        "committee:referred"
+      ],
+      "related_entities": [
+        {
+          "type": "committee",
+          "name": "Finance and Taxation Education",
+          "id": "ALC000058"
+        }
+      ],
+      "actor": "upper"
+    },
+    {
+      "date": "2017-04-13 04:00:00",
+      "action": "Read for the second time and placed on the calendar",
+      "type": [
+        "bill:reading:2"
+      ],
+      "related_entities": [],
+      "actor": "upper"
+    },
+    {
+      "date": "2017-05-09 04:00:00",
+      "action": "Third Reading Carried Over to Call of the Chair",
+      "type": [
+        "other"
+      ],
+      "related_entities": [],
+      "actor": "upper"
+    },
+    {
+      "date": "2017-05-09 04:00:00",
+      "action": "Dial motion to Carry Over to the Call of the Chair adopted Voice Vote",
+      "type": [
+        "other"
+      ],
+      "related_entities": [],
+      "actor": "upper"
+    },
+    {
+      "action": "Third Reading Passed",
+      "date": "2017-05-11 04:00:00",
+      "type": [
+        "bill:passed"
+      ],
+      "related_entities": [],
+      "actor": "upper"
+    },
+    {
+      "date": "2017-05-11 04:00:00",
+      "action": "Marsh first Substitute Offered",
+      "type": [
+        "amendment:introduced"
+      ],
+      "related_entities": [],
+      "actor": "upper"
+    },
+    {
+      "action": "Marsh motion to Adopt adopted Roll Call 1031",
+      "date": "2017-05-11 04:00:00",
+      "type": [
+        "amendment:passed"
+      ],
+      "related_entities": [],
+      "actor": "upper"
+    },
+    {
+      "action": "Motion to Read a Third Time and Pass adopted Roll Call 1032",
+      "date": "2017-05-11 04:00:00",
+      "type": [
+        "bill:passed"
+      ],
+      "related_entities": [],
+      "actor": "upper"
+    },
+    {
+      "date": "2017-05-11 04:00:00",
+      "action": "Engrossed",
+      "type": [
+        "other"
+      ],
+      "related_entities": [],
+      "actor": "upper"
+    },
+    {
+      "date": "2017-05-11 04:00:00",
+      "action": "Read for the first time and referred to the House of Representatives committee on Ways and Means Education",
+      "type": [
+        "bill:reading:1",
+        "committee:referred"
+      ],
+      "related_entities": [
+        {
+          "type": "committee",
+          "name": "Ways and Means Education",
+          "id": "ALC000016"
+        }
+      ],
+      "actor": "lower"
+    }
+  ],
+  "sources": [
+    {
+      "url": "http://alisondb.legislature.state.al.us/Alison/SESSBillsList.aspx?STATUSCODES=Had%20First%20Reading%20House%20of%20Origin&BODY=999999"
+    },
+    {
+      "url": "http://alisondb.legislature.state.al.us/Alison/SESSBillStatusResult.aspx?BILL=SB3"
+    }
+  ],
+  "session": "2017rs",
+  "id": "ALB00011556",
+  "votes": [
+    {
+      "sources": [
+        {
+          "url": "http://alisondb.legislature.state.al.us/Alison/GetRollCallVoteResults.aspx?VOTE=1031&BODY=S&INST=SB3&SESS=1069"
+        }
+      ],
+      "session": "2017rs",
+      "id": "ALV00013513",
+      "other_count": 8,
+      "state": "al",
+      "+action": null,
+      "type": "other",
+      "no_count": 1,
+      "passed": true,
+      "yes_votes": [
+        {
+          "leg_id": "ALL000165",
+          "name": "Albritton"
+        },
+        {
+          "leg_id": "ALL000001",
+          "name": "Allen"
+        },
+        {
+          "leg_id": "ALL000002",
+          "name": "Beasley"
+        },
+        {
+          "leg_id": "ALL000008",
+          "name": "Bussman"
+        },
+        {
+          "leg_id": "ALL000169",
+          "name": "Chambliss"
+        },
+        {
+          "leg_id": null,
+          "name": "Coleman-Madison"
+        },
+        {
+          "leg_id": "ALL000010",
+          "name": "Dial"
+        },
+        {
+          "leg_id": "ALL000011",
+          "name": "Dunn"
+        },
+        {
+          "leg_id": "ALL000013",
+          "name": "Figures"
+        },
+        {
+          "leg_id": "ALL000144",
+          "name": "Hightower"
+        },
+        {
+          "leg_id": "ALL000016",
+          "name": "Holtzclaw"
+        },
+        {
+          "leg_id": "ALL000179",
+          "name": "Livingston"
+        },
+        {
+          "leg_id": "ALL000019",
+          "name": "Marsh"
+        },
+        {
+          "leg_id": "ALL000101",
+          "name": "McClendon"
+        },
+        {
+          "leg_id": "ALL000021",
+          "name": "Orr"
+        },
+        {
+          "leg_id": "ALL000023",
+          "name": "Reed"
+        },
+        {
+          "leg_id": "ALL000024",
+          "name": "Ross"
+        },
+        {
+          "leg_id": "ALL000025",
+          "name": "Sanders"
+        },
+        {
+          "leg_id": "ALL000027",
+          "name": "Scofield"
+        },
+        {
+          "leg_id": "ALL000174",
+          "name": "Shelnutt"
+        },
+        {
+          "leg_id": "ALL000028",
+          "name": "Singleton"
+        },
+        {
+          "leg_id": "ALL000030",
+          "name": "Smitherman"
+        },
+        {
+          "leg_id": "ALL000186",
+          "name": "Stutts"
+        },
+        {
+          "leg_id": "ALL000032",
+          "name": "Waggoner"
+        },
+        {
+          "leg_id": "ALL000033",
+          "name": "Ward"
+        },
+        {
+          "leg_id": "ALL000034",
+          "name": "Whatley"
+        }
+      ],
+      "date": "2017-05-11 04:00:00",
+      "no_votes": [
+        {
+          "leg_id": "ALL000026",
+          "name": "Sanford"
+        }
+      ],
+      "vote_id": "ALV00013513",
+      "other_votes": [
+        {
+          "leg_id": "ALL000014",
+          "name": "Glover"
+        },
+        {
+          "leg_id": "ALL000015",
+          "name": "Holley"
+        },
+        {
+          "leg_id": "ALL000022",
+          "name": "Pittman"
+        },
+        {
+          "leg_id": "ALL000005",
+          "name": "Blackwell"
+        },
+        {
+          "leg_id": "ALL000006",
+          "name": "Brewbaker"
+        },
+        {
+          "leg_id": "ALL000183",
+          "name": "Melson"
+        },
+        {
+          "leg_id": "ALL000029",
+          "name": "Smith"
+        },
+        {
+          "leg_id": "ALL000035",
+          "name": "Williams"
+        }
+      ],
+      "yes_count": 26,
+      "bill_chamber": "upper",
+      "motion": "Marsh motion to Adopt adopted Roll Call 1031",
+      "chamber": "upper",
+      "bill_id": "ALB00011556"
+    },
+    {
+      "sources": [
+        {
+          "url": "http://alisondb.legislature.state.al.us/Alison/GetRollCallVoteResults.aspx?VOTE=1032&BODY=S&INST=SB3&SESS=1069"
+        }
+      ],
+      "session": "2017rs",
+      "id": "ALV00013514",
+      "other_count": 8,
+      "state": "al",
+      "+action": null,
+      "type": "other",
+      "no_count": 1,
+      "passed": true,
+      "yes_votes": [
+        {
+          "leg_id": "ALL000165",
+          "name": "Albritton"
+        },
+        {
+          "leg_id": "ALL000001",
+          "name": "Allen"
+        },
+        {
+          "leg_id": "ALL000002",
+          "name": "Beasley"
+        },
+        {
+          "leg_id": "ALL000008",
+          "name": "Bussman"
+        },
+        {
+          "leg_id": "ALL000169",
+          "name": "Chambliss"
+        },
+        {
+          "leg_id": null,
+          "name": "Coleman-Madison"
+        },
+        {
+          "leg_id": "ALL000010",
+          "name": "Dial"
+        },
+        {
+          "leg_id": "ALL000011",
+          "name": "Dunn"
+        },
+        {
+          "leg_id": "ALL000013",
+          "name": "Figures"
+        },
+        {
+          "leg_id": "ALL000144",
+          "name": "Hightower"
+        },
+        {
+          "leg_id": "ALL000016",
+          "name": "Holtzclaw"
+        },
+        {
+          "leg_id": "ALL000179",
+          "name": "Livingston"
+        },
+        {
+          "leg_id": "ALL000019",
+          "name": "Marsh"
+        },
+        {
+          "leg_id": "ALL000101",
+          "name": "McClendon"
+        },
+        {
+          "leg_id": "ALL000021",
+          "name": "Orr"
+        },
+        {
+          "leg_id": "ALL000023",
+          "name": "Reed"
+        },
+        {
+          "leg_id": "ALL000024",
+          "name": "Ross"
+        },
+        {
+          "leg_id": "ALL000025",
+          "name": "Sanders"
+        },
+        {
+          "leg_id": "ALL000027",
+          "name": "Scofield"
+        },
+        {
+          "leg_id": "ALL000174",
+          "name": "Shelnutt"
+        },
+        {
+          "leg_id": "ALL000028",
+          "name": "Singleton"
+        },
+        {
+          "leg_id": "ALL000030",
+          "name": "Smitherman"
+        },
+        {
+          "leg_id": "ALL000186",
+          "name": "Stutts"
+        },
+        {
+          "leg_id": "ALL000032",
+          "name": "Waggoner"
+        },
+        {
+          "leg_id": "ALL000033",
+          "name": "Ward"
+        },
+        {
+          "leg_id": "ALL000034",
+          "name": "Whatley"
+        }
+      ],
+      "date": "2017-05-11 04:00:00",
+      "no_votes": [
+        {
+          "leg_id": "ALL000026",
+          "name": "Sanford"
+        }
+      ],
+      "vote_id": "ALV00013514",
+      "other_votes": [
+        {
+          "leg_id": "ALL000014",
+          "name": "Glover"
+        },
+        {
+          "leg_id": "ALL000015",
+          "name": "Holley"
+        },
+        {
+          "leg_id": "ALL000022",
+          "name": "Pittman"
+        },
+        {
+          "leg_id": "ALL000005",
+          "name": "Blackwell"
+        },
+        {
+          "leg_id": "ALL000006",
+          "name": "Brewbaker"
+        },
+        {
+          "leg_id": "ALL000183",
+          "name": "Melson"
+        },
+        {
+          "leg_id": "ALL000029",
+          "name": "Smith"
+        },
+        {
+          "leg_id": "ALL000035",
+          "name": "Williams"
+        }
+      ],
+      "yes_count": 26,
+      "bill_chamber": "upper",
+      "motion": "Motion to Read a Third Time and Pass adopted Roll Call 1032",
+      "chamber": "upper",
+      "bill_id": "ALB00011556"
+    }
+  ],
+  "documents": [],
+  "title": "Teachers' Retirement System, retirees, one-time lump sum retirement payment in December 2017, approp. from Edu. Trust Fund in Oct. 2017.",
+  "alternate_titles": [],
+  "companions": [],
+  "all_ids": [
+    "ALB00011556"
+  ],
+  "state": "al",
+  "subjects": [
+    "Labor and Employment",
+    "Education"
+  ],
+  "type": [
+    "bill"
+  ],
+  "scraped_subjects": [
+    "Teachers' Retirement System"
+  ],
+  "sponsors": [
+    {
+      "leg_id": "ALL000010",
+      "type": "primary",
+      "name": "Dial"
+    }
+  ],
+  "updated_at": "2017-05-23 05:54:51",
+  "action_dates": {
+    "passed_upper": "2017-05-11 04:00:00",
+    "passed_lower": null,
+    "last": "2017-05-11 04:00:00",
+    "signed": null,
+    "first": "2017-02-07 05:00:00"
+  },
+  "created_at": "2017-01-02 06:37:53",
+  "versions": [
+    {
+      "mimetype": "application/pdf",
+      "url": "http://alisondb.legislature.state.al.us/ALISON/SearchableInstruments/2017rs/PrintFiles/SB3-int.pdf",
+      "+date": null,
+      "doc_id": "ALD00029804",
+      "name": "Introduced"
+    },
+    {
+      "mimetype": "application/pdf",
+      "url": "http://alisondb.legislature.state.al.us/ALISON/SearchableInstruments/2017rs/PrintFiles/SB3-eng.pdf",
+      "+date": null,
+      "doc_id": "ALD00030560",
+      "name": "Engrossed"
+    }
+  ],
+  "chamber": "upper",
+  "alternate_bill_ids": [],
+  "bill_id": "SB 3"
+}

@@ -67,7 +67,6 @@ def update_bill(localid, sourceid):
         )
 
 
-
 @shared_task
 def update_state_legislators(state):
     humans = _list_state_legislators(state)
@@ -117,7 +116,11 @@ def _list_state_bills(state, chamber):
     url = "%s/bills/" % OPEN_STATES_URL
 
     r = get(url,
-            params={"state": state, "chamber": chamber, "search_window": "session"},
+            params={
+                "state": state,
+                "chamber": chamber,
+                "search_window": "session"
+            },
             headers=HEADERS
             )
     return r.json()

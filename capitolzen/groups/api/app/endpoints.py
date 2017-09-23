@@ -5,7 +5,7 @@ from rest_framework import status, exceptions
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
-from config.filters import OrganizationFilter
+from common.utils.filters.sets import OrganizationFilterSet
 from config.viewsets import OwnerBasedViewSet
 from capitolzen.proposals.models import Bill, Wrapper
 from capitolzen.proposals.api.app.serializers import BillSerializer
@@ -16,13 +16,15 @@ from capitolzen.groups.api.app.serializers import (
 )
 
 
-class GroupFilter(OrganizationFilter):
-    class Meta(OrganizationFilter.Meta):
+class GroupFilter(OrganizationFilterSet):
+    title = filters.CharFilter(
+        name='title',
+        label='Title',
+        help_text='Title of a Group',
+        lookup_expr='exact')
+
+    class Meta(OrganizationFilterSet.Meta):
         model = Group
-        fields = {
-            **OrganizationFilter.Meta.fields,
-            'title': ['exact'],
-        }
 
 
 class GroupViewSet(OwnerBasedViewSet):
@@ -75,23 +77,24 @@ class GroupViewSet(OwnerBasedViewSet):
                          "message": "Bill(s) added", "bills": bill_list})
 
 
-class ReportFilter(OrganizationFilter):
+class ReportFilter(OrganizationFilterSet):
     user = filters.CharFilter(
         name='user',
         label='User',
         method='filter_user',
     )
 
+    title = filters.CharFilter(
+        name='title',
+        label='Title',
+        help_text='Title of a Report',
+        lookup_expr='exact')
+
     def filter_user(self, queryset, name, value):
         return queryset.filter(user__username=value)
 
-    class Meta(OrganizationFilter.Meta):
+    class Meta(OrganizationFilterSet.Meta):
         model = Group
-        fields = {
-            **OrganizationFilter.Meta.fields,
-            'title': ['exact'],
-            'user': ['exact'],
-        }
 
 
 class ReportViewSet(OwnerBasedViewSet):

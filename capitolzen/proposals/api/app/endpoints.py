@@ -1,12 +1,14 @@
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 
 from django.conf import settings
+from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework_elasticsearch import es_views, es_pagination, es_filters
 
+from common.utils.filters.sets import OrganizationFilterSet, BaseModelFilterSet
+from common.utils.filters.filters import UUIDInFilter
 
 from config.viewsets import OwnerBasedViewSet, GenericBaseViewSet
-from config.filters import OrganizationFilter, BaseModelFilter
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
 from capitolzen.proposals.documents import BillDocument
 from capitolzen.proposals.api.app.serializers import (
@@ -15,15 +17,16 @@ from capitolzen.proposals.api.app.serializers import (
 )
 
 
-class BillFilter(BaseModelFilter):
+class BillFilter(BaseModelFilterSet):
+    state = filters.CharFilter(
+        name='state',
+        lookup_expr='exact',
+        label='State',
+        help_text='State in which a Bill is located'
+    )
 
-    class Meta(BaseModelFilter.Meta):
+    class Meta(BaseModelFilterSet.Meta):
         model = Bill
-
-        fields = {
-            **BaseModelFilter.Meta.fields,
-            'state': ['exact'],
-        }
 
 
 class BillViewSet(mixins.RetrieveModelMixin,
@@ -83,16 +86,49 @@ class CommitteeViewSet(mixins.RetrieveModelMixin,
     ordering = ('state', 'name')
 
 
-class WrapperFilter(OrganizationFilter):
-    class Meta(OrganizationFilter.Meta):
+class WrapperFilter(OrganizationFilterSet):
+    state = filters.CharFilter(
+        name='state',
+        lookup_expr='exact',
+        label='State',
+        method='filter_bill_by_state',
+        help_text='State in which a Bill is located'
+    )
+
+    state_id = filters.CharFilter(
+        name='state_id',
+        lookup_expr='exact',
+        label='State ID',
+        method='filter_bill_by_state_id',
+        help_text='ID of State in which a Bill is located'
+    )
+
+    bill_id = UUIDInFilter(
+        name='bill_id',
+        lookup_expr='exact',
+        label='Bill ID',
+        method='filter_bill_by_id',
+        help_text='ID of Bill'
+    )
+
+    group = filters.CharFilter(
+        name='group',
+        lookup_expr='exact',
+        label='Group',
+        help_text='Group associated with the Bill'
+    )
+
+    def filter_bill_by_state(self, queryset, name, value):
+        return queryset.filter(bill__state=value)
+
+    def filter_bill_by_state_id(self, queryset, name, value):
+        return queryset.filter(bill__state_id=value)
+
+    def filter_bill_by_id(self, queryset, name, value):
+        return queryset.filter(bill__id=value)
+
+    class Meta(OrganizationFilterSet.Meta):
         model = Wrapper
-        fields = {
-            **OrganizationFilter.Meta.fields,
-            'bill__state': ['exact'],
-            'bill__state_id': ['exact'],
-            'bill__id': ['exact'],
-            'group': ['exact']
-        }
 
 
 class WrapperViewSet(OwnerBasedViewSet):
