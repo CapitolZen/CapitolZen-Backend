@@ -67,7 +67,8 @@ LOCAL_APPS = [
     'capitolzen.users.apps.UsersConfig',
     'capitolzen.organizations.apps.OrganizationsConfig',
     'capitolzen.groups.apps.GroupsConfig',
-    'capitolzen.proposals.apps.ProposalsConfig'
+    'capitolzen.proposals.apps.ProposalsConfig',
+    'capitolzen.es_ingest.apps.ESIngestConfig'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + ADMIN_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -374,9 +375,9 @@ API_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 # ------------------------------------------------------------------------------
 INSTALLED_APPS += ('capitolzen.tasks.celery.CeleryConfig',)
 CELERY_BROKER_URL = '{0}/{1}'.format(
-    env('REDIS_URL', default='redis://127.0.0.1:6379'), 1)
+    env('REDIS_URL', default='redis://redis:6379'), 1)
 CELERY_RESULT_BACKEND = '{0}/{1}'.format(
-    env('REDIS_URL', default='redis://127.0.0.1:6379'), 1)
+    env('REDIS_URL', default='redis://redis:6379'), 1)
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'

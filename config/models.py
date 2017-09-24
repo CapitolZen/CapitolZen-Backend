@@ -7,17 +7,23 @@ from django.contrib.postgres.fields import JSONField
 from thorn import ModelEvent
 
 
-class AbstractBaseModel(models.Model):
-    """
-    An abstract model class used for all models.
-    """
+class AbstractNoIDModel(models.Model):
     # We do not use auto_now_add or auto_now because they cannot be overwritten
     # in tests and some core devs have a thread open to eliminate them
     # https://code.djangoproject.com/ticket/22995
     created = models.DateTimeField(default=timezone.now, db_index=True)
     modified = models.DateTimeField(db_index=True)
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     metadata = JSONField(blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+
+class AbstractBaseModel(AbstractNoIDModel):
+    """
+    An abstract model class used for all models.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
     class Meta:
         abstract = True

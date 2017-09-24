@@ -11,10 +11,10 @@ from django.utils.translation import ugettext_lazy as _
 
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
-from config.models import AbstractBaseModel
+from config.models import AbstractNoIDModel, AbstractBaseModel
 
 
-class User(AbstractUser, AbstractBaseModel):
+class User(AbstractUser, AbstractNoIDModel):
     first_name = None
     last_name = None
 
