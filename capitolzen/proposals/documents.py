@@ -1,8 +1,10 @@
+import base64
+import requests
+
 from elasticsearch_dsl import analyzer, Keyword
 from django_elasticsearch_dsl import Index, fields, DocType
 
 from capitolzen.proposals.models import Bill
-
 
 html_strip = analyzer(
     'html_strip',
@@ -22,37 +24,13 @@ bill.settings(
 @bill.doc_type
 class BillDocument(DocType):
     id = fields.String()
-    current_committee = fields.ObjectField(properties={
-        'name': fields.StringField(),
-        'state': fields.StringField(),
-        'chamber': fields.StringField(),
-        'remote_id': fields.StringField(),
-        'parent_id': fields.StringField(),
-        'subcommittee': fields.StringField()
-    })
-    sponsor = fields.ObjectField(properties={
-        'remote_id': fields.StringField(),
-        'state': fields.StringField(),
-        'active': fields.BooleanField(),
-        'chamber': fields.StringField(),
-        'party': fields.StringField(),
-        'district': fields.StringField(),
-        'email': fields.StringField(),
-        'url': fields.StringField(),
-        'photo_url': fields.StringField(),
-        'first_name': fields.StringField(),
-        'middle_name': fields.StringField(),
-        'last_name': fields.StringField(),
-        'suffixes': fields.StringField()
-    })
-    history = fields.ObjectField()
+    sponsors = fields.NestedField()
     action_dates = fields.ObjectField()
-    cosponsors = fields.ObjectField()
     companions = fields.NestedField()
-    categories = fields.NestedField()
     votes = fields.ObjectField()
     sources = fields.ObjectField()
     documents = fields.ObjectField()
+    versions = fields.NestedField()
     bill_text = fields.TextField(
         analyzer=html_strip,
         fields={'raw': Keyword()}
@@ -81,3 +59,21 @@ class BillDocument(DocType):
     def prepare_summary(self, instance):
         # do something here to generate a human readable summary
         return instance.summary
+
+    def prepare(self, instance):
+        parent = super()
+        response = requests.get(instance.current_version)
+        if 200 >= response.status_code < 300:
+            content = response.content
+        else:
+            return parent
+        self.connection.update(
+            index=str(self._doc_type.index),
+            doc_type=self._doc_type.mapping.doc_type,
+            id=instance.pk,
+            pipeline='attachment',
+            body={
+                'data': base64.b64encode(content).decode('ascii')
+            }
+        )
+        return parent

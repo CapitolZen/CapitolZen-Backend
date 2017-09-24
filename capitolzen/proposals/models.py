@@ -25,6 +25,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
     status = models.TextField(null=True)
     current_committee = models.ForeignKey('proposals.Committee', null=True)
     sponsor = models.ForeignKey('proposals.Legislator', null=True)
+    sponsors = JSONField(default=dict, blank=True)
     cosponsors = JSONField(default=list, null=True)
     title = models.TextField()
     companions = ArrayField(
@@ -39,6 +40,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
     summary = models.TextField(blank=True, null=True)
     sources = JSONField(default=dict, blank=True)
     documents = JSONField(default=dict, blank=True)
+    current_version = models.URLField(blank=True)
     bill_versions = JSONField(default=dict, blank=True)
     bill_text = models.TextField(null=True)
 
@@ -59,7 +61,8 @@ class Bill(AbstractBaseModel, MixinExternalData):
 
     @property
     def remote_url(self):
-        source = next((l for l in self.sources if l.get('url') is not False), None)
+        source = next((l for l in self.sources if l.get('url') is not False),
+                      None)
         if not source:
             return False
         return source.get('url', False)

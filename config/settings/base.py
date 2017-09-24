@@ -384,15 +384,15 @@ CELERY_TIMEZONE = 'America/Detroit'
 
 CELERY_BEAT_SCHEDULE = {
     'import_committee': {
-        'task': 'capitolzen.proposals.tasks.update_state_committees',
+        'task': 'capitolzen.proposals.tasks.spawn_committee_updates',
         'schedule': crontab(minute=0, hour=0, day_of_week='sun')
     },
     'import_legislators': {
-        'task': 'capitolzen.proposals.tasks.update_state_legislators',
+        'task': 'capitolzen.proposals.tasks.spawn_legislator_updates',
         'schedule': crontab(minute=0, hour=3, day_of_week='sat')
     },
     'import_bills': {
-        'task': 'capitolzen.proposals.tasks.update_all_bills',
+        'task': 'capitolzen.proposals.tasks.spawn_bill_updates',
         'schedule': crontab(minute=0, hour='*/6')
     }
 }

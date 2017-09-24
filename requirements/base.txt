@@ -58,7 +58,3 @@ django-rest-elasticsearch==0.3.2
 django-elasticsearch-dsl==0.2.0
 django-rest-swagger==2.1.2
 thorn==1.5.0
-
-#
-# Other
-beautifulsoup4==4.6.0
