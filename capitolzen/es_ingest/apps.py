@@ -9,6 +9,9 @@ class ESIngestConfig(AppConfig):
     name = 'capitolzen.es_ingest'
 
     def ready(self):
+        # This needs to be in it's own app because if we put it in an app
+        # with tasks it causes Celery to fail due to us using the ready
+        # function, which Celery also uses but in it's own area.
         try:
             # This will throw a lot of errors but will eventually succeed
             # after migrations and everything have run
