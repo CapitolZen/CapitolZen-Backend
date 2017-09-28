@@ -70,12 +70,14 @@ class CommitteeViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class WrapperFilter(FilterSet):
+    state_id = CharFilter(name='bill__state_id')
+    state = CharFilter(name='bill__state')
 
     class Meta:
         model = Wrapper
         fields = {
                     'organization': ['exact'],
-                    'group': ['in'],
+                    'group': ['exact'],
                     'position': ['exact'],
                     'summary': ['in'],
                     'starred': ['exact']

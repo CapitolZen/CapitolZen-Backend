@@ -1,4 +1,5 @@
 from rest_framework_json_api import serializers
+from rest_framework.serializers import ValidationError
 from rest_framework_json_api.relations import ResourceRelatedField
 from capitolzen.organizations.models import Organization
 from capitolzen.groups.models import Group
@@ -37,3 +38,14 @@ class WrapperSerializer(serializers.ModelSerializer):
     group = ResourceRelatedField(many=False, queryset=Group.objects)
     id = serializers.ReadOnlyField()
 
+    def create(self, validated_data):
+        print(validated_data)
+        bill = validated_data.get('bill')
+        group = validated_data.get('group')
+        print(bill.id)
+        print(group.id)
+        queryset = Wrapper.objects.filter(bill_id=bill.id, group_id=group.id)
+        print(queryset)
+        if queryset.exists():
+            raise ValidationError('Wrapper already exists for this data')
+        return Wrapper.objects.create(**validated_data)

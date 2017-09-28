@@ -1,5 +1,5 @@
 from json import loads
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet, CharFilter
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
@@ -12,10 +12,21 @@ from capitolzen.groups.tasks import generate_report, email_report
 from .serializers import GroupSerializer, ReportSerializer
 
 
-class GroupFilterBackend(DRYPermissionFiltersBase):
-    def filter_list_queryset(self, request, queryset, view):
-        # TODO Add filtering here
-        return queryset
+class GroupFilter(FilterSet):
+    without_bill = CharFilter(method='without_bill_filter')
+
+    def without_bill_filter(self, queryset, name, value):
+        return queryset.exclude(wrapper__bill__id=value)
+
+    class Meta:
+        model = Group
+        fields = [
+            'title',
+            'starred',
+            'organization',
+            'active',
+            'without_bill'
+        ]
 
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -53,7 +64,8 @@ class GroupViewSet(viewsets.ModelViewSet):
         return Response({"status_code": status.HTTP_200_OK, "message": "Bill(s) added", "bills": bill_list})
 
     permission_classes = (DRYPermissions,)
-    filter_backends = (GroupFilterBackend, DjangoFilterBackend)
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = GroupFilter
 
 
 class ReportViewSet(viewsets.ModelViewSet):
