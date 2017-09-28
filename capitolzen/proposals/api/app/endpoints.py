@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from json import loads
 from django.db.models import Q
 from rest_framework import viewsets, filters, status
@@ -16,6 +17,20 @@ class BillFilter(FilterSet):
 
     def sponsor_full_name(self, queryset, name, value):
         return queryset.filter(Q(sponsor__first_name__contains=value) | Q(sponsor__last_name__contains=value))
+
+    introduced_in = CharFilter(name='first', method='action_date_filter')
+    active_in = CharFilter(name='last', method='action_date_filter')
+
+    def action_date_filter(self, queryset, name, value):
+        today = datetime.today()
+        date_range = today - timedelta(days=int(value))
+        print(date_range)
+        params = {}
+        key = "action_dates__%s__range" % name
+        print(key)
+        params[key] = [str(date_range), str(today)]
+        print(params)
+        return queryset.filter(**params)
 
     class Meta:
         model = Bill
