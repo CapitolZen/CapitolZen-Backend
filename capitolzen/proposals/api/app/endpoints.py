@@ -24,12 +24,9 @@ class BillFilter(FilterSet):
     def action_date_filter(self, queryset, name, value):
         today = datetime.today()
         date_range = today - timedelta(days=int(value))
-        print(date_range)
         params = {}
         key = "action_dates__%s__range" % name
-        print(key)
         params[key] = [str(date_range), str(today)]
-        print(params)
         return queryset.filter(**params)
 
     class Meta:
