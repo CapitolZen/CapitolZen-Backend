@@ -18,10 +18,11 @@ class CongressionalManager(object):
     index = None
     cache_key = "%s-%s" % (index, state)
     cache_value = "updating"
-    url = "%s/%s/" % (domain, index)
+    url = None
 
     def __init__(self, state):
         self.state = state
+        self.url = "%s%s/" % (self.domain, self.index)
 
     def _time_convert(self, time):
         utc = UTC
@@ -60,7 +61,8 @@ class CongressionalManager(object):
         if cache.get(self.cache_key) is None:
             cache.set(self.cache_key, self.cache_value, None)
             for resource in self._get_remote_list():
-                self.update(None, resource['id'], **resource)
+                remote_id = resource.pop('id')
+                self.update(None, remote_id, resource)
             cache.delete(self.cache_key)
 
         return True
@@ -117,14 +119,26 @@ class BillManager(CongressionalManager):
         return full_list_of_bills
 
     def _get_remote_detail_response(self, identifier):
-        url = "%s%s/" % (self.url, identifier)
+        url = "%s%s/%s/" % (self.url, self.state, identifier)
         return get(url, headers=self.headers)
 
     def update(self, local_id, remote_id, resource_info):
+        resource_info.pop('bill_id')
+
+        bill_info = self._get_remote_detail(remote_id)
+        if bill_info.get('created_at'):
+            bill_info['created_at'] = self._time_convert(
+                bill_info.get('created_at')
+            )
+        if bill_info.get('updated_at'):
+            resource_info['updated_at'] = self._time_convert(
+                resource_info.pop('updated_at')
+            )
         bill, created = Bill.objects.get_or_create(
             remote_id=remote_id,
             defaults={
                 "state": self.state,
+                **bill_info
             }
         )
         if bill.modified < self._time_convert(resource_info['updated_at']) or \
@@ -140,7 +154,7 @@ class LegislatorManager(CongressionalManager):
     index = "legislators"
 
     def _get_remote_detail_response(self, identifier):
-        return get("%s%s/" % (self.url, identifier), headers=self.headers)
+        return get("%s%s" % (self.url, identifier), headers=self.headers)
 
     def _get_remote_list_response(self):
         return get(
@@ -150,7 +164,8 @@ class LegislatorManager(CongressionalManager):
 
     def update(self, local_id, remote_id, resource_info):
         legislator = Legislator.objects.get_or_create(
-            remote_id=remote_id
+            remote_id=remote_id,
+            **resource_info
         )
         source = self._get_remote_detail(remote_id)
         legislator.update_from_source(source)

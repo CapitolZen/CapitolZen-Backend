@@ -37,10 +37,11 @@ services:
       dockerfile: ./compose/django/Dockerfile-dev
     env_file:
       - .env
-    command: ["./utilities/wait-for-it.sh -t 90", "postgres:5432", "--", "/start-dev.sh"]
+    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch1:9200", "--", "/start-dev.sh"]
     depends_on:
       - postgres
       - mailhog
+      - elasticsearch1
     environment:
       - POSTGRES_USER=capitolzen
       - POSTGRES_PASSWORD=capitolzen
@@ -62,8 +63,10 @@ services:
       dockerfile: ./compose/django/Dockerfile-dev
     env_file:
       - .env
+    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch1:9200", "--", "/start-dev.sh"]
     depends_on:
       - postgres
+      - elasticsearch1
     environment:
       - POSTGRES_USER=capitolzen
       - POSTGRES_PASSWORD=capitolzen
@@ -87,11 +90,12 @@ services:
     depends_on:
      - postgres
      - redis
+     - elasticsearch1
     links:
       - postgres
       - redis
       - elasticsearch1
-    command: ["./utilities/wait-for-it.sh -t 90", "postgres:5432", "--", celery, -A, capitolzen.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
+    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch1:9200", "--", celery, -A, capitolzen.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
     volumes:
       - .:/app
 

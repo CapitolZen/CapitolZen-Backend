@@ -25,24 +25,26 @@ class Bill(AbstractBaseModel, MixinExternalData):
     status = models.TextField(null=True)
     current_committee = models.ForeignKey('proposals.Committee', null=True)
     sponsor = models.ForeignKey('proposals.Legislator', null=True)
-    sponsors = JSONField(default=dict, blank=True)
+    sponsors = JSONField(default=dict, blank=True, null=True)
     cosponsors = JSONField(default=list, null=True)
-    title = models.TextField()
+    title = models.TextField(null=True)
     companions = ArrayField(
-        blank=True, default=list,
+        blank=True, null=True, default=list,
         base_field=models.TextField(blank=True)
     )
     categories = ArrayField(
         models.TextField(blank=True),
         default=list
     )
-    votes = JSONField(default=dict, blank=True)
+    votes = JSONField(default=dict, blank=True, null=True)
     summary = models.TextField(blank=True, null=True)
-    sources = JSONField(default=dict, blank=True)
-    documents = JSONField(default=dict, blank=True)
-    current_version = models.URLField(blank=True)
-    bill_versions = JSONField(default=dict, blank=True)
+    sources = JSONField(default=dict, blank=True, null=True)
+    documents = JSONField(default=dict, blank=True, null=True)
+    current_version = models.URLField(blank=True, null=True)
+    bill_versions = JSONField(default=dict, blank=True, null=True)
     bill_text = models.TextField(null=True)
+    updated_at = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(null=True)
 
     # Properties
     @property
@@ -86,7 +88,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
         for key, value in props.items():
             setattr(self, value, source.get(key, None))
 
-        for sponsor in source['sponsors']:
+        for sponsor in source.get('sponsors', []):
             if sponsor.get('leg_id', False):
                 q = {"remote_id": sponsor['leg_id']}
             else:

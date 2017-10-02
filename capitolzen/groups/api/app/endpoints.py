@@ -1,5 +1,4 @@
 from json import loads
-
 from django_filters import rest_framework as filters
 from rest_framework import status, exceptions
 from rest_framework.decorators import detail_route, list_route
@@ -22,6 +21,33 @@ class GroupFilter(OrganizationFilterSet):
         label='Title',
         help_text='Title of a Group',
         lookup_expr='exact')
+
+    starred = filters.CharFilter(
+        name='starred',
+        label="Starred",
+        help_text="Starred Bills",
+        lookup_expr='exact'
+    )
+
+    organization = filters.CharFilter(
+        name="organization",
+        label="Organization",
+        help_text="Filter Groups based on Organziation"
+    )
+
+    active = filters.CharFilter(
+        name="active",
+        label="Active",
+        help_text="Filter Groups based on whether or not they are active"
+    )
+
+    without_bill = filters.CharFilter(
+        method='without_bill_filter',
+        help_text="Filter Groups on a Bill They Do Not Have"
+    )
+
+    def without_bill_filter(self, queryset, name, value):
+        return queryset.exclude(wrapper__bill__id=value)
 
     class Meta(OrganizationFilterSet.Meta):
         model = Group
@@ -112,7 +138,10 @@ class ReportViewSet(OwnerBasedViewSet):
     def perform_create(self, serializer):
         serializer.save()
         report = serializer.instance
-        generate_report(report)
+        try:
+            generate_report(report)
+        except Exception:
+            pass
 
     @detail_route(methods=['GET'])
     def url(self, request, pk):

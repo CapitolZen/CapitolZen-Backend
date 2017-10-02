@@ -62,6 +62,8 @@ class BillDocument(DocType):
 
     def prepare(self, instance):
         parent = super()
+        if not instance.current_version:
+            return parent
         response = requests.get(instance.current_version)
         if 200 >= response.status_code < 300:
             content = response.content

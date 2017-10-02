@@ -13,6 +13,11 @@ REPORT_FUNCTION = "capitolzen_search_reportify"
 @shared_task
 def generate_report(report):
     wrappers = Wrapper.objects.filter(group=report.group)
+    filters = report.filter
+    if filters:
+        filters = loads(filters)
+        wrappers = wrappers.filter(**filters)
+
     bill_list = normalize_data(wrappers)
     data = {
         "title": report.title,
@@ -31,7 +36,7 @@ def generate_report(report):
 
     layout = report.preferences.get('layout', False)
     if layout:
-        data['layout'] = layout['value']
+        data['layout'] = layout
 
     event = {
         "data": data,

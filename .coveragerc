@@ -1,5 +1,32 @@
 [run]
-include = downdraft/*
-omit = *migrations*, *tests*
+include = capitolzen/*
+omit =
+    *migrations*
+    *tests*
+    *__init__.py*
+    */settings/*
+    *wsgi.py*
+    *admin.py*
+    *sitemap.py*
+    *s3utils.py*
 plugins =
     django_coverage_plugin
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
+    except ImportError:
+    except JSONResponseError as e:
+    except(TypeError, IoError, BotoClientError, BotoServerError, AWSConnectionError, Exception) as e:
+    pass
+
+
+[html]
+directory = $CIRCLE_ARTIFACTS

@@ -33,7 +33,7 @@ docker-compose -f dev.yml run pycharm python manage.py
 
 **Running Tests**
 ```bash
-docker-compose -f dev.yml run pycharm python manage.py test --noinput
+docker-compose -f dev.yml run pycharm sh utilities/tests.sh
 ```
 
 **Rebuilding Search Index**:

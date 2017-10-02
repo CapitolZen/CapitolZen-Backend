@@ -1,0 +1,553 @@
+{
+  "actions": [
+    {
+      "date": "2017-01-11 05:00:00",
+      "action": "introduced by Representative Dan Lauwers",
+      "type": [
+        "bill:introduced"
+      ],
+      "related_entities": [],
+      "actor": "lower"
+    },
+    {
+      "related_entities": [],
+      "actor": "lower",
+      "action": "adopted",
+      "date": "2017-01-11 05:00:00",
+      "type": [
+        "bill:passed"
+      ],
+      "related_votes": [
+        "MIV00007784"
+      ]
+    },
+    {
+      "date": "2017-01-11 05:00:00",
+      "action": "Roll Call # 3 Yeas 108 Nays 0",
+      "type": [
+        "other"
+      ],
+      "related_entities": [],
+      "actor": "lower"
+    }
+  ],
+  "sources": [
+    {
+      "url": "http://legislature.mi.gov/doc.aspx?2017-HR-0003"
+    }
+  ],
+  "session": "2017-2018",
+  "id": "MIB00012114",
+  "votes": [
+    {
+      "sources": [
+        {
+          "url": "http://www.legislature.mi.gov/documents/2017-2018/Journal/House/htm/2017-HJ-01-11-001.htm"
+        }
+      ],
+      "session": "2017-2018",
+      "id": "MIV00007784",
+      "other_count": 0,
+      "state": "mi",
+      "+action": null,
+      "type": "other",
+      "no_count": 0,
+      "passed": true,
+      "yes_votes": [
+        {
+          "leg_id": "MIL000314",
+          "name": "Afendoulis"
+        },
+        {
+          "leg_id": "MIL000336",
+          "name": "Frederick"
+        },
+        {
+          "leg_id": "MIL000212",
+          "name": "Kesto"
+        },
+        {
+          "leg_id": "MIL000343",
+          "name": "Reilly"
+        },
+        {
+          "leg_id": "MIL000332",
+          "name": "Albert"
+        },
+        {
+          "leg_id": "MIL000270",
+          "name": "Garcia"
+        },
+        {
+          "leg_id": "MIL000249",
+          "name": "Kivela"
+        },
+        {
+          "leg_id": "MIL000351",
+          "name": "Rendon"
+        },
+        {
+          "leg_id": "MIL000338",
+          "name": "Alexander"
+        },
+        {
+          "leg_id": "MIL000283",
+          "name": "Gay-Dagnogo"
+        },
+        {
+          "leg_id": "MIL000201",
+          "name": "Kosowski"
+        },
+        {
+          "leg_id": "MIL000286",
+          "name": "Roberts"
+        },
+        {
+          "leg_id": "MIL000325",
+          "name": "Allor"
+        },
+        {
+          "leg_id": "MIL000271",
+          "name": "Geiss"
+        },
+        {
+          "leg_id": "MIL000363",
+          "name": "LaFave"
+        },
+        {
+          "leg_id": "MIL000190",
+          "name": "Robinson"
+        },
+        {
+          "leg_id": "MIL000187",
+          "name": "Banks"
+        },
+        {
+          "leg_id": "MIL000258",
+          "name": "Glenn"
+        },
+        {
+          "leg_id": "MIL000321",
+          "name": "LaGrand"
+        },
+        {
+          "leg_id": "MIL000277",
+          "name": "Runestad"
+        },
+        {
+          "leg_id": "MIL000300",
+          "name": "Barrett"
+        },
+        {
+          "leg_id": "MIL000151",
+          "name": "Graves"
+        },
+        {
+          "leg_id": "MIL000362",
+          "name": "LaSata"
+        },
+        {
+          "leg_id": "MIL000341",
+          "name": "Sabo"
+        },
+        {
+          "leg_id": "MIL000344",
+          "name": "Bellino"
+        },
+        {
+          "leg_id": "MIL000331",
+          "name": "Green"
+        },
+        {
+          "leg_id": "MIL000366",
+          "name": "Lasinski"
+        },
+        {
+          "leg_id": "MIL000356",
+          "name": "Santana"
+        },
+        {
+          "leg_id": "MIL000304",
+          "name": "Bizon"
+        },
+        {
+          "leg_id": "MIL000275",
+          "name": "Greig"
+        },
+        {
+          "leg_id": "MIL000236",
+          "name": "Lauwers"
+        },
+        {
+          "leg_id": "MIL000228",
+          "name": "Schor"
+        },
+        {
+          "leg_id": "MIL000327",
+          "name": "Brann"
+        },
+        {
+          "leg_id": "MIL000150",
+          "name": "Greimel"
+        },
+        {
+          "leg_id": "MIL000242",
+          "name": "Leonard"
+        },
+        {
+          "leg_id": "MIL000328",
+          "name": "Scott"
+        },
+        {
+          "leg_id": "MIL000232",
+          "name": "Brinks"
+        },
+        {
+          "leg_id": "MIL000323",
+          "name": "Griffin"
+        },
+        {
+          "leg_id": "MIL000267",
+          "name": "Leutheuser"
+        },
+        {
+          "leg_id": "MIL000285",
+          "name": "Sheppard"
+        },
+        {
+          "leg_id": "MIL000278",
+          "name": "Byrd"
+        },
+        {
+          "leg_id": "MIL000299",
+          "name": "Guerra"
+        },
+        {
+          "leg_id": "MIL000293",
+          "name": "Liberati"
+        },
+        {
+          "leg_id": "MIL000229",
+          "name": "Singh"
+        },
+        {
+          "leg_id": "MIL000350",
+          "name": "Calley"
+        },
+        {
+          "leg_id": "MIL000337",
+          "name": "Hammoud"
+        },
+        {
+          "leg_id": "MIL000365",
+          "name": "Lilly"
+        },
+        {
+          "leg_id": "MIL000335",
+          "name": "Sneller"
+        },
+        {
+          "leg_id": "MIL000342",
+          "name": "Camilleri"
+        },
+        {
+          "leg_id": "MIL000352",
+          "name": "Hauck"
+        },
+        {
+          "leg_id": "MIL000256",
+          "name": "Love"
+        },
+        {
+          "leg_id": "MIL000348",
+          "name": "Sowerby"
+        },
+        {
+          "leg_id": "MIL000273",
+          "name": "Canfield"
+        },
+        {
+          "leg_id": "MIL000329",
+          "name": "Hernandez"
+        },
+        {
+          "leg_id": "MIL000326",
+          "name": "Lower"
+        },
+        {
+          "leg_id": "MIL000308",
+          "name": "Tedder"
+        },
+        {
+          "leg_id": "MIL000291",
+          "name": "Chang"
+        },
+        {
+          "leg_id": "MIL000355",
+          "name": "Hertel"
+        },
+        {
+          "leg_id": "MIL000282",
+          "name": "Lucido"
+        },
+        {
+          "leg_id": "MIL000297",
+          "name": "Theis"
+        },
+        {
+          "leg_id": "MIL000311",
+          "name": "Chatfield"
+        },
+        {
+          "leg_id": "MIL000287",
+          "name": "Hoadley"
+        },
+        {
+          "leg_id": "MIL000324",
+          "name": "Marino"
+        },
+        {
+          "leg_id": "MIL000333",
+          "name": "VanderWall"
+        },
+        {
+          "leg_id": "MIL000292",
+          "name": "Chirkun"
+        },
+        {
+          "leg_id": "MIL000361",
+          "name": "Hoitenga"
+        },
+        {
+          "leg_id": "MIL000289",
+          "name": "Maturen"
+        },
+        {
+          "leg_id": "MIL000334",
+          "name": "VanSingel"
+        },
+        {
+          "leg_id": "MIL000364",
+          "name": "Clemente"
+        },
+        {
+          "leg_id": "MIL000353",
+          "name": "Hornberger"
+        },
+        {
+          "leg_id": "MIL000213",
+          "name": "McCready"
+        },
+        {
+          "leg_id": "MIL000345",
+          "name": "Vaupel"
+        },
+        {
+          "leg_id": "MIL000227",
+          "name": "Cochran"
+        },
+        {
+          "leg_id": "MIL000319",
+          "name": "Howell"
+        },
+        {
+          "leg_id": "MIL000309",
+          "name": "Miller"
+        },
+        {
+          "leg_id": "MIL000231",
+          "name": "VerHeulen"
+        },
+        {
+          "leg_id": "MIL000298",
+          "name": "Cole"
+        },
+        {
+          "leg_id": "MIL000214",
+          "name": "Howrylak"
+        },
+        {
+          "leg_id": "MIL000284",
+          "name": "Moss"
+        },
+        {
+          "leg_id": "MIL000239",
+          "name": "Victory"
+        },
+        {
+          "leg_id": "MIL000279",
+          "name": "Cox"
+        },
+        {
+          "leg_id": "MIL000129",
+          "name": "Hughes"
+        },
+        {
+          "leg_id": "MIL000280",
+          "name": "Neeley"
+        },
+        {
+          "leg_id": "MIL000294",
+          "name": "Webber"
+        },
+        {
+          "leg_id": "MIL000250",
+          "name": "Dianda"
+        },
+        {
+          "leg_id": "MIL000315",
+          "name": "Iden"
+        },
+        {
+          "leg_id": "MIL000358",
+          "name": "Noble"
+        },
+        {
+          "leg_id": "MIL000322",
+          "name": "Wentworth"
+        },
+        {
+          "leg_id": "MIL000044",
+          "name": "Durhal"
+        },
+        {
+          "leg_id": "MIL000266",
+          "name": "Inman"
+        },
+        {
+          "leg_id": "MIL000310",
+          "name": "Pagan"
+        },
+        {
+          "leg_id": "MIL000320",
+          "name": "Whiteford"
+        },
+        {
+          "leg_id": "MIL000349",
+          "name": "Elder"
+        },
+        {
+          "leg_id": "MIL000346",
+          "name": "Johnson"
+        },
+        {
+          "leg_id": "MIL000234",
+          "name": "Pagel"
+        },
+        {
+          "leg_id": "MIL000264",
+          "name": "Wittenberg"
+        },
+        {
+          "leg_id": "MIL000359",
+          "name": "Ellison"
+        },
+        {
+          "leg_id": "MIL000354",
+          "name": "Jones"
+        },
+        {
+          "leg_id": "MIL000340",
+          "name": "Peterson"
+        },
+        {
+          "leg_id": "MIL000207",
+          "name": "Yanez"
+        },
+        {
+          "leg_id": "MIL000218",
+          "name": "Faris"
+        },
+        {
+          "leg_id": "MIL000357",
+          "name": "Kahle"
+        },
+        {
+          "leg_id": "MIL000255",
+          "name": "Phelps"
+        },
+        {
+          "leg_id": "MIL000360",
+          "name": "Yaroch"
+        },
+        {
+          "leg_id": "MIL000339",
+          "name": "Farrington"
+        },
+        {
+          "leg_id": "MIL000243",
+          "name": "Kelly"
+        },
+        {
+          "leg_id": "MIL000330",
+          "name": "Rabhi"
+        },
+        {
+          "leg_id": "MIL000220",
+          "name": "Zemke"
+        }
+      ],
+      "date": "2017-01-11 05:00:00",
+      "no_votes": [],
+      "vote_id": "MIV00007784",
+      "other_votes": [],
+      "yes_count": 108,
+      "bill_chamber": "lower",
+      "motion": " Roll Call # 3 Yeas 108 Nays 0",
+      "chamber": "lower",
+      "bill_id": "MIB00012114"
+    }
+  ],
+  "documents": [],
+  "title": "A resolution to provide for the Clerk of the House of Representatives for the Ninety-ninth Legislature.",
+  "alternate_titles": [],
+  "companions": [],
+  "all_ids": [
+    "MIB00012114"
+  ],
+  "state": "mi",
+  "subjects": [],
+  "type": [
+    "resolution"
+  ],
+  "sponsors": [
+    {
+      "leg_id": "MIL000236",
+      "type": "primary",
+      "name": "Dan Lauwers"
+    },
+    {
+      "leg_id": "MIL000275",
+      "type": "cosponsor",
+      "name": "Christine Greig"
+    }
+  ],
+  "updated_at": "2017-05-22 06:30:15",
+  "action_dates": {
+    "passed_upper": null,
+    "passed_lower": "2017-01-11 05:00:00",
+    "last": "2017-01-11 05:00:00",
+    "signed": null,
+    "first": "2017-01-11 05:00:00"
+  },
+  "created_at": "2017-01-25 06:04:24",
+  "versions": [
+    {
+      "mimetype": "text/html",
+      "url": "http://www.legislature.mi.gov/documents/2017-2018/resolutionintroduced/House/htm/2017-HIR-0003.htm",
+      "+date": null,
+      "doc_id": "MID00042511",
+      "name": "House Introduced Resolution"
+    },
+    {
+      "mimetype": "text/html",
+      "url": "http://www.legislature.mi.gov/documents/2017-2018/resolutionadopted/House/htm/2017-HAR-0003.htm",
+      "+date": null,
+      "doc_id": "MID00042512",
+      "name": "House Adopted Resolution"
+    }
+  ],
+  "chamber": "lower",
+  "alternate_bill_ids": [],
+  "bill_id": "HR 3"
+}
