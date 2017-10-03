@@ -47,12 +47,8 @@ class CongressionalManager(object):
         if response is not None:
             try:
                 responsejson = response.json()
-                print('here')
-                print(responsejson)
                 return responsejson
             except ValueError as e:
-                print(e)
-                print(response.text)
                 return {}
         return {}
 
@@ -137,9 +133,7 @@ class BillManager(CongressionalManager):
             **bill_info
         })
         if not bill_info.is_valid():
-            print(bill_info.errors)
             return False
-        print(bill_info.data)
         if bill_info.data.get('created_at'):
             bill_info.data['created_at'] = self._time_convert(
                 bill_info.data.get('created_at')

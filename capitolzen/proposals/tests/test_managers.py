@@ -35,7 +35,7 @@ class TestBillManager(TestCase):
             m.return_value = json.load(data_file)
         self.assertEqual(
             len(self.manager(AVAILABLE_STATES[0].name)._get_remote_list()),
-            1208
+            3
         )
 
     @mock.patch('capitolzen.proposals.managers.BillManager._get_remote_list')
@@ -53,7 +53,7 @@ class TestBillManager(TestCase):
     @requests_mock.mock()
     def test_get_remote_detail(self, m):
         with open('capitolzen/proposals/tests/sample_data/bills/'
-                  'detail.json') as data_file:
+                  'MIB00012114.json') as data_file:
             m.get('%s%s/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
                   json=json.load(data_file), status_code=200)
         self.assertEqual(
@@ -78,5 +78,17 @@ class TestBillManager(TestCase):
         with open('capitolzen/proposals/tests/sample_data/bills/'
                   'list.json') as data_file:
             m.return_value = json.load(data_file)
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  'MIB00012114.json') as data_file:
+            m.get('%s%s/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
+                  json=json.load(data_file), status_code=200)
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  'MIB00013865.json') as data_file:
+            m.get('%s%s/MIB00013865/' % (settings.OPEN_STATES_URL, "bills"),
+                  json=json.load(data_file), status_code=200)
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  'MIB00013864.json') as data_file:
+            m.get('%s%s/MIB00013864/' % (settings.OPEN_STATES_URL, "bills"),
+                  json=json.load(data_file), status_code=200)
         self.manager(AVAILABLE_STATES[0].name).run()
-        self.assertEqual(Bill.objects.count(), 1208)
+        self.assertEqual(Bill.objects.count(), 3)

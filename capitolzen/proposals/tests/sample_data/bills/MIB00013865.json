@@ -1,0 +1,126 @@
+{
+  "actions": [
+    {
+      "date": "2017-09-26 04:00:00",
+      "action": "introduced by Representative Jim Lilly",
+      "type": [
+        "bill:introduced"
+      ],
+      "related_entities": [],
+      "actor": "lower"
+    },
+    {
+      "date": "2017-09-26 04:00:00",
+      "action": "read a first time",
+      "type": [
+        "bill:reading:1"
+      ],
+      "related_entities": [],
+      "actor": "lower"
+    },
+    {
+      "date": "2017-09-26 04:00:00",
+      "action": "referred to Committee on Elections and Ethics",
+      "type": [
+        "committee:referred"
+      ],
+      "related_entities": [],
+      "actor": "lower"
+    },
+    {
+      "date": "2017-09-27 04:00:00",
+      "action": "bill electronically reproduced 09/26/2017",
+      "type": [
+        "other"
+      ],
+      "related_entities": [],
+      "actor": "lower"
+    }
+  ],
+  "sources": [
+    {
+      "url": "http://legislature.mi.gov/doc.aspx?2017-HB-5012"
+    }
+  ],
+  "session": "2017-2018",
+  "id": "MIB00013865",
+  "votes": [],
+  "documents": [],
+  "title": "Elections; recounts; aggrieved candidate for purposes of recount; clarify. Amends secs. 862 & 879 of 1954 PA 116 (MCL 168.862 & 168.879).",
+  "alternate_titles": [],
+  "companions": [],
+  "all_ids": [
+    "MIB00013865"
+  ],
+  "state": "mi",
+  "subjects": [],
+  "type": [
+    "bill"
+  ],
+  "scraped_subjects": [
+    "Elections: recounts"
+  ],
+  "sponsors": [
+    {
+      "leg_id": "MIL000365",
+      "type": "primary",
+      "name": "Jim Lilly"
+    },
+    {
+      "leg_id": "MIL000239",
+      "type": "cosponsor",
+      "name": "Roger Victory"
+    },
+    {
+      "leg_id": "MIL000285",
+      "type": "cosponsor",
+      "name": "Jason Sheppard"
+    },
+    {
+      "leg_id": "MIL000334",
+      "type": "cosponsor",
+      "name": "Scott VanSingel"
+    },
+    {
+      "leg_id": "MIL000294",
+      "type": "cosponsor",
+      "name": "Michael Webber"
+    },
+    {
+      "leg_id": "MIL000350",
+      "type": "cosponsor",
+      "name": "Julie Calley"
+    },
+    {
+      "leg_id": "MIL000309",
+      "type": "cosponsor",
+      "name": "Aaron Miller"
+    },
+    {
+      "leg_id": "MIL000212",
+      "type": "cosponsor",
+      "name": "Klint Kesto"
+    }
+  ],
+  "updated_at": "2017-09-27 06:48:24",
+  "action_dates": {
+    "passed_upper": null,
+    "passed_lower": null,
+    "last": "2017-09-27 04:00:00",
+    "signed": null,
+    "first": "2017-09-26 04:00:00"
+  },
+  "created_at": "2017-09-27 06:48:24",
+  "versions": [
+    {
+      "mimetype": "text/html",
+      "url": "http://www.legislature.mi.gov/documents/2017-2018/billintroduced/House/htm/2017-HIB-5012.htm",
+      "+date": null,
+      "doc_id": "MID00047008",
+      "name": "House Introduced Bill"
+    }
+  ],
+  "chamber": "lower",
+  "alternate_bill_ids": [],
+  "bill_id": "HB 5012"
+}
