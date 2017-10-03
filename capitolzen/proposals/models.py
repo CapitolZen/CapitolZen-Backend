@@ -21,7 +21,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
     history = JSONField(default=dict, blank=True, null=True)
     action_dates = JSONField(default=dict, blank=True, null=True)
     chamber = models.CharField(max_length=255, null=True)
-    type = models.CharField(max_length=255, null=True)
+    type = JSONField(default=list, max_length=255, null=True)
     status = models.TextField(null=True)
     current_committee = models.ForeignKey('proposals.Committee', null=True)
     sponsor = models.ForeignKey('proposals.Legislator', null=True)
@@ -182,7 +182,7 @@ class Committee(AbstractBaseModel, MixinExternalData):
     name = models.CharField(max_length=255)
     state = models.CharField(max_length=255)
     chamber = models.CharField(max_length=255)
-    remote_id = models.CharField(max_length=255)
+    remote_id = models.CharField(max_length=255, db_index=True)
     parent_id = models.CharField(max_length=255, null=True, blank=True)
     subcommittee = models.CharField(max_length=255, null=True, blank=True)
 

@@ -7,11 +7,13 @@ from django.core.cache import cache
 
 from capitolzen.proposals.models import Legislator
 from capitolzen.proposals.models import Bill, Committee
+from capitolzen.proposals.api.app.serializers import BillSerializer
 
 
 class CongressionalManager(object):
     headers = {
-        "X-API-KEY": settings.OPEN_STATES_KEY
+        "X-API-KEY": settings.OPEN_STATES_KEY,
+        'content-type': 'application/json'
     }
     domain = settings.OPEN_STATES_URL
     state = None
@@ -44,8 +46,13 @@ class CongressionalManager(object):
         response = self._get_remote_detail_response(identifier)
         if response is not None:
             try:
-                return response.json()
-            except ValueError:
+                responsejson = response.json()
+                print('here')
+                print(responsejson)
+                return responsejson
+            except ValueError as e:
+                print(e)
+                print(response.text)
                 return {}
         return {}
 
@@ -119,26 +126,33 @@ class BillManager(CongressionalManager):
         return full_list_of_bills
 
     def _get_remote_detail_response(self, identifier):
-        url = "%s%s/%s/" % (self.url, self.state, identifier)
+        url = "%s%s/" % (self.url, identifier)
         return get(url, headers=self.headers)
 
     def update(self, local_id, remote_id, resource_info):
-        resource_info.pop('bill_id')
-
         bill_info = self._get_remote_detail(remote_id)
-        if bill_info.get('created_at'):
-            bill_info['created_at'] = self._time_convert(
-                bill_info.get('created_at')
+        bill_info['bill_versions'] = bill_info.pop('versions')
+        bill_info = BillSerializer(data={
+            'remote_id': remote_id,
+            **bill_info
+        })
+        if not bill_info.is_valid():
+            print(bill_info.errors)
+            return False
+        print(bill_info.data)
+        if bill_info.data.get('created_at'):
+            bill_info.data['created_at'] = self._time_convert(
+                bill_info.data.get('created_at')
             )
-        if bill_info.get('updated_at'):
-            resource_info['updated_at'] = self._time_convert(
-                resource_info.pop('updated_at')
+        if bill_info.data.get('updated_at'):
+            bill_info.data['updated_at'] = self._time_convert(
+                bill_info.data.get('updated_at')
             )
         bill, created = Bill.objects.get_or_create(
             remote_id=remote_id,
             defaults={
                 "state": self.state,
-                **bill_info
+                **bill_info.data
             }
         )
         if bill.modified < self._time_convert(resource_info['updated_at']) or \

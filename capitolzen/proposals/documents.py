@@ -31,6 +31,7 @@ class BillDocument(DocType):
     sources = fields.ObjectField()
     documents = fields.ObjectField()
     versions = fields.NestedField()
+    type = fields.NestedField()
     bill_text = fields.TextField(
         analyzer=html_strip,
         fields={'raw': Keyword()}
@@ -47,7 +48,6 @@ class BillDocument(DocType):
             'remote_id',
             'session',
             'chamber',
-            'type',
             'status',
             'title',
             'summary',
@@ -69,13 +69,21 @@ class BillDocument(DocType):
             content = response.content
         else:
             return parent
-        self.connection.update(
+        doc_exists = self.connection.exists(
             index=str(self._doc_type.index),
             doc_type=self._doc_type.mapping.doc_type,
-            id=instance.pk,
-            pipeline='attachment',
-            body={
-                'data': base64.b64encode(content).decode('ascii')
-            }
+            id=instance.pk
         )
+        if not doc_exists:
+            # TODO need to handle updated versions and whether or not
+            # we want to update the bill or append
+            self.connection.create(
+                index=str(self._doc_type.index),
+                doc_type=self._doc_type.mapping.doc_type,
+                id=instance.pk,
+                pipeline='attachment',
+                body={
+                    'data': base64.b64encode(content).decode('ascii')
+                }
+            )
         return parent

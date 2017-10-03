@@ -54,7 +54,7 @@ class TestBillManager(TestCase):
     def test_get_remote_detail(self, m):
         with open('capitolzen/proposals/tests/sample_data/bills/'
                   'detail.json') as data_file:
-            m.get('%s%s/MI/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
+            m.get('%s%s/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
                   json=json.load(data_file), status_code=200)
         self.assertEqual(
             len(self.manager(AVAILABLE_STATES[0].name)._get_remote_detail(
@@ -64,7 +64,7 @@ class TestBillManager(TestCase):
 
     @requests_mock.mock()
     def test_get_remote_detail_no_data(self, m):
-        m.get('%s%s/MI/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
+        m.get('%s%s/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
               json={}, status_code=200)
         self.assertEqual(
             self.manager(AVAILABLE_STATES[0].name)._get_remote_detail(
