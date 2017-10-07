@@ -14,7 +14,13 @@ class UserSerializer(serializers.ModelSerializer):
         source='organizations_organization'
     )
 
-    username = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all())])
+    username = serializers.EmailField(
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message="Email address is already in use",
+            )]
+    )
 
     class Meta:
         model = User
