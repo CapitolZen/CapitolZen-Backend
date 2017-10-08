@@ -1,12 +1,11 @@
-from datetime import datetime
-from pytz import UTC
 from requests import get
 
 from django.conf import settings
 from django.core.cache import cache
 
+from capitolzen.proposals.utils import time_convert
 from capitolzen.proposals.models import Legislator
-from capitolzen.proposals.models import Bill, Committee
+from capitolzen.proposals.models import Committee
 from capitolzen.proposals.api.app.serializers import BillSerializer
 
 
@@ -25,10 +24,6 @@ class CongressionalManager(object):
     def __init__(self, state):
         self.state = state
         self.url = "%s%s/" % (self.domain, self.index)
-
-    def _time_convert(self, time):
-        utc = UTC
-        return utc.localize(datetime.strptime(time, '%Y-%m-%d %I:%M:%S'))
 
     def _get_remote_detail_response(self, identifier):
         return None
@@ -91,7 +86,7 @@ class CommitteeManager(CongressionalManager):
                 'parent_id': resource_info['parent_id']
             }
         )
-        if committee.modified < self._time_convert(resource_info['updated_at']):
+        if committee.modified < time_convert(resource_info['updated_at']):
             committee.name = resource_info['committee']
             committee.subcommittee = resource_info.get('subcommittee', None)
             committee.save()
@@ -127,35 +122,15 @@ class BillManager(CongressionalManager):
 
     def update(self, local_id, remote_id, resource_info):
         bill_info = self._get_remote_detail(remote_id)
-        bill_info['bill_versions'] = bill_info.pop('versions')
+        if bill_info.get('versions'):
+            bill_info['bill_versions'] = bill_info.pop('versions')
         bill_info = BillSerializer(data={
             'remote_id': remote_id,
             **bill_info
         })
-        if not bill_info.is_valid():
-            return False
-        if bill_info.data.get('created_at'):
-            bill_info.data['created_at'] = self._time_convert(
-                bill_info.data.get('created_at')
-            )
-        if bill_info.data.get('updated_at'):
-            bill_info.data['updated_at'] = self._time_convert(
-                bill_info.data.get('updated_at')
-            )
-        bill, created = Bill.objects.get_or_create(
-            remote_id=remote_id,
-            defaults={
-                "state": self.state,
-                **bill_info.data
-            }
-        )
-        if bill.modified < self._time_convert(resource_info['updated_at']) or \
-                created:
-            source = self._get_remote_detail(bill.remote_id)
-            bill.update_from_source(source)
-            if bill.bill_versions:
-                bill.current_version = bill.bill_versions[-1].get('url')
-            bill.save()
+        bill_info.is_valid(raise_exception=True)
+        bill_info.save()
+        return bill_info
 
 
 class LegislatorManager(CongressionalManager):

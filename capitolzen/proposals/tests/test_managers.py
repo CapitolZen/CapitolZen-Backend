@@ -92,3 +92,5 @@ class TestBillManager(TestCase):
                   json=json.load(data_file), status_code=200)
         self.manager(AVAILABLE_STATES[0].name).run()
         self.assertEqual(Bill.objects.count(), 3)
+        # TODO add check to see if count of docs in index is 3
+        # self.assertEqual()
