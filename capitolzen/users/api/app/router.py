@@ -7,7 +7,7 @@ router = routers.SimpleRouter()
 router.register(r'users', UserViewSet, base_name="users")
 
 urlpatterns = [
-    url(r'password', PasswordResetViewSet.as_view()),
+    url(r'^password/$', PasswordResetViewSet.as_view()),
 ]
 
 urlpatterns += router.urls

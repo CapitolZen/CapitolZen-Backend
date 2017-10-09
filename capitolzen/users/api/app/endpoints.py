@@ -5,14 +5,14 @@ from dry_rest_permissions.generics import DRYPermissionFiltersBase
 from dry_rest_permissions.generics import DRYPermissions
 from rest_framework import viewsets
 from rest_framework.decorators import list_route, detail_route
-from rest_framework.exceptions import NotAuthenticated, NotFound
+from rest_framework.exceptions import NotAuthenticated, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from capitolzen.organizations.models import Organization
 from capitolzen.users.api.app.serializers import UserSerializer
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
-from capitolzen.users.models import User, Notification
+from capitolzen.users.models import User
 from rest_framework import status
 
 
@@ -20,8 +20,6 @@ class UserFilterBackend(DRYPermissionFiltersBase):
     """
     -- Don't show any users to anon
     -- Only show users to users who are in the current organization.
-
-
     """
 
     def filter_list_queryset(self, request, queryset, view):
@@ -72,6 +70,26 @@ class UserViewSet(viewsets.ModelViewSet):
         organization_serializer.save()
         organization = organization_serializer.instance
         organization.add_user(user)
+        return Response({"status": status.HTTP_200_OK})
+
+    @detail_route(methods=['POST'])
+    def change_password(self, request, id=None):
+        """
+        Change Password for an already authenticated user.
+        :param request:
+        :param pk:
+        :return:
+        """
+        user = self.get_object()
+        if not user.check_password(request.data.get('current_password')):
+            raise ValidationError(detail="Current password is not correct")
+
+        if request.data.get('password') != request.data.get('confirm_password'):
+            raise ValidationError(detail="Password and Confirm Password should be the same")
+
+        from pprint import pprint
+        pprint(request.data)
+
         return Response({"status": status.HTTP_200_OK})
 
     queryset = User.objects.all()

@@ -60,25 +60,44 @@ class User(AbstractUser, TimeStampedModel):
     @staticmethod
     @allow_staff_or_superuser
     def has_read_permission(request):
+        if request.user.is_anonymous:
+            return False
+
         return True
+
+    def has_object_read_permission(self, request):
+        return request.user.id == self.id
 
     @staticmethod
     @allow_staff_or_superuser
     def has_write_permission(request):
+        if request.user.is_anonymous:
+            return False
+
         return True
+
+    def has_object_write_permission(self, request):
+        return request.user.id == self.id
+
 
     @staticmethod
     def has_create_permission(request):
         return False
 
-    def has_object_read_permission(self, request):
-        return request.user.id == self.id
-
-    def has_object_write_permission(self, request):
-        return request.user.id == self.id
-
     def has_object_create_permission(self, request):
         return False
+
+    @staticmethod
+    def has_change_password_permission(request):
+        if request.user.is_anonymous:
+            return False
+
+        return True
+
+
+    def has_object_change_password_permission(self, request):
+        return request.user.id == self.id
+
 
 
 class Notification(AbstractBaseModel):
