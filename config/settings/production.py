@@ -1,13 +1,3 @@
-"""
-Production Configurations
-
-- Use Amazon's S3 for storing static files and uploaded media
-- Use mailgun to send emails
-- Use Redis for cache
-
-
-"""
-
 from boto.s3.connection import OrdinaryCallingFormat
 
 
@@ -83,36 +73,6 @@ CACHEOPS_REDIS = '{0}/{1}'.format(env('CACHE_APP_OPCACHE_URL',
 BROKER_URL = '{0}/{1}'.format(env('CACHE_APP_CELERY_URL', default='redis://127.0.0.1:6379'), 0)
 CELERY_RESULT_BACKEND = '{0}/{1}'.format(env('CACHE_APP_CELERY_URL', default='redis://127.0.0.1:6379'), 0)
 
-# STORAGE CONFIGURATION
-# ------------------------------------------------------------------------------
-# Uploaded Media Files
-# ------------------------
-# See: http://django-storages.readthedocs.io/en/latest/index.html
-INSTALLED_APPS += ['storages', ]
-
-AWS_ACCESS_KEY_ID = env('AWS_ACCESSID')
-AWS_SECRET_ACCESS_KEY = env('AWS_SECRETKEY')
-AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
-AWS_AUTO_CREATE_BUCKET = True
-AWS_QUERYSTRING_AUTH = False
-AWS_S3_CALLING_FORMAT = OrdinaryCallingFormat()
-
-# AWS cache settings, don't change unless you know what you're doing:
-AWS_EXPIRY = 60 * 60 * 24 * 7
-
-# TODO See: https://github.com/jschneier/django-storages/issues/47
-# Revert the following and use str after the above-mentioned bug is fixed in
-# either django-storage-redux or boto
-control = 'max-age=%d, s-maxage=%d, must-revalidate' % (AWS_EXPIRY, AWS_EXPIRY)
-AWS_HEADERS = {
-    'Cache-Control': bytes(control, encoding='latin-1')
-}
-
-# URL that handles the media served from MEDIA_ROOT, used for managing
-# stored files.
-MEDIA_URL = 'https://s3.amazonaws.com/%s/' % AWS_STORAGE_BUCKET_NAME
-
-
 # Static Assets
 # ------------------------
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -125,7 +85,7 @@ EMAIL_BACKEND = "anymail.backends.sparkpost.EmailBackend"
 ANYMAIL = {
     "SPARKPOST_API_KEY": SPARKPOST_KEY,
 }
-DEFAULT_FROM_EMAIL = "donald@capitolzen.com"
+DEFAULT_FROM_EMAIL = "hello@capitolzen.com"
 
 
 # TEMPLATE CONFIGURATION
