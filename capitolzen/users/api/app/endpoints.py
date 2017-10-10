@@ -1,18 +1,18 @@
-from base64 import b64decode
-from json import loads
 from django_filters.rest_framework import DjangoFilterBackend
 from dry_rest_permissions.generics import DRYPermissionFiltersBase
 from dry_rest_permissions.generics import DRYPermissions
 from rest_framework import viewsets
 from rest_framework.decorators import list_route, detail_route
-from rest_framework.exceptions import NotAuthenticated, NotFound
+from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from capitolzen.organizations.models import Organization
-from capitolzen.users.api.app.serializers import UserSerializer
-from capitolzen.organizations.api.app.serializers import OrganizationSerializer
-from capitolzen.users.models import User, Notification
+from capitolzen.users.api.app.serializers import (UserSerializer,
+                                                  ChangePasswordSerializer,
+                                                  RegistrationSerializer,
+                                                  ResetPasswordRequestSerializer,
+                                                  ResetPasswordSerializer)
+from capitolzen.users.models import User
 from rest_framework import status
 
 
@@ -20,8 +20,6 @@ class UserFilterBackend(DRYPermissionFiltersBase):
     """
     -- Don't show any users to anon
     -- Only show users to users who are in the current organization.
-
-
     """
 
     def filter_list_queryset(self, request, queryset, view):
@@ -35,92 +33,102 @@ class UserFilterBackend(DRYPermissionFiltersBase):
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-
+    Catchall user endpoint.
     """
 
     @list_route(methods=['GET'])
     def current(self, request):
+        """
+        Return the currently logged in user.
+        :param request:
+        :return:
+        """
         return Response(UserSerializer(request.user).data)
 
-    @list_route(methods=['post'])
+    @list_route(methods=['post'],
+                serializer_class=RegistrationSerializer,
+                permission_classes=(AllowAny,))
     def register(self, request):
+        """
+        User Registration
+        :param request:
+        :return:
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
 
-        #
-        # We prepare both the organization and user models
-        # before saving either so that errors are raised prior
-        # to anything being created.
+        if instance:
+            return Response({"status": status.HTTP_200_OK})
+        else:
+            return Response(
+                {"status": status.HTTP_400_BAD_REQUEST},
+                status=status.HTTP_400_BAD_REQUEST)
 
-        user_serializer = UserSerializer(data=request.data)
-        user_serializer.is_valid(raise_exception=True)
+    @list_route(methods=['post'],
+                serializer_class=ResetPasswordRequestSerializer,
+                permission_classes=(AllowAny,))
+    def reset_password_request(self, request):
+        """
+        Reset password request
+        :param request:
+        :return:
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
 
-        orgData = {
-            'name': request.data['organizationName']
-        }
+        if instance:
+            return Response({"status": status.HTTP_200_OK})
+        else:
+            return Response(
+                {"status": status.HTTP_400_BAD_REQUEST},
+                status=status.HTTP_400_BAD_REQUEST)
 
-        organization_serializer = OrganizationSerializer(data=orgData)
-        organization_serializer.is_valid(raise_exception=True)
+    @list_route(methods=['post'],
+                serializer_class=ResetPasswordSerializer,
+                permission_classes=(AllowAny,))
+    def reset_password(self, request):
+        """
+        Reset Password
+        :param request:
+        :return:
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        if instance:
+            return Response(instance)
+        else:
+            return Response(
+                {"status": status.HTTP_400_BAD_REQUEST},
+                status=status.HTTP_400_BAD_REQUEST)
 
-        #
-        # Make the user first
-        user_serializer.save()
-        user = user_serializer.instance
-        user.set_password(request.data['password'])
-        user.save()
+    @detail_route(methods=['post'], serializer_class=ChangePasswordSerializer)
+    def change_password(self, request, id=None):
+        """
+        Change Password for an already authenticated user.
+        :param request:
+        :param pk:
+        :return:
+        """
+        user = self.get_object()
+        data = request.data
+        data['user'] = user.id
 
-        #
-        # Do organization things
-        organization_serializer.save()
-        organization = organization_serializer.instance
-        organization.add_user(user)
-        return Response({"status": status.HTTP_200_OK})
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+
+        if instance:
+            return Response({"status": status.HTTP_200_OK})
+        else:
+            return Response(
+                {"status": status.HTTP_400_BAD_REQUEST},
+                status=status.HTTP_400_BAD_REQUEST)
 
     queryset = User.objects.all()
     permission_classes = (DRYPermissions, )
     serializer_class = UserSerializer
     filter_backends = (UserFilterBackend, DjangoFilterBackend)
     lookup_field = "id"
-
-
-class PasswordResetViewSet(APIView):
-    permission_classes = (AllowAny,)
-
-    def get(self, request):
-        params = request.GET
-        email = params.get("email", False)
-        if not email:
-            return Response({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid request"},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            user = User.objects.get(username=params.get('email', False))
-            user.reset_password()
-        except Exception:
-            pass
-        return Response({"status": status.HTTP_200_OK, "message": "password reset email sent"})
-
-    def post(self, request):
-        params = loads(request.body)
-        password = params.get("password", False)
-        token = params.get("hash", False)
-        if not token or not password:
-            return Response({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid request"},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        decoded = b64decode(token)
-        decoded = decoded.decode('utf-8')
-        parts = decoded.split('|')
-        try:
-            user = User.objects.get(id=parts[2])
-            valid = user.compare_reset_hash(token)
-            if not valid:
-                return Response({"status": status.HTTP_403_FORBIDDEN, "message": "Invalid token"},
-                                status=status.HTTP_403_FORBIDDEN)
-            user.set_password(password)
-            user.save()
-            return Response({"status": status.HTTP_200_OK, "email": user.username, "message": "password reset"},
-                            status=status.HTTP_200_OK)
-
-        except Exception:
-            return Response({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid request"},
-                            status=status.HTTP_400_BAD_REQUEST)
-

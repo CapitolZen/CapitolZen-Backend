@@ -1,20 +1,19 @@
-from __future__ import unicode_literals
+import stripe
+
 from django.contrib.auth import get_user_model
 from crum import get_current_user
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.core.mail import send_mail
 from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import JSONField
 
 from organizations.abstract import (AbstractOrganization,
                                     AbstractOrganizationUser,
                                     AbstractOrganizationOwner)
 from capitolzen.meta.billing import BASIC, PlanChoices
-import stripe
-from templated_email import send_templated_mail
+from capitolzen.organizations.notifications import email_member_invite
 
 
 class OrganizationManager(models.Manager):
@@ -27,7 +26,6 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     Default Organization model.
     """
     objects = OrganizationManager()
-
 
     ORG_DEMO = (
         ('association', 'Association'),
@@ -182,23 +180,12 @@ class OrganizationInvite(AbstractBaseModel):
         return user
 
     def send_user_invite(self):
-
         url = "%s/claim/%s" % (settings.APP_FRONTEND, self.id)
+        email_member_invite(self.email,
+                          action_url=url,
+                          name=self.user.name,
+                          organization_name=self.organization_name)
 
-        msg = "<p>You've been invited to join %s on Capitol Zen.</p>" % self.organization_name
-
-        send_templated_mail(
-            template_name='simple_action',
-            from_email='hello@capitolzen.com',
-            recipient_list=[self.email],
-            context={
-                "name": self.user.name,
-                "message": msg,
-                "subject": "You've been invited to Capitol Zen",
-                "action_url": url,
-                "action_cta": "Accept Invite"
-            },
-        )
 
     class JSONAPIMeta:
         resource_name = "invites"
