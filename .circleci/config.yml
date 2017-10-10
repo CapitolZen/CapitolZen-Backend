@@ -28,7 +28,7 @@ jobs:
           name: Start Docker Application
           command: |
             set -x
-            docker-compose up -d
+            docker-compose up
 
       - run:
           name: Run Tests
