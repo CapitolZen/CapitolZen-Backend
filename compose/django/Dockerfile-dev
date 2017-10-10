@@ -20,6 +20,9 @@ COPY ./compose/django/start-dev.sh /start-dev.sh
 RUN sed -i 's/\r//' /start-dev.sh
 RUN chmod +x /start-dev.sh
 
+COPY ./utilities/wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
+
 WORKDIR /app
 
 ENTRYPOINT ["/entrypoint-dev.sh"]
