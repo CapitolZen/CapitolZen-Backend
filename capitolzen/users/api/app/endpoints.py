@@ -87,8 +87,8 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.data.get('password') != request.data.get('confirm_password'):
             raise ValidationError(detail="Password and Confirm Password should be the same")
 
-        from pprint import pprint
-        pprint(request.data)
+        user.set_password(request.data.get('password'))
+        user.save()
 
         return Response({"status": status.HTTP_200_OK})
 
