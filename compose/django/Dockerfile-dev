@@ -12,9 +12,9 @@ RUN pip install -r /requirements/development.txt \
     && groupadd -r django \
     && useradd -r -g django django
 
-COPY ./compose/django/entrypoint.sh /entrypoint.sh
-RUN sed -i 's/\r//' /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY ./compose/django/entrypoint-dev.sh /entrypoint-dev.sh
+RUN sed -i 's/\r//' /entrypoint-dev.sh
+RUN chmod +x /entrypoint-dev.sh
 
 COPY ./compose/django/start-dev.sh /start-dev.sh
 RUN sed -i 's/\r//' /start-dev.sh
@@ -22,4 +22,4 @@ RUN chmod +x /start-dev.sh
 
 WORKDIR /app
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint-dev.sh"]

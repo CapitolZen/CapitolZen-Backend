@@ -25,12 +25,6 @@ jobs:
             docker-compose build
 
       - run:
-          name: Start Docker Application
-          command: |
-            set -x
-            docker-compose up
-
-      - run:
           name: Run Tests
           command: |
             set -ou pipefail
