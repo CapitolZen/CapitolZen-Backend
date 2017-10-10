@@ -1,0 +1,52 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/app
+    executorType: machine
+    steps:
+      - checkout
+
+      - run:
+          name: Show Docker Versions
+          command: |
+            set -x
+            docker --version
+            docker-compose --version
+
+      - run:
+          name: Setup Environment
+          command: |
+            env > ~/project/.env
+
+      - run:
+          name: Build Docker Application
+          command: |
+            set -x
+            docker-compose build
+
+      - run:
+          name: Start Docker Application
+          command: |
+            set -x
+            docker-compose up -d
+
+      - run:
+          name: Run Tests
+          command: |
+            set -ou pipefail
+            docker-compose run pycharm python manage.py test core -v 3 --noinput
+
+      ##
+      # DEPLOYMENT
+      ##
+      - run: bash .circleci/setup-heroku.sh
+      - add_ssh_keys:
+          fingerprints:
+            - "SHA256:BggD8RSk738Q0ebf0O/wE/Hv9NktSXewS4pWlq0LuiY mwisner@Matts-MacBook-Pro-2.local"
+      - run:
+          name: Deploy Production (If master)
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              git push heroku master
+              heroku run python manage.py migrate --app cz-app-backend
+            fi

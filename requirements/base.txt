@@ -38,7 +38,7 @@ django-material==1.0.0
 django-address==0.1.5
 django-health-check==2.3.0
 awesome-slugify==1.6.5
-django-allauth==0.32.0
+django-allauth==0.33.0
 argon2-cffi==16.3.0
 django-fsm==2.6.0
 django-cacheops==3.2.1
@@ -50,7 +50,6 @@ django-templated-email==2.2.0
 # DRF
 djangorestframework==3.6.3
 coreapi==2.3.1
-drfdocs==0.0.11
 djangorestframework-jwt==1.11.0
 djangorestframework-jsonapi==2.2.0
 dry-rest-permissions==0.1.9
