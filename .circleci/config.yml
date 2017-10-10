@@ -28,7 +28,7 @@ jobs:
           name: Run Tests
           command: |
             set -ou pipefail
-            docker-compose run pycharm python manage.py test core -v 3 --noinput
+            docker-compose run pycharm python manage.py test capitolzen -v 3 --noinput
 
       ##
       # DEPLOYMENT
