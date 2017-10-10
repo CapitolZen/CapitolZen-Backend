@@ -9,18 +9,18 @@ logger = get_task_logger(__name__)
 
 
 @shared_task()
-def intercom_manage_user(user_id, op):
+def intercom_manage_user(user_id, operation):
     """
     Create, Update, Delete user in intercom
 
     :param user_id:
-    :param op:
+    :param operation:
     :return:
     """
 
     intercom = get_intercom_client()
 
-    if op != "delete":
+    if operation != "delete":
         user = User.objects.get(id=user_id)
     else:
         user = None
@@ -54,7 +54,7 @@ def intercom_manage_user(user_id, op):
         except ResourceNotFound:
             pass
 
-    if op == "create":
+    if operation == "create":
         _create()
     elif op == "update":
         _update()

@@ -1,12 +1,10 @@
 from rest_framework_json_api import serializers
-from dry_rest_permissions.generics import DRYPermissionsField
 from capitolzen.organizations.models import (Organization, OrganizationInvite)
 from capitolzen.users.models import User
 
 class OrganizationSerializer(serializers.ModelSerializer):
-    user_is_member = serializers.ReadOnlyField()
-    id = serializers.ReadOnlyField()
-    is_active = serializers.ReadOnlyField()
+    user_is_member = serializers.BooleanField(read_only=True)
+    is_active = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Organization
