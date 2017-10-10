@@ -16,7 +16,7 @@ jobs:
       - run:
           name: Setup Environment
           command: |
-            env > ~/project/.env
+            env > ~/app/.env
 
       - run:
           name: Build Docker Application
