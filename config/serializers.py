@@ -1,9 +1,7 @@
 from rest_framework import serializers
-from pprint import pprint
 from urllib.parse import urlparse
 from django.conf import settings
 from capitolzen.utils.s3 import copy_s3_object
-from django.core.files.storage import default_storage
 
 
 class RemoteFileField(serializers.Field):
@@ -60,6 +58,7 @@ class RemoteFileField(serializers.Field):
         instance = self.parent.instance
         attr = getattr(instance, self.field_name)
 
+        # Don't do anything if it's the same file
         if attr and attr.file.name and attr.file.name == info['file']:
             return attr.file.name
 
@@ -78,7 +77,7 @@ class RemoteFileField(serializers.Field):
         else:
             destination['key'] = info['file']
 
-        # If we're going from temp to not temp
+        # Don't copy if the file is already in the correct location
         if source != destination:
             copy_s3_object(source, destination, delete_source=True)
 
