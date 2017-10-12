@@ -14,16 +14,14 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotAuthenticated, NotFound
 
 from capitolzen.meta.clients import DocManager
-from capitolzen.groups.models import Group
-from capitolzen.users.api.app.serializers import UserSerializer
 from capitolzen.users.models import User
 from capitolzen.users.tasks import create_user_notification
 from capitolzen.organizations.models import (Organization, OrganizationInvite)
 from .serializers import (OrganizationSerializer, OrganizationInviteSerializer)
+from rest_framework import mixins
 
 
 class OrganizationFilter(filters.FilterSet):
-
     class Meta:
         model = Organization
         ordering = ['name']
@@ -39,6 +37,7 @@ class OrganizationFilterBackend(DRYPermissionFiltersBase):
     """
 
     """
+
     def filter_list_queryset(self, request, queryset, view):
         """
         Limits all list requests to only show orgs that the user is part of.
@@ -57,20 +56,16 @@ class OrganizationFilterBackend(DRYPermissionFiltersBase):
             return queryset.filter(owner__organization_user__user__email=email)
 
 
-class OrganizationViewSet(viewsets.ModelViewSet):
+class OrganizationViewSet(mixins.RetrieveModelMixin,
+                          mixins.UpdateModelMixin,
+                          mixins.ListModelMixin,
+                          viewsets.GenericViewSet):
+
     serializer_class = OrganizationSerializer
-    permission_classes = (DRYPermissions, )
+    permission_classes = (DRYPermissions,)
     queryset = Organization.objects.all()
     filter_backends = (OrganizationFilterBackend, DjangoFilterBackend)
     filter_class = OrganizationFilter
-
-    @detail_route(methods=['get'])
-    def logo_upload(self):
-        organization = self.get_object()
-        c = DocManager(org_instance=organization)
-        params = c.upload_logo()
-        params['acl'] = 'public-read'
-        return Response({"status": status.HTTP_200_OK, "params": params})
 
     @detail_route(methods=['POST'])
     def asset_upload(self, request, pk):
@@ -94,7 +89,6 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 
 
 class InviteFilter(filters.FilterSet):
-
     class Meta:
         model = OrganizationInvite
 
@@ -109,7 +103,6 @@ class InviteFilter(filters.FilterSet):
 
 
 class OrganizationInviteFilterBackend(DRYPermissionFiltersBase):
-
     def _get_org_by_consumer_id(self, consumer_id):
         return Organization.objects.get(consumer_id=consumer_id)
 
@@ -131,7 +124,7 @@ class OrganizationInviteFilterBackend(DRYPermissionFiltersBase):
 
 
 class OrganizationInviteViewSet(viewsets.ModelViewSet):
-    permission_classes = (DRYPermissions, )
+    permission_classes = (DRYPermissions,)
     serializer_class = OrganizationInviteSerializer
     queryset = OrganizationInvite.objects.all().order_by('created')
     filter_backends = (OrganizationInviteFilterBackend, DjangoFilterBackend)
@@ -204,14 +197,13 @@ class OrganizationInviteViewSet(viewsets.ModelViewSet):
         if invite.status != 'unclaimed':
             return Response({"status_code": status.HTTP_400_BAD_REQUEST,
                              "detail":
-                             "You may only take actions on pending invites"},
+                                 "You may only take actions on pending invites"},
                             status=status.HTTP_400_BAD_REQUEST)
 
         action = request.data.get('actions', False)
 
         if not action:
-            return Response({"detail":
-                             "Please provide an action."},
+            return Response({"detail":"Please provide an action."},
                             status=status.HTTP_400_BAD_REQUEST)
 
         if action == 'resend':

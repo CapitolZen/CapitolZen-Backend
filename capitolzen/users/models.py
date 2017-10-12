@@ -7,12 +7,24 @@ from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
 
+def avatar_directory_path(instance, filename):
+    """
+    Note the need to use the ID here. meaning we can't
+    upload files during creation.
+    :param instance:
+    :param filename:
+    :return:
+    """
+    return '{0}/misc/{1}'.format(instance.id, filename)
+
+
 class User(AbstractUser, TimeStampedModel):
     first_name = None
     last_name = None
 
     name = models.CharField(_('Name of User'), blank=True, max_length=255)
     metadata = JSONField(default=dict, null=True, blank=True)
+    avatar = models.FileField(blank=True, null=True, max_length=255, upload_to=avatar_directory_path)
 
     def __str__(self):
         return self.name or self.username

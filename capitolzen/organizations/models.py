@@ -63,7 +63,6 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     billing_zip_code = models.CharField(max_length=10, null=True, blank=True)
 
     demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO, default='individual')
-    logo = models.URLField(blank=True, null=True)
     avatar = models.FileField(blank=True, null=True, max_length=255, upload_to=avatar_directory_path)
     contacts = JSONField(blank=True, default=dict)
 
