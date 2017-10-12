@@ -460,6 +460,7 @@ AWS_ACCESS_ID = env("AWS_ACCESSID", default='')
 AWS_SECRET_KEY = env("AWS_SECRETKEY", default='')
 AWS_REGION = env("AWS_REGION", default='us-east-1')
 AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
+AWS_TEMP_BUCKET_NAME = env("AWS_TEMP_BUCKET_NAME", default='')
 INDEX_LAMBDA = env("capitolzen_search_bills", default="capitolzen_search_bills")
 
 # OPEN STATES

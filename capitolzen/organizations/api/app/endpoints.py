@@ -45,7 +45,6 @@ class OrganizationFilterBackend(DRYPermissionFiltersBase):
         """
         if request.user.is_authenticated():
             return queryset.filter(users=request.user)
-
         else:
             if not request.GET.get('email'):
                 raise NotAuthenticated()
