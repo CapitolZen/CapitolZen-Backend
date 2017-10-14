@@ -6,6 +6,7 @@ from capitolzen.users.utils import token_decode, token_encode
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
 from capitolzen.users.notifications import email_user_password_reset_request
 from capitolzen.organizations.notifications import email_owner_welcome
+from config.serializers import RemoteFileField
 
 User = get_user_model()
 
@@ -28,6 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
                 message="Email address is already in use",
             )]
     )
+    avatar = RemoteFileField()
 
     class Meta:
         model = User
@@ -40,7 +42,9 @@ class UserSerializer(serializers.ModelSerializer):
                   'is_staff',
                   'is_superuser',
                   'organizations',
-                  'date_joined')
+                  'date_joined',
+                  'avatar',
+                  )
         read_only_fields = ('id',
                             'is_staff',
                             'is_superuser',

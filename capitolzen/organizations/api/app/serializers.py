@@ -1,10 +1,12 @@
 from rest_framework_json_api import serializers
 from capitolzen.organizations.models import (Organization, OrganizationInvite)
 from capitolzen.users.models import User
+from config.serializers import RemoteFileField
+
 
 class OrganizationSerializer(serializers.ModelSerializer):
-    user_is_member = serializers.BooleanField(read_only=True)
     is_active = serializers.BooleanField(read_only=True)
+    avatar = RemoteFileField()
 
     class Meta:
         model = Organization
@@ -12,11 +14,8 @@ class OrganizationSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'is_active',
-            'user_is_owner',
             'billing_email',
             'billing_phone',
-            'user_is_admin',
-            'user_is_member',
             'billing_address_one',
             'billing_name',
             'billing_address_two',
@@ -25,7 +24,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
             'billing_zip_code',
             'stripe_payment_tokens',
             'plan_name',
-            'logo'
+            'avatar',
         )
 
     def create(self, validated_data):

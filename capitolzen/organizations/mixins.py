@@ -1,8 +1,7 @@
-from crum import get_current_user
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
 
-class MixinResourcedOwnedByOrganization:
+class MixinResourcedOwnedByOrganization(object):
     """
     A model mixin useful for automatically setting some DRY Permissions.
 

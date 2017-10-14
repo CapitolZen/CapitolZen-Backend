@@ -1,7 +1,6 @@
 import stripe
 
 from django.contrib.auth import get_user_model
-from crum import get_current_user
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -14,6 +13,17 @@ from organizations.abstract import (AbstractOrganization,
                                     AbstractOrganizationOwner)
 from capitolzen.meta.billing import BASIC, PlanChoices
 from capitolzen.organizations.notifications import email_member_invite
+
+
+def avatar_directory_path(instance, filename):
+    """
+    Note the need to use the ID here. meaning we can't
+    upload files during creation.
+    :param instance:
+    :param filename:
+    :return:
+    """
+    return '{0}/misc/{1}'.format(instance.id, filename)
 
 
 class OrganizationManager(models.Manager):
@@ -53,24 +63,12 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     billing_zip_code = models.CharField(max_length=10, null=True, blank=True)
 
     demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO, default='individual')
-    logo = models.URLField(blank=True, null=True)
+    avatar = models.FileField(blank=True, null=True, max_length=255, upload_to=avatar_directory_path)
     contacts = JSONField(blank=True, default=dict)
 
     def owner_user_account(self):
         """Because I can never remember how to get this"""
         return self.owner.organization_user.user
-
-    @property
-    def user_is_owner(self):
-        return self.is_owner(get_current_user())
-
-    @property
-    def user_is_admin(self):
-        return self.is_admin(get_current_user())
-
-    @property
-    def user_is_member(self):
-        return self.is_member(get_current_user())
 
     class Meta(AbstractOrganization.Meta):
         abstract = False

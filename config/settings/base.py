@@ -10,14 +10,9 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 import environ
 import datetime
 from celery.schedules import crontab
+from django.utils import six
 
 ROOT_DIR = environ.Path(__file__) - 3  # (capitolzen/config/settings/base.py - 3 = capitolzen/)
-APPS_DIR = ROOT_DIR.path('capitolzen')
-
-# LOCATION VARS
-# ------------------------------------------------------------------------------
-# (project_name/config/settings/common.py - 3 = project_name/)
-ROOT_DIR = environ.Path(__file__) - 3
 APPS_DIR = ROOT_DIR.path('capitolzen')
 
 env = environ.Env()
@@ -45,6 +40,7 @@ THIRD_PARTY_APPS = [
     'rest_framework_jwt',
     'dry_rest_permissions',
     'annoying',
+    'storages',
     'health_check',
     'health_check.db',
     'health_check.cache',
@@ -188,9 +184,6 @@ CI = env("CI", default=False)
 APP_FRONTEND = env("APP_FRONTEND", default='')
 
 
-
-
-
 # TEMPLATE CONFIGURATION
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#templates
@@ -253,6 +246,30 @@ MEDIA_ROOT = str(APPS_DIR('media'))
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#media-url
 MEDIA_URL = '/media/'
+
+AWS_ACCESS_KEY_ID = env('AWS_ACCESSID', default="")
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRETKEY', default="")
+AWS_STORAGE_BUCKET_NAME = env('AWS_BUCKET_NAME', default="")
+AWS_AUTO_CREATE_BUCKET = False
+AWS_S3_CALLING_FORMAT = "path"
+AWS_DEFAULT_ACL = 'private'
+AWS_QUERYSTRING_AUTH = True
+
+# AWS cache settings, don't change unless you know what you're doing:
+AWS_EXPIRY = 60 * 60 * 24 * 7
+
+# TODO See: https://github.com/jschneier/django-storages/issues/47
+# Revert the following and use str after the above-mentioned bug is fixed in
+# either django-storage-redux or boto
+AWS_HEADERS = {
+    'Cache-Control': six.b('max-age=%d, s-maxage=%d, must-revalidate' % (
+        AWS_EXPIRY, AWS_EXPIRY))
+}
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+
+MEDIA_URL = 'https://s3.amazonaws.com/%s/' % AWS_STORAGE_BUCKET_NAME
 
 # URL Configuration
 # ------------------------------------------------------------------------------
@@ -443,6 +460,7 @@ AWS_ACCESS_ID = env("AWS_ACCESSID", default='')
 AWS_SECRET_KEY = env("AWS_SECRETKEY", default='')
 AWS_REGION = env("AWS_REGION", default='us-east-1')
 AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
+AWS_TEMP_BUCKET_NAME = env("AWS_TEMP_BUCKET_NAME", default='')
 INDEX_LAMBDA = env("capitolzen_search_bills", default="capitolzen_search_bills")
 
 # OPEN STATES

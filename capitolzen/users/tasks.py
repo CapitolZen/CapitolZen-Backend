@@ -56,9 +56,9 @@ def intercom_manage_user(user_id, operation):
 
     if operation == "create":
         _create()
-    elif op == "update":
+    elif operation == "update":
         _update()
-    elif op == "delete":
+    elif operation == "delete":
         _delete()
 
     return True

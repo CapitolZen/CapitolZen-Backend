@@ -6,6 +6,7 @@ from rest_framework.decorators import list_route, detail_route
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework import mixins
 from capitolzen.organizations.models import Organization
 from capitolzen.users.api.app.serializers import (UserSerializer,
                                                   ChangePasswordSerializer,
@@ -23,7 +24,6 @@ class UserFilterBackend(DRYPermissionFiltersBase):
     """
 
     def filter_list_queryset(self, request, queryset, view):
-
         if request.user.is_anonymous():
             raise NotAuthenticated()
 
@@ -31,10 +31,18 @@ class UserFilterBackend(DRYPermissionFiltersBase):
         return queryset.filter(organizations_organization=current_user_organizations)
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(mixins.RetrieveModelMixin,
+                  mixins.UpdateModelMixin,
+                  mixins.ListModelMixin,
+                  viewsets.GenericViewSet):
     """
     Catchall user endpoint.
     """
+    queryset = User.objects.all()
+    permission_classes = (DRYPermissions,)
+    serializer_class = UserSerializer
+    filter_backends = (UserFilterBackend, DjangoFilterBackend)
+    lookup_field = "id"
 
     @list_route(methods=['GET'])
     def current(self, request):
@@ -126,9 +134,3 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(
                 {"status": status.HTTP_400_BAD_REQUEST},
                 status=status.HTTP_400_BAD_REQUEST)
-
-    queryset = User.objects.all()
-    permission_classes = (DRYPermissions, )
-    serializer_class = UserSerializer
-    filter_backends = (UserFilterBackend, DjangoFilterBackend)
-    lookup_field = "id"
