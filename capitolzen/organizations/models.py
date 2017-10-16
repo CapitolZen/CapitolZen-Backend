@@ -28,7 +28,6 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     """
     objects = OrganizationManager()
 
-
     ORG_DEMO = (
         ('association', 'Association'),
         ('union', 'Labor Union'),
@@ -225,3 +224,15 @@ class OrganizationInvite(AbstractBaseModel):
 
     def has_object_create_permission(self, request):
         return request.user.is_authenticated()
+
+
+class File(AbstractBaseModel):
+    class Meta:
+        verbose_name = _("file")
+        verbose_name_plural = _("files")
+
+    class JSONAPIMeta:
+        resource_name = "files"
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    file = models.FileField()
