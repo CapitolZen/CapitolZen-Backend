@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from config.models import AbstractBaseModel
 from dry_rest_permissions.generics import allow_staff_or_superuser
 from django.contrib.postgres.fields import JSONField
-
+from model_utils import Choices
 from organizations.abstract import (AbstractOrganization,
                                     AbstractOrganizationUser,
                                     AbstractOrganizationOwner)
@@ -212,13 +212,35 @@ class OrganizationInvite(AbstractBaseModel):
         return request.user.is_authenticated()
 
 
+def file_directory_path(instance, filename):
+    """
+    format directory path for file library
+    :param instance:
+    :param filename:
+    :return string:
+    """
+    return '{0}/files/{1}'.format(instance.id, filename)
+
+
 class File(AbstractBaseModel):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    user = models.ForeignKey('users.User')
+    file = models.FileField(max_length=255, upload_to=file_directory_path)
+    user_path = models.CharField(default='', max_length=255)
+    name = models.CharField(max_length=255)
+
+    visibility_choices = Choices(
+        ('public', 'Public'),
+        ('org', 'Private to organization')
+    )
+
+    visibility = models.CharField(
+        choices=visibility_choices, max_length=225, default='org', db_index=True
+    )
+
     class Meta:
         verbose_name = _("file")
         verbose_name_plural = _("files")
 
     class JSONAPIMeta:
         resource_name = "files"
-
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    file = models.FileField()
