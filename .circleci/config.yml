@@ -1,0 +1,31 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/app
+    executorType: machine
+    steps:
+      - checkout
+
+      - run:
+          name: Show Docker Versions
+          command: |
+            set -x
+            docker --version
+            docker-compose --version
+
+      - run:
+          name: Setup Environment
+          command: |
+            env > ~/app/.env
+
+      - run:
+          name: Build Docker Application
+          command: |
+            set -x
+            docker-compose build
+
+      - run:
+          name: Run Tests
+          command: |
+            set -ou pipefail
+            docker-compose run pycharm python manage.py test capitolzen -v 3 --noinput
