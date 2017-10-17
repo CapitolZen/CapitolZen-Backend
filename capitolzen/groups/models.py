@@ -12,11 +12,22 @@ from config.models import AbstractBaseModel
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
 
 
+def avatar_directory_path(instance, filename):
+    """
+    Note the need to use the ID here. meaning we can't
+    upload files during creation.
+    :param instance:
+    :param filename:
+    :return:
+    """
+    return '{0}/misc/{1}'.format(instance.organization.id, filename)
+
+
 class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     title = models.CharField(blank=False, max_length=225)
     description = models.TextField(blank=True, null=True)
     contacts = JSONField(blank=True, null=True)
-    logo = models.URLField(blank=True, null=True)
+    avatar = models.FileField(blank=True, null=True, max_length=255, upload_to=avatar_directory_path)
     starred = models.BooleanField(default=False)
     attachments = JSONField(blank=True, null=True)
     saved_filters = JSONField(default=dict)

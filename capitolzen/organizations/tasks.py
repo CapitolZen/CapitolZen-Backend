@@ -6,7 +6,7 @@ from intercom.errors import ResourceNotFound
 from .utils import get_stripe_client
 from stripe.error import StripeError
 @shared_task()
-def intercom_manage_organization(organization_id, op):
+def intercom_manage_organization(organization_id, operation):
     """
     Create, Update, Delete organization in intercom
 
@@ -17,7 +17,7 @@ def intercom_manage_organization(organization_id, op):
 
     intercom = get_intercom_client()
 
-    if op != "delete":
+    if operation != "delete":
         organization = Organization.objects.get(id=organization_id)
     else:
         organization = None
@@ -74,17 +74,17 @@ def intercom_manage_organization(organization_id, op):
         except ResourceNotFound:
             pass
 
-    if op == "create":
+    if operation == "create":
         _create()
-    elif op == "update":
+    elif operation == "update":
         _update()
-    elif op == "delete":
+    elif operation == "delete":
         _delete()
 
     return True
 
 @shared_task()
-def stripe_manage_customer(organization_id, op):
+def stripe_manage_customer(organization_id, operation):
     """
     Create, Update, Delete customer in stripe...
     Customer in stripe == Organization on our end.
@@ -96,7 +96,7 @@ def stripe_manage_customer(organization_id, op):
 
     stripe = get_stripe_client()
 
-    if op != "delete":
+    if operation != "delete":
         organization = Organization.objects.get(id=organization_id)
     else:
         organization = None
@@ -142,11 +142,11 @@ def stripe_manage_customer(organization_id, op):
             pass
 
 
-    if op == "create":
+    if operation == "create":
         _create()
-    elif op == "update":
+    elif operation == "update":
         _update()
-    elif op == "delete":
+    elif operation == "delete":
         _delete()
 
     return True

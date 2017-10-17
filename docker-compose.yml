@@ -1,32 +1,153 @@
 version: '2'
 
+volumes:
+  postgres_data_dev: {}
+  postgres_backup_dev: {}
+
 services:
+
+  #
+  # DB
+  postgres:
+    build: ./compose/postgres
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - postgres_backup_dev:/backups
+    environment:
+      - POSTGRES_USER=capitolzen
+
+  #
+  # Cache
+  redis:
+    image: redis:latest
+    ports:
+      - "6379"
+
+  #
+  # App
   django:
-    build: ./compose/django/Dockerfile
-    command: /gunicorn.sh
-    env_file: .env
-    container_name: django
-    ports:
-      - 5000
-
-  nginx:
-    build: ./compose/nginx
-    links:
-      - django
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: ./compose/django/Dockerfile-dev
+    env_file:
+      - .env
+    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch1:9200", "--", "/start-dev.sh"]
     depends_on:
-      - django
+      - postgres
+      - mailhog
+    environment:
+      - POSTGRES_USER=capitolzen
+      - POSTGRES_PASSWORD=capitolzen
+      - USE_DOCKER=yes
+    volumes:
+      - .:/app
     ports:
-      - 443:443
-    container_name: nginx
+      - "8000:8000"
+    links:
+      - postgres
+      - redis
 
+  #
+  # Local Development utility for running commands.
+  pycharm:
+    build:
+      context: .
+      dockerfile: ./compose/django/Dockerfile-dev
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    environment:
+      - POSTGRES_USER=capitolzen
+      - POSTGRES_PASSWORD=capitolzen
+    volumes:
+      - .:/app
+    links:
+      - postgres
+      - redis
+
+  #
+  # Workers
   celeryworker:
-    user: django
-    build: ./compose/django/Dockerfile
+    build:
+      context: .
+      dockerfile: ./compose/django/Dockerfile-dev
     env_file: .env
-    command: [celery, -A, capitolzen.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
+    environment:
+      - POSTGRES_USER=capitolzen
+      - POSTGRES_PASSWORD=capitolzen
+    depends_on:
+     - postgres
+     - redis
+    links:
+      - postgres
+      - redis
+    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch1:9200", "--", celery, -A, capitolzen.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
+    volumes:
+      - .:/app
 
+  #
+  # Beat
   celerybeat:
-    user: django
-    build: ./compose/django/Dockerfile
+    build:
+      context: .
+      dockerfile: ./compose/django/Dockerfile-dev
     env_file: .env
-    command: [celery, -A, capitolzen.tasks, beat, --workdir=/app, -l, INFO]
+    environment:
+      - POSTGRES_USER=capitolzen
+      - POSTGRES_PASSWORD=capitolzen
+    depends_on:
+      - postgres
+      - redis
+    links:
+      - postgres
+      - redis
+    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch1:9200", "--", celery, -A, capitolzen.tasks, beat, --workdir=/app, -l, INFO]
+    volumes:
+      - .:/app
+
+  #
+  # Intercepts mail sent and provides a nice UI for debugging.
+  mailhog:
+    image: mailhog/mailhog:v1.0.0
+    ports:
+      - "8025:8025"
+
+  #
+  # Elastic Search Cluster
+  elasticsearch1:
+    build:
+      context: .
+      dockerfile: ./compose/elastic/Dockerfile
+    container_name: elasticsearch1
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+
+  elasticsearch2:
+    build:
+      context: .
+      dockerfile: ./compose/elastic/Dockerfile
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    volumes:
+      - esdata2:/usr/share/elasticsearch/data

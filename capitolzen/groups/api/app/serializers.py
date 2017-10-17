@@ -1,10 +1,11 @@
 from rest_framework_json_api.relations import ResourceRelatedField
 
-from config.serializers import BaseInternalModelSerializer
+from config.serializers import BaseInternalModelSerializer, RemoteFileField
 
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import User
 from capitolzen.groups.models import Group, Report, Comment
+
 
 
 class GroupSerializer(BaseInternalModelSerializer):
@@ -12,10 +13,12 @@ class GroupSerializer(BaseInternalModelSerializer):
         many=False,
         queryset=Organization.objects
     )
+    avatar = RemoteFileField()
 
     class Meta:
         model = Group
         fields = (
+            'id',
             'title',
             'organization',
             'attachments',
@@ -24,6 +27,8 @@ class GroupSerializer(BaseInternalModelSerializer):
             'description',
             'logo',
             'starred',
+            'created',
+            'avatar',
         )
         read_only_fields = ('id',)
 
@@ -45,6 +50,9 @@ class ReportSerializer(BaseInternalModelSerializer):
     class Meta:
         model = Report
         fields = (
+            'id',
+            'created',
+            'modified',
             'organization',
             'group',
             'filter',

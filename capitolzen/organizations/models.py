@@ -6,20 +6,31 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
 from django.contrib.postgres.fields import JSONField
 
 from dry_rest_permissions.generics import allow_staff_or_superuser
-
-from crum import get_current_user
+from django.contrib.postgres.fields import JSONField
 
 from config.models import AbstractBaseModel
-
 from organizations.abstract import (
-    AbstractOrganization, AbstractOrganizationUser,
+    AbstractOrganization,
+    AbstractOrganizationUser,
     AbstractOrganizationOwner
 )
-
 from capitolzen.meta.billing import BASIC, PlanChoices
+from capitolzen.organizations.notifications import email_member_invite
+
+
+def avatar_directory_path(instance, filename):
+    """
+    Note the need to use the ID here. meaning we can't
+    upload files during creation.
+    :param instance:
+    :param filename:
+    :return:
+    """
+    return '{0}/misc/{1}'.format(instance.id, filename)
 
 
 class OrganizationManager(models.Manager):
@@ -59,24 +70,12 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     billing_zip_code = models.CharField(max_length=10, null=True, blank=True)
 
     demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO, default='individual')
-    logo = models.URLField(blank=True, null=True)
+    avatar = models.FileField(blank=True, null=True, max_length=255, upload_to=avatar_directory_path)
     contacts = JSONField(blank=True, default=dict)
 
     def owner_user_account(self):
         """Because I can never remember how to get this"""
         return self.owner.organization_user.user
-
-    @property
-    def user_is_owner(self):
-        return self.is_owner(get_current_user())
-
-    @property
-    def user_is_admin(self):
-        return self.is_admin(get_current_user())
-
-    @property
-    def user_is_member(self):
-        return self.is_member(get_current_user())
 
     class Meta(AbstractOrganization.Meta):
         abstract = False
@@ -186,23 +185,12 @@ class OrganizationInvite(AbstractBaseModel):
         return user
 
     def send_user_invite(self):
-
         url = "%s/claim/%s" % (settings.APP_FRONTEND, self.id)
+        email_member_invite(self.email,
+                          action_url=url,
+                          name=self.user.name,
+                          organization_name=self.organization_name)
 
-        msg = "<p>You've been invited to join %s on Capitol Zen.</p>" % self.organization_name
-
-        send_templated_mail(
-            template_name='simple_action',
-            from_email='hello@capitolzen.com',
-            recipient_list=[self.email],
-            context={
-                "name": self.user.name,
-                "message": msg,
-                "subject": "You've been invited to Capitol Zen",
-                "action_url": url,
-                "action_cta": "Accept Invite"
-            },
-        )
 
     class JSONAPIMeta:
         resource_name = "invites"

@@ -8,36 +8,30 @@ from .tasks import (intercom_manage_user_companies,
 from stream_django.feed_manager import feed_manager
 from templated_email import send_templated_mail
 from django.conf import settings
+from django.conf import settings
+from django.db import transaction
+
+
 ################################################################################################
 # INTERCOM
 ################################################################################################
-
-
 @receiver(post_save, sender=User)
 def intercom_update_user(sender, **kwargs):
     """
-    https://www.whatan00b.com/posts/celery-jobs-unable-to-access-objects-when-queued-by-post_save-signal-in-django/
-    http://docs.celeryproject.org/en/latest/whatsnew-4.0.html#django-support
-    https://docs.djangoproject.com/en/1.11/topics/db/transactions/#performing-actions-after-commit
-
-    We delay the task execution 10 seconds because post_save
-    isn't post database commit. Need to how to take
-    advantage of transaction.on_commit while still using the
-    receiver decorator. This isn't great, because technically it
-    could take longer than 10 seconds to do a db transaction.
-
     :param sender:
     :param kwargs:
     :return:
     """
+    if settings.INTERCOM_ENABLE_SYNC:
+        created = kwargs.get('created')
+        user = kwargs.get('instance')
+        operation = 'create' if created else 'update'
 
-    created = kwargs.get('created')
-    user = kwargs.get('instance')
-
-    if created:
-        intercom_manage_user.apply_async([str(user.id), "create"], countdown=10)
-    else:
-        intercom_manage_user.apply_async([str(user.id), "update"], countdown=10)
+        transaction.on_commit(
+            lambda: intercom_manage_user.apply_async(kwargs={
+                'user_id': str(user.id),
+                'operation': operation
+            }))
 
 
 @receiver(post_delete, sender=User)
@@ -48,27 +42,15 @@ def intercom_delete_user(sender, **kwargs):
     :param kwargs:
     :return:
     """
-    user = kwargs.get('instance')
-    intercom_manage_user.apply_async([str(user.id), "delete"], countdown=10)
+    if settings.INTERCOM_ENABLE_SYNC:
+        user = kwargs.get('instance')
+        transaction.on_commit(lambda: intercom_manage_user.apply_async(kwargs={
+            'user_id': str(user.id),
+            'operation': 'delete'
+        }))
 
 
 @receiver(user_added)
-def user_added_to_organization(sender, **kwargs):
-    """
-    Note: This is only called when we use the add_user / etc
-    methods directly (which we do via the api) however it doesn't
-    get called when using things like the django admin area to
-    add or remove users from an organization see:
-    https://github.com/bennylope/django-organizations/issues/123
-    :param sender:
-    :param kwargs:
-    :return:
-    """
-
-    user = kwargs.get('user')
-    intercom_manage_user_companies.apply_async([user.id], countdown=10)
-
-
 @receiver(user_removed)
 def user_removed_from_organization(sender, **kwargs):
     """
@@ -81,33 +63,10 @@ def user_removed_from_organization(sender, **kwargs):
     :param kwargs:
     :return:
     """
-    user = kwargs.get('user')
-    intercom_manage_user_companies.apply_async([user.id], countdown=10)
-
-################################################################################################
-# NOTIFICATIONS
-################################################################################################
-
-
-@receiver(user_added)
-def send_welcome_email(sender, **kwargs):
-    """
-
-    :param sender:
-    :param kwargs:
-    :return:
-    """
-
-    user = kwargs.get('user')
-    if sender.is_owner(user):
-        send_templated_mail(
-            template_name='welcome',
-            from_email='hello@capitolzen.com',
-            recipient_list=[user.username],
-            context={
-                "name": user.name,
-                "url": settings.APP_FRONTEND,
-            },
-        )
-
+    if settings.INTERCOM_ENABLE_SYNC:
+        user = kwargs.get('user')
+        transaction.on_commit(
+            lambda: intercom_manage_user_companies.apply_async(kwargs={
+                "user_id": str(user.id),
+            }))
 

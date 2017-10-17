@@ -10,14 +10,9 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 import environ
 import datetime
 from celery.schedules import crontab
+from django.utils import six
 
 # (capitolzen/config/settings/base.py - 3 = capitolzen/)
-ROOT_DIR = environ.Path(__file__) - 3
-APPS_DIR = ROOT_DIR.path('capitolzen')
-
-# LOCATION VARS
-# ------------------------------------------------------------------------------
-# (project_name/config/settings/common.py - 3 = project_name/)
 ROOT_DIR = environ.Path(__file__) - 3
 APPS_DIR = ROOT_DIR.path('capitolzen')
 
@@ -47,6 +42,7 @@ THIRD_PARTY_APPS = [
     'rest_framework_swagger',
     'dry_rest_permissions',
     'annoying',
+    'storages',
     'health_check',
     'health_check.db',
     'health_check.cache',
@@ -256,6 +252,30 @@ MEDIA_ROOT = str(APPS_DIR('media'))
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#media-url
 MEDIA_URL = '/media/'
 
+AWS_ACCESS_KEY_ID = env('AWS_ACCESSID', default="")
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRETKEY', default="")
+AWS_STORAGE_BUCKET_NAME = env('AWS_BUCKET_NAME', default="")
+AWS_AUTO_CREATE_BUCKET = False
+AWS_S3_CALLING_FORMAT = "path"
+AWS_DEFAULT_ACL = 'private'
+AWS_QUERYSTRING_AUTH = True
+
+# AWS cache settings, don't change unless you know what you're doing:
+AWS_EXPIRY = 60 * 60 * 24 * 7
+
+# TODO See: https://github.com/jschneier/django-storages/issues/47
+# Revert the following and use str after the above-mentioned bug is fixed in
+# either django-storage-redux or boto
+AWS_HEADERS = {
+    'Cache-Control': six.b('max-age=%d, s-maxage=%d, must-revalidate' % (
+        AWS_EXPIRY, AWS_EXPIRY))
+}
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+
+MEDIA_URL = 'https://s3.amazonaws.com/%s/' % AWS_STORAGE_BUCKET_NAME
+
 # URL Configuration
 # ------------------------------------------------------------------------------
 ROOT_URLCONF = 'config.urls'
@@ -286,7 +306,7 @@ REST_FRAMEWORK = {
     'DEFAULT_MODEL_SERIALIZER_CLASS':
         'rest_framework.serializers.HyperlinkedModelSerializer',
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
@@ -447,6 +467,7 @@ AWS_ACCESS_ID = env("AWS_ACCESSID", default='')
 AWS_SECRET_KEY = env("AWS_SECRETKEY", default='')
 AWS_REGION = env("AWS_REGION", default='us-east-1')
 AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
+AWS_TEMP_BUCKET_NAME = env("AWS_TEMP_BUCKET_NAME", default='')
 INDEX_LAMBDA = env(
     "capitolzen_search_bills", default="capitolzen_search_bills")
 
@@ -468,6 +489,7 @@ SLACK_URL = env("UPDRAFT_SLACK_URL", default='')
 
 # INTERCOM
 INTERCOM_ACCESS_TOKEN = env("INTERCOM_ACCESS_TOKEN", default="")
+INTERCOM_ENABLE_SYNC = True
 
 # STRIPE
 STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY", default="")
@@ -477,3 +499,4 @@ STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
 STREAM_API_KEY = env("STREAM_API_KEY", default="")
 STREAM_API_SECRET = env("STREAM_API_SECRET", default="")
 STREAM_FEED_MANAGER_CLASS = 'capitolzen.meta.stream.FeedManager'
+

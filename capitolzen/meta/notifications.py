@@ -27,6 +27,13 @@ def admin_slack(message):
 
 @shared_task
 def send_report(user, url):
+    """
+    TODO: Convert to templated email. see other examples.
+    :param message:
+    :param subject:
+    :return:
+    """
+
     recipients = [user.username]
     html = "<p>Your report is now available.<p><p><a href='%s'>Download</a><p>Or copy this link</p><p>%s</p>" % \
            (url, url)
@@ -41,6 +48,13 @@ def send_report(user, url):
 
 @shared_task
 def admin_email(message, subject=False):
+    """
+    TODO: Convert to templated email. see other examples.
+    :param message:
+    :param subject:
+    :return:
+    """
+
     recipients = ['dwasserman@capitolzen.com']
     html = "<p>%s<p>" % message
     sp = client()
@@ -59,6 +73,13 @@ def admin_email(message, subject=False):
 
 @shared_task
 def api_email(recpients, subject, message):
+    """
+    TODO: Convert to templated email. see other examples.
+    :param message:
+    :param subject:
+    :return:
+    """
+
     sp = client()
     sp.transmission.send(
         recpients=recpients,
