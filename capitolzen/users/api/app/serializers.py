@@ -29,7 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
                 message="Email address is already in use",
             )]
     )
-    avatar = RemoteFileField()
+    avatar = RemoteFileField(required=False)
 
     class Meta:
         model = User

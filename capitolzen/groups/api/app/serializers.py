@@ -22,7 +22,6 @@ class GroupSerializer(serializers.ModelSerializer):
                   'active',
                   'contacts',
                   'description',
-                  'logo',
                   'created',
                   'starred',
                   'avatar',
