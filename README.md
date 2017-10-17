@@ -1,4 +1,4 @@
-# capitolzen / Application Backend
+# CapitolZen / Application Backend
 
 ## Information
 This Django app is used for the generic multi-tenant SaaS solution used by the primary frontend application.

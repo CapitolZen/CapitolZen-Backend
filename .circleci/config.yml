@@ -28,4 +28,4 @@ jobs:
           name: Run Tests
           command: |
             set -ou pipefail
-            docker-compose run pycharm python manage.py test capitolzen -v 3 --noinput
+            sh ~/$CIRCLE_PROJECT_REPONAME/utilities/circletestrunner.sh
