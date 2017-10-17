@@ -28,4 +28,4 @@ jobs:
           name: Run Tests
           command: |
             set -ou pipefail
-            sh ~/$CIRCLE_PROJECT_REPONAME/utilities/circletestrunner.sh
+            docker-compose run pycharm sh /app/.devops/circletestrunner.sh

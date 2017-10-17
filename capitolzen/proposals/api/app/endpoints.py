@@ -94,6 +94,17 @@ class BillViewSet(mixins.RetrieveModelMixin,
     )
     ordering = ('state', 'state_id', )
 
+    @list_route(methods=['GET'])
+    def list_saved(self, request):
+        wrappers = Wrapper.objects.filter(organization__users=request.user).prefetch_related('bill')
+        bill_list = []
+        for wrapper in wrappers:
+            if any(b.id == wrapper.bill.id for b in bill_list):
+                bill_list.append(wrapper.bil)
+
+        serializer = BillSerializer(bill_list, many=True)
+        return Response(serializer.data)
+
 
 class BillSearchView(es_views.ListElasticAPIView):
     es_client = Elasticsearch(

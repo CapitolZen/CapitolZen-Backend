@@ -1,7 +1,12 @@
 from rest_framework_json_api import serializers
+from rest_framework_json_api.relations import ResourceRelatedField
 
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
-from capitolzen.organizations.models import (Organization, OrganizationInvite)
+from capitolzen.organizations.models import (
+    Organization,
+    OrganizationInvite,
+    File
+)
 from capitolzen.users.models import User
 
 
@@ -10,8 +15,8 @@ from capitolzen.users.models import User
 class OrganizationSerializer(BaseInternalModelSerializer):
     user_is_member = serializers.ReadOnlyField()
     id = serializers.ReadOnlyField()
-    is_active = serializers.ReadOnlyField()
-    avatar = RemoteFileField()
+    is_active = serializers.BooleanField(read_only=True)
+    avatar = RemoteFileField(required=False)
 
     class Meta:
         model = Organization
@@ -67,3 +72,21 @@ class OrganizationInviteSerializer(BaseInternalModelSerializer):
             'status'
         )
 
+
+class FileSerializer(serializers.ModelSerializer):
+    file = RemoteFileField()
+    organization = ResourceRelatedField(many=False, queryset=Organization.objects)
+    user = ResourceRelatedField(many=False, queryset=User.objects)
+
+    class Meta:
+        model = File
+        fields = ('id',
+                  'metadata',
+                  'created',
+                  'modified',
+                  'visibility',
+                  'user_path',
+                  'organization',
+                  'user',
+                  'name')
+        read_only_fields = ('id',)

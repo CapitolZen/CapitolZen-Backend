@@ -54,10 +54,19 @@ class NoByteCharField(serializers.CharField):
 
 
 class RemoteFileField(serializers.Field):
+
+    def __init__(self, required=True):
+        args = {
+            'required': required,
+            'allow_null': not required
+        }
+        super().__init__(**args)
+        print(self.allow_null)
+
     """
     Returns the full url to whatever file exists.
 
-    If a url is provided, we move it to the proper location for storage.
+    If a url is provided, we move it to the proper, location for storage.
 
     I think this whole thing is pretty questionable.
     """
