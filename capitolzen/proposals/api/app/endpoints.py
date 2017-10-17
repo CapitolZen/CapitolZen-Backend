@@ -84,7 +84,8 @@ class CommitteeViewSet(viewsets.ReadOnlyModelViewSet):
 class WrapperFilter(FilterSet):
     state_id = CharFilter(name='bill__state_id')
     state = CharFilter(name='bill__state')
-
+    bill_id = CharFilter(name='bill__id')
+    
     class Meta:
         model = Wrapper
         fields = {
