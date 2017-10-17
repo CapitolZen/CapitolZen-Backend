@@ -12,7 +12,6 @@ from capitolzen.users.utils import token_decode, token_encode
 from capitolzen.users.notifications import email_user_password_reset_request
 
 
-
 User = get_user_model()
 
 
@@ -150,7 +149,8 @@ class ResetPasswordRequestSerializer(serializers.Serializer):
             return True
 
         #
-        # Again, don't tell the requestor anything about the permissions of the user.
+        # Again, don't tell the requestor anything about the
+        # permissions of the user.
         if user.is_staff or user.is_superuser:
             return True
 
@@ -173,7 +173,9 @@ class ResetPasswordSerializer(serializers.Serializer):
     def validate(self, data):
         # Perform server side validation
         if data['password'] != data['confirm_password']:
-            raise serializers.ValidationError('Password and Confirm Password should be the same')
+            raise serializers.ValidationError(
+                'Password and Confirm Password should be the same'
+            )
 
         payload = token_decode(data['token'])
         if not payload:
@@ -223,7 +225,9 @@ class ChangePasswordSerializer(serializers.Serializer):
 
         # Perform server side validation
         if data['password'] != data['confirm_password']:
-            raise serializers.ValidationError('Password and Confirm Password should be the same')
+            raise serializers.ValidationError(
+                'Password and Confirm Password should be the same'
+            )
 
         return data
 

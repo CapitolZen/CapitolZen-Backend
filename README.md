@@ -1,4 +1,4 @@
-# Downdraft / Application Backend
+# capitolzen / Application Backend
 
 ## Information
 This Django app is used for the generic multi-tenant SaaS solution used by the primary frontend application.
@@ -19,8 +19,8 @@ You'll need to get the env file from someone who has it. (See Matt Wisner) Renam
 
 **Starting w/ Docker For Mac**
 ```bash
-docker-compose -f dev.yml build
-docker-compose -f dev.yml up
+docker-compose build
+docker-compose up
 ```
 
 ### Working With
@@ -28,29 +28,29 @@ You'll need to get the env file from someone who has it. (See Matt Wisner)
 
 You can run management commands using:
 ```bash
-docker-compose -f dev.yml run pycharm python manage.py
+docker-compose run pycharm python manage.py
 ```
 
 **Running Tests**
 ```bash
-docker-compose -f dev.yml run pycharm sh utilities/tests.sh
+docker-compose run pycharm sh utilities/tests.sh
 ```
 
 **Rebuilding Search Index**:
 ```bash
-docker-compose -f dev.yml run pycharm python manage.py search_index --rebuild
+docker-compose run pycharm python manage.py search_index --rebuild
 ```
 
 
 **Connecting To DB w/ CLI**
 ```bash
-docker-compose -f dev.yml run postgres psql -h postgres -U downdraft
+docker-compose run postgres psql -h postgres -U capitolzen
 ```
 
 **Code Quality**
 ```bash
-docker-compose -f dev.yml run pycharm coverage run --source='/app' manage.py test --failfast
-docker-compose -f dev.yml run pycharm flake8 /app/downdraft. --ignore C901
+docker-compose run pycharm coverage run --source='/app' manage.py test --failfast
+docker-compose run pycharm flake8 /app/capitolzen. --ignore C901
 ```
 
 **Email Stuff**
