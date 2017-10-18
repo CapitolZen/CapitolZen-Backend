@@ -14,5 +14,5 @@ set -o errexit
 # If we call our validation commands with individual docker-compose commands
 # it results in a new container being created without files from the previous
 # one.
-# docker-compose -f dev.yml run pycharm sh /app/utilities/validator.sh
-docker-compose -f dev.yml run pycharm sh /app/utilities/tests.sh
+# sh /app/utilities/validator.sh
+sh /app/utilities/tests.sh
