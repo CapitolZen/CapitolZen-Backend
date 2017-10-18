@@ -16,7 +16,7 @@ class BillFilter(FilterSet):
     sponsor_name = CharFilter(name='sponsor__name', method='sponsor_full_name')
 
     def sponsor_full_name(self, queryset, name, value):
-        return queryset.filter(Q(sponsor__first_name__contains=value) | Q(sponsor__last_name__contains=value))
+        return queryset.filter(Q(sponsor__first_name__icontains=value) | Q(sponsor__last_name__icontains=value))
 
     introduced_in = CharFilter(name='first', method='action_date_filter')
     active_in = CharFilter(name='last', method='action_date_filter')
@@ -27,6 +27,16 @@ class BillFilter(FilterSet):
         params = {}
         key = "action_dates__%s__range" % name
         params[key] = [str(date_range), str(today)]
+        return queryset.filter(**params)
+
+    introduced_range = CharFilter(name='first', method='action_date_range_filter')
+    active_range = CharFilter(name='last', method='action_date_range_filter')
+
+    def action_date_range_filter(self, queryset, name, value):
+        params = {}
+        key = "action_dates__%s__range" % name
+        parts = value.split(',')
+        params[key] = [parts[0], parts[1]]
         return queryset.filter(**params)
 
     class Meta:
