@@ -5,8 +5,6 @@ volumes:
   postgres_backup_dev: {}
   esdata1:
     driver: local
-  esdata2:
-    driver: local
 
 services:
 
@@ -36,7 +34,7 @@ services:
       dockerfile: ./compose/django/Dockerfile-dev
     env_file:
       - .env
-    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch1:9200", "--", "/start-dev.sh"]
+    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch:9200", "--", "/start-dev.sh"]
     depends_on:
       - postgres
       - mailhog
@@ -87,7 +85,7 @@ services:
     links:
       - postgres
       - redis
-    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch1:9200", "--", celery, -A, capitolzen.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
+    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch:9200", "--", celery, -A, capitolzen.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
     volumes:
       - .:/app
 
@@ -107,7 +105,7 @@ services:
     links:
       - postgres
       - redis
-    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch1:9200", "--", celery, -A, capitolzen.tasks, beat, --workdir=/app, -l, INFO]
+    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch:9200", "--", celery, -A, capitolzen.tasks, beat, --workdir=/app, -l, INFO]
     volumes:
       - .:/app
 
@@ -120,11 +118,11 @@ services:
 
   #
   # Elastic Search Cluster
-  elasticsearch1:
+  elasticsearch:
     build:
       context: .
       dockerfile: ./compose/elastic/Dockerfile
-    container_name: elasticsearch1
+    container_name: elasticsearch
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
@@ -138,20 +136,3 @@ services:
       - esdata1:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
-
-  elasticsearch2:
-    build:
-      context: .
-      dockerfile: ./compose/elastic/Dockerfile
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms128m -Xmx128m"
-      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    mem_limit: 1g
-    volumes:
-      - esdata2:/usr/share/elasticsearch/data
