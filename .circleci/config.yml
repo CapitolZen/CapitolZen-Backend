@@ -25,6 +25,11 @@ jobs:
             docker-compose build
 
       - run:
+          name: Increase VM Max Map Count
+          command: |
+            sudo sysctl -w vm.max_map_count=262144
+
+      - run:
           name: Run Tests
           command: |
             set -ou pipefail
