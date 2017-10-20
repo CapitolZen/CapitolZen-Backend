@@ -455,6 +455,11 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': False,
         },
+        'cz_logger': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propogate': False
+        }
     },
 }
 

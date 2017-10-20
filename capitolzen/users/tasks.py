@@ -1,9 +1,10 @@
 from celery.utils.log import get_task_logger
 from celery import shared_task
-from capitolzen.users.models import Notification, User
+
 from intercom.errors import ResourceNotFound
-from django.conf import settings
-from .utils import get_intercom_client
+
+from capitolzen.users.models import Notification, User
+from capitolzen.users.utils import get_intercom_client
 
 logger = get_task_logger(__name__)
 
@@ -88,6 +89,7 @@ def intercom_manage_user_companies(user_id):
 
     intercom_user.companies = companies
     intercom.users.save(intercom_user)
+
 
 @shared_task
 def create_notification_task(title, categories, bill):

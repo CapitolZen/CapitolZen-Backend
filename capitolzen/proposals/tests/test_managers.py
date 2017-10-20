@@ -26,10 +26,6 @@ class TestBillManager(TestCase):
 
     @mock.patch('capitolzen.proposals.managers.BillManager._get_remote_list')
     def test_get_remote_list(self, m):
-        """
-        Tests get_average_idle_time_last_day: tests that zero is returned
-        :return: 0 (ZeroDivisionError)
-        """
         with open('capitolzen/proposals/tests/sample_data/bills/'
                   'list.json') as data_file:
             m.return_value = json.load(data_file)
@@ -40,10 +36,6 @@ class TestBillManager(TestCase):
 
     @mock.patch('capitolzen.proposals.managers.BillManager._get_remote_list')
     def test_get_remote_list_no_data(self, m):
-        """
-        Tests get_average_idle_time_last_day: tests that zero is returned
-        :return: 0 (ZeroDivisionError)
-        """
         m.return_value = []
         self.assertEqual(
             len(self.manager(AVAILABLE_STATES[0].name)._get_remote_list()),
@@ -73,7 +65,7 @@ class TestBillManager(TestCase):
 
     @mock.patch(
         'capitolzen.proposals.managers.BillManager._get_remote_list')
-    def test_get_remote_detail(self, m):
+    def test_get_remote_list_population(self, m):
         cache.clear()
         with open('capitolzen/proposals/tests/sample_data/bills/'
                   'list.json') as data_file:

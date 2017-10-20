@@ -1,16 +1,7 @@
-import hashlib
-from time import time
-from base64 import b64encode, b64decode
-
-from django.conf import settings
-from django.contrib.auth.models import AbstractUser
-from django.core.mail import send_mail
 from django.db import models
 from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractUser
-from model_utils.models import TimeStampedModel
-from config.models import AbstractBaseModel
 
 from dry_rest_permissions.generics import allow_staff_or_superuser
 

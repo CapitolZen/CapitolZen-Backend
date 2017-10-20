@@ -10,8 +10,6 @@ from capitolzen.organizations.models import (
 from capitolzen.users.models import User
 
 
-
-
 class OrganizationSerializer(BaseInternalModelSerializer):
     user_is_member = serializers.ReadOnlyField()
     id = serializers.ReadOnlyField()
@@ -75,7 +73,9 @@ class OrganizationInviteSerializer(BaseInternalModelSerializer):
 
 class FileSerializer(serializers.ModelSerializer):
     file = RemoteFileField()
-    organization = ResourceRelatedField(many=False, queryset=Organization.objects)
+    organization = ResourceRelatedField(
+        many=False, queryset=Organization.objects
+    )
     user = ResourceRelatedField(many=False, queryset=User.objects)
 
     class Meta:

@@ -6,7 +6,6 @@ from config.serializers import (
     BaseInternalModelSerializer
 )
 
-from capitolzen.proposals.utils import time_convert
 from capitolzen.organizations.models import Organization
 from capitolzen.groups.models import Group
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
