@@ -7,3 +7,4 @@ class ProposalsConfig(AppConfig):
     name = 'capitolzen.proposals'
     label = 'proposals'
     verbose_name = 'Proposals'
+

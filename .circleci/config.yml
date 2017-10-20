@@ -25,7 +25,12 @@ jobs:
             docker-compose build
 
       - run:
+          name: Increase VM Max Map Count
+          command: |
+            sudo sysctl -w vm.max_map_count=262144
+
+      - run:
           name: Run Tests
           command: |
             set -ou pipefail
-            docker-compose run pycharm python manage.py test capitolzen -v 3 --noinput
+            docker-compose run pycharm sh /app/utilities/circletestrunner.sh

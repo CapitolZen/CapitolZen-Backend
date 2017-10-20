@@ -1,16 +1,24 @@
+from __future__ import unicode_literals
 import stripe
+from templated_email import send_templated_mail
 
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from config.models import AbstractBaseModel
+
+from django.contrib.postgres.fields import JSONField
+
 from dry_rest_permissions.generics import allow_staff_or_superuser
 from django.contrib.postgres.fields import JSONField
 from model_utils import Choices
-from organizations.abstract import (AbstractOrganization,
-                                    AbstractOrganizationUser,
-                                    AbstractOrganizationOwner)
+
+from config.models import AbstractBaseModel
+from organizations.abstract import (
+    AbstractOrganization,
+    AbstractOrganizationUser,
+    AbstractOrganizationOwner
+)
 from capitolzen.meta.billing import BASIC, PlanChoices
 from capitolzen.organizations.notifications import email_member_invite
 

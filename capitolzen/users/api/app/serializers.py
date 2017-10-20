@@ -1,17 +1,21 @@
+from django.contrib.auth import get_user_model
+
 from rest_framework_json_api import serializers
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework.validators import UniqueValidator
-from django.contrib.auth import get_user_model
-from capitolzen.users.utils import token_decode, token_encode
+
+from config.serializers import BaseInternalModelSerializer, RemoteFileField
+
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
-from capitolzen.users.notifications import email_user_password_reset_request
 from capitolzen.organizations.notifications import email_owner_welcome
-from config.serializers import RemoteFileField
+from capitolzen.users.utils import token_decode, token_encode
+from capitolzen.users.notifications import email_user_password_reset_request
+
 
 User = get_user_model()
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(BaseInternalModelSerializer):
     """
     Model: User
 
@@ -33,23 +37,25 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id',
-                  'created',
-                  'modified',
-                  'metadata',
-                  'name',
-                  'username',
-                  'is_staff',
-                  'is_superuser',
-                  'organizations',
-                  'date_joined',
-                  'avatar',
-                  )
-        read_only_fields = ('id',
-                            'is_staff',
-                            'is_superuser',
-                            'organizations',
-                            'date_joined')
+        fields = (
+            'id',
+            'created',
+            'modified',
+            'name',
+            'username',
+            'is_staff',
+            'is_superuser',
+            'organizations',
+            'date_joined',
+            'avatar',
+        )
+        read_only_fields = (
+            'id',
+            'is_staff',
+            'is_superuser',
+            'organizations',
+            'date_joined',
+        )
         lookup_field = 'id'
 
 
@@ -143,7 +149,8 @@ class ResetPasswordRequestSerializer(serializers.Serializer):
             return True
 
         #
-        # Again, don't tell the requestor anything about the permissions of the user.
+        # Again, don't tell the requestor anything about the
+        # permissions of the user.
         if user.is_staff or user.is_superuser:
             return True
 
@@ -166,7 +173,9 @@ class ResetPasswordSerializer(serializers.Serializer):
     def validate(self, data):
         # Perform server side validation
         if data['password'] != data['confirm_password']:
-            raise serializers.ValidationError('Password and Confirm Password should be the same')
+            raise serializers.ValidationError(
+                'Password and Confirm Password should be the same'
+            )
 
         payload = token_decode(data['token'])
         if not payload:
@@ -216,7 +225,9 @@ class ChangePasswordSerializer(serializers.Serializer):
 
         # Perform server side validation
         if data['password'] != data['confirm_password']:
-            raise serializers.ValidationError('Password and Confirm Password should be the same')
+            raise serializers.ValidationError(
+                'Password and Confirm Password should be the same'
+            )
 
         return data
 

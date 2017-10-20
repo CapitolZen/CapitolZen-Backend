@@ -1,10 +1,20 @@
+import hashlib
+from time import time
+from base64 import b64encode, b64decode
+
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.core.mail import send_mail
 from django.db import models
 from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractUser
 from model_utils.models import TimeStampedModel
 from config.models import AbstractBaseModel
+
 from dry_rest_permissions.generics import allow_staff_or_superuser
+
+from config.models import AbstractNoIDModel, AbstractBaseModel
 
 
 def avatar_directory_path(instance, filename):
@@ -18,13 +28,16 @@ def avatar_directory_path(instance, filename):
     return '{0}/misc/{1}'.format(instance.id, filename)
 
 
-class User(AbstractUser, TimeStampedModel):
+class User(AbstractUser, AbstractNoIDModel):
     first_name = None
     last_name = None
 
     name = models.CharField(_('Name of User'), blank=True, max_length=255)
     metadata = JSONField(default=dict, null=True, blank=True)
-    avatar = models.FileField(blank=True, null=True, max_length=255, upload_to=avatar_directory_path)
+    avatar = models.FileField(
+        blank=True, null=True, max_length=255,
+        upload_to=avatar_directory_path
+    )
 
     def __str__(self):
         return self.name or self.username
@@ -53,7 +66,6 @@ class User(AbstractUser, TimeStampedModel):
 
     def has_object_write_permission(self, request):
         return request.user.id == self.id
-
 
     @staticmethod
     def has_create_permission(request):
