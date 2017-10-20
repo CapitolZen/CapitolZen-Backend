@@ -91,7 +91,9 @@ class RegistrationSerializer(serializers.Serializer):
 
         # Perform server side validation
         if data['password'] != data['confirm_password']:
-            raise serializers.ValidationError('Password and Confirm Password should be the same')
+            raise serializers.ValidationError(
+                'Password and Confirm Password should be the same'
+            )
 
         user_serializer = UserSerializer(data=data)
         user_serializer.is_valid(raise_exception=True)
@@ -221,7 +223,9 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate(self, data):
         # Check current password
         if not data['user'].check_password(data['current_password']):
-            raise serializers.ValidationError('Current password is not correct')
+            raise serializers.ValidationError(
+                'Current password is not correct'
+            )
 
         # Perform server side validation
         if data['password'] != data['confirm_password']:
@@ -239,4 +243,3 @@ class ChangePasswordSerializer(serializers.Serializer):
 
     class Meta:
         model = User
-

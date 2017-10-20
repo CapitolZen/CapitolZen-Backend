@@ -7,7 +7,6 @@ from capitolzen.users.models import User
 from capitolzen.groups.models import Group, Report, Comment
 
 
-
 class GroupSerializer(BaseInternalModelSerializer):
     organization = ResourceRelatedField(
         many=False,

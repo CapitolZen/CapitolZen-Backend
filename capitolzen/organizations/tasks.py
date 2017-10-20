@@ -1,10 +1,14 @@
 from celery import shared_task
 
+from intercom.errors import ResourceNotFound
+
+from stripe.error import StripeError
+
 from capitolzen.users.utils import get_intercom_client
 from capitolzen.organizations.models import Organization
-from intercom.errors import ResourceNotFound
-from .utils import get_stripe_client
-from stripe.error import StripeError
+from capitolzen.organizations.utils import get_stripe_client
+
+
 @shared_task()
 def intercom_manage_organization(organization_id, operation):
     """
@@ -83,6 +87,7 @@ def intercom_manage_organization(organization_id, operation):
 
     return True
 
+
 @shared_task()
 def stripe_manage_customer(organization_id, operation):
     """
@@ -140,7 +145,6 @@ def stripe_manage_customer(organization_id, operation):
             cu.delete()
         except StripeError:
             pass
-
 
     if operation == "create":
         _create()

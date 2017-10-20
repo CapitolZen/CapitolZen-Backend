@@ -1,11 +1,11 @@
 from django import forms
 from django.contrib import admin
-from config.admin import BaseModelAdmin
 from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
-from .models import User, Notification
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 
+from config.admin import BaseModelAdmin
+from capitolzen.users.models import User, Notification
 
 
 class MyUserChangeForm(UserChangeForm):
@@ -38,7 +38,8 @@ class MyUserAdmin(AuthUserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         (_('Personal info'), {'fields': ('name', 'email')}),
-        (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser')}),
+        (_('Permissions'), {'fields': (
+            'is_active', 'is_staff', 'is_superuser')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
     list_display = ('username', 'name', 'email', 'is_active', 'is_superuser')
@@ -47,5 +48,6 @@ class MyUserAdmin(AuthUserAdmin):
 
 class NotificationAdmin(BaseModelAdmin):
     list_display = ['message', 'is_read', 'created', 'user']
+
 
 admin.site.register(Notification, NotificationAdmin)

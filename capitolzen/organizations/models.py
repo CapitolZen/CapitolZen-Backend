@@ -1,16 +1,14 @@
 from __future__ import unicode_literals
 import stripe
-from templated_email import send_templated_mail
 
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
 from django.contrib.postgres.fields import JSONField
 
 from dry_rest_permissions.generics import allow_staff_or_superuser
-from django.contrib.postgres.fields import JSONField
+
 from model_utils import Choices
 
 from config.models import AbstractBaseModel
@@ -64,14 +62,22 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     billing_name = models.CharField(max_length=256, blank=True, null=True)
     billing_email = models.EmailField(max_length=256, blank=True, null=True)
     billing_phone = models.CharField(max_length=256, blank=True, null=True)
-    billing_address_one = models.CharField(max_length=254, null=True, blank=True)
-    billing_address_two = models.CharField(max_length=254, blank=True, null=True)
+    billing_address_one = models.CharField(
+        max_length=254, null=True, blank=True
+    )
+    billing_address_two = models.CharField(
+        max_length=254, blank=True, null=True
+    )
     billing_city = models.CharField(max_length=254, null=True, blank=True)
     billing_state = models.CharField(max_length=100, null=True, blank=True)
     billing_zip_code = models.CharField(max_length=10, null=True, blank=True)
 
-    demographic_org_type = models.CharField(blank=True, max_length=255, choices=ORG_DEMO, default='individual')
-    avatar = models.FileField(blank=True, null=True, max_length=255, upload_to=avatar_directory_path)
+    demographic_org_type = models.CharField(
+        blank=True, max_length=255, choices=ORG_DEMO, default='individual'
+    )
+    avatar = models.FileField(
+        blank=True, null=True, max_length=255, upload_to=avatar_directory_path
+    )
     contacts = JSONField(blank=True, default=dict)
 
     def owner_user_account(self):
@@ -187,11 +193,11 @@ class OrganizationInvite(AbstractBaseModel):
 
     def send_user_invite(self):
         url = "%s/claim/%s" % (settings.APP_FRONTEND, self.id)
-        email_member_invite(self.email,
-                          action_url=url,
-                          name=self.user.name,
-                          organization_name=self.organization_name)
-
+        email_member_invite(
+            self.email,
+            action_url=url,
+            name=self.user.name,
+            organization_name=self.organization_name)
 
     class JSONAPIMeta:
         resource_name = "invites"

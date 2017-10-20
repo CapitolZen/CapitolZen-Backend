@@ -1,4 +1,6 @@
 from json import loads
+from logging import getLogger
+
 from django_filters import rest_framework as filters
 from rest_framework import status, exceptions
 from rest_framework.decorators import detail_route, list_route
@@ -13,6 +15,8 @@ from capitolzen.groups.tasks import generate_report, email_report
 from capitolzen.groups.api.app.serializers import (
     GroupSerializer, ReportSerializer
 )
+
+logger = getLogger('cz_logger')
 
 
 class GroupFilter(OrganizationFilterSet):
@@ -140,8 +144,8 @@ class ReportViewSet(OwnerBasedViewSet):
         report = serializer.instance
         try:
             generate_report(report)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.exception(e)
 
     @detail_route(methods=['GET'])
     def url(self, request, pk):
@@ -166,5 +170,3 @@ class ReportViewSet(OwnerBasedViewSet):
             "status_code": status.HTTP_200_OK,
             "message": "Report hopefully emailed"
         })
-
-
