@@ -480,7 +480,7 @@ OPEN_STATES_URL = env(
 ELASTICSEARCH_DSL = {
     'default': {
         'hosts':
-            env("ELASTIC_SEARCH_URL", default='elastic:changeme@elasticsearch1')
+            env("ELASTIC_SEARCH_URL", default='elastic:changeme@elasticsearch')
     },
 }
 
