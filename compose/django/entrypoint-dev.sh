@@ -2,6 +2,6 @@
 set -e
 cmd="$@"
 
-bash /wait-for-it.sh postgres:5432
+bash /wait-for-it.sh elasticsearch:9200
 
 exec $cmd
