@@ -135,9 +135,11 @@ class Legislator(AbstractBaseModel, MixinExternalData):
     url = models.URLField(blank=True)
     photo_url = models.URLField(blank=True)
     first_name = models.CharField(max_length=255)
-    middle_name = models.CharField(max_length=255)
+    middle_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255)
     suffixes = models.CharField(max_length=255, blank=True, null=True)
+    updated_at = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(null=True)
 
     # Properties
     @property
@@ -185,6 +187,8 @@ class Committee(AbstractBaseModel, MixinExternalData):
     remote_id = models.CharField(max_length=255, db_index=True)
     parent_id = models.CharField(max_length=255, null=True, blank=True)
     subcommittee = models.CharField(max_length=255, null=True, blank=True)
+    updated_at = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(null=True)
 
     class Meta:
         abstract = False

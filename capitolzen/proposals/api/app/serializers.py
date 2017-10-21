@@ -75,8 +75,23 @@ class LegislatorSerializer(BaseModelSerializer):
             'middle_name',
             'last_name',
             'suffixes',
-            'full_name'
+            'full_name',
+            'created_at',
+            'updated_at'
         )
+
+    def create(self, validated_data):
+        remote_id = validated_data.pop('remote_id')
+        instance, created = Legislator.objects.get_or_create(
+            remote_id=remote_id,
+            defaults={
+                **validated_data
+            }
+        )
+        if instance.modified < validated_data.get('updated_at') or created:
+            instance.update_from_source(validated_data)
+            instance.save()
+        return instance
 
 
 class CommitteeSerializer(BaseModelSerializer):
@@ -88,8 +103,24 @@ class CommitteeSerializer(BaseModelSerializer):
             'chamber',
             'remote_id',
             'parent_id',
-            'subcommittee'
+            'subcommittee',
+            'created_at',
+            'updated_at'
         )
+
+    def create(self, validated_data):
+        remote_id = validated_data.pop('remote_id')
+        instance, created = Committee.objects.get_or_create(
+            remote_id=remote_id,
+            defaults={
+                **validated_data
+            }
+        )
+        if instance.modified < validated_data.get('updated_at') and not created:
+            for attr, value in validated_data.iteritems():
+                setattr(instance, attr, value)
+            instance.save()
+        return instance
 
 
 class WrapperSerializer(BaseInternalModelSerializer):
