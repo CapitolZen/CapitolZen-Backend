@@ -1,0 +1,19 @@
+{
+  "members": [],
+  "created_at": "2017-04-16 06:22:56",
+  "updated_at": "2017-05-25 06:31:33",
+  "all_ids": [
+    "MIC000186"
+  ],
+  "parent_id": null,
+  "state": "mi",
+  "sources": [
+    {
+      "url": "http://www.senate.michigan.gov/committee/appropssubcommittee.html"
+    }
+  ],
+  "subcommittee": "Capital Outlay",
+  "committee": "Appropriations",
+  "chamber": "committee",
+  "id": "MIC000186"
+}

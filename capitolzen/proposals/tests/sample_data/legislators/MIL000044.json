@@ -1,0 +1,118 @@
+{
+  "last_name": "Durhal",
+  "updated_at": "2017-10-20 06:53:48",
+  "sources": [
+    {
+      "url": "http://housedems.com/state-rep-fred-durhal"
+    }
+  ],
+  "full_name": "Frederick Durhal Jr.",
+  "old_roles": {
+    "2013-2014": [
+      {
+        "term": "2013-2014",
+        "end_date": null,
+        "district": "5",
+        "chamber": "lower",
+        "state": "mi",
+        "party": "Democratic",
+        "type": "member",
+        "start_date": null
+      },
+      {
+        "term": "2013-2014",
+        "committee_id": "MIC000022",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Appropriations",
+        "position": "member",
+        "type": "committee member"
+      }
+    ],
+    "2011-2012": [
+      {
+        "term": "2011-2012",
+        "end_date": null,
+        "district": "6",
+        "chamber": "lower",
+        "state": "mi",
+        "party": "Democratic",
+        "type": "member",
+        "start_date": null
+      }
+    ],
+    "2015-2016": [
+      {
+        "term": "2015-2016",
+        "end_date": null,
+        "district": "5",
+        "chamber": "lower",
+        "state": "mi",
+        "party": "Democratic",
+        "type": "member",
+        "start_date": null
+      },
+      {
+        "term": "2015-2016",
+        "committee_id": "MIC000022",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Appropriations",
+        "position": "member",
+        "type": "committee member"
+      }
+    ]
+  },
+  "id": "MIL000044",
+  "first_name": "Fred",
+  "middle_name": "",
+  "district": "5",
+  "state": "mi",
+  "votesmart_id": "20126",
+  "party": "Democratic",
+  "csrfmiddlewaretoken": "6W0EVxLP4KAC1iZ0gGYjHaREUO0HtFaK",
+  "email": "FredDurhal@house.mi.gov",
+  "+office": "S 0685 HOB",
+  "all_ids": [
+    "MIL000044",
+    "MIL000154",
+    "MIL000191"
+  ],
+  "leg_id": "MIL000044",
+  "+leg_url": "http://006.housedems.com/",
+  "active": true,
+  "transparencydata_id": "21bf75b05a4b4c7587ba06e823e616bf",
+  "nickname": "",
+  "photo_url": "http://media.housedems.com/media_cache/c5/89/40/5e/71/8c/76/d5/9e/7c/7b/e2/6e/fc/9f/20/84/12/50/5c/Durhal_Headshot.jpg",
+  "+phone": "(517) 373-0844",
+  "roles": [
+    {
+      "term": "2017-2018",
+      "end_date": null,
+      "district": "5",
+      "chamber": "lower",
+      "state": "mi",
+      "party": "Democratic",
+      "type": "member",
+      "start_date": null
+    }
+  ],
+  "url": "http://housedems.com/state-rep-fred-durhal",
+  "country": "us",
+  "created_at": "2011-04-07 20:15:35",
+  "level": "state",
+  "chamber": "lower",
+  "offices": [
+    {
+      "fax": null,
+      "name": "Capitol Office",
+      "phone": "5173730844",
+      "address": "S0589 Anderson House Office Building\n124 North Capitol Avenue\nLansing, MI 48933",
+      "type": "capitol",
+      "email": "FredDurhal@house.mi.gov"
+    }
+  ],
+  "suffixes": "Jr."
+}

@@ -1,0 +1,145 @@
+{
+  "last_name": "Greimel",
+  "updated_at": "2017-10-20 06:53:48",
+  "sources": [
+    {
+      "url": "http://housedems.com/state-rep-tim-greimel"
+    }
+  ],
+  "full_name": "Tim Greimel",
+  "old_roles": {
+    "2015-2016": [
+      {
+        "term": "2015-2016",
+        "end_date": null,
+        "district": "29",
+        "chamber": "lower",
+        "state": "mi",
+        "party": "Democratic",
+        "type": "member",
+        "start_date": null
+      },
+      {
+        "term": "2015-2016",
+        "committee_id": "MIC000028",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Government Operations",
+        "position": "vice chair",
+        "type": "committee member"
+      }
+    ],
+    "2013-2014": [
+      {
+        "term": "2013-2014",
+        "end_date": null,
+        "district": "29",
+        "chamber": "lower",
+        "state": "mi",
+        "party": "Democratic",
+        "type": "member",
+        "start_date": null
+      },
+      {
+        "term": "2013-2014",
+        "committee_id": "MIC000028",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Government Operations",
+        "position": "member",
+        "type": "committee member"
+      }
+    ],
+    "2011-2012": [
+      {
+        "term": "2011-2012",
+        "end_date": null,
+        "district": "29",
+        "chamber": "lower",
+        "state": "mi",
+        "party": "Democratic",
+        "type": "member",
+        "start_date": null
+      },
+      {
+        "term": "2011-2012",
+        "committee_id": "MIC000026",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Energy and Technology",
+        "position": "member",
+        "type": "committee member"
+      },
+      {
+        "term": "2011-2012",
+        "committee_id": "MIC000029",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Health Policy",
+        "position": "member",
+        "type": "committee member"
+      },
+      {
+        "term": "2011-2012",
+        "committee_id": "MIC000033",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Military and Veterans Affairs and Homeland Security",
+        "position": "member",
+        "type": "committee member"
+      }
+    ]
+  },
+  "id": "MIL000150",
+  "first_name": "Tim",
+  "middle_name": "",
+  "district": "29",
+  "state": "mi",
+  "votesmart_id": "88580",
+  "party": "Democratic",
+  "csrfmiddlewaretoken": "6W0EVxLP4KAC1iZ0gGYjHaREUO0HtFaK",
+  "email": "TimGreimel@house.mi.gov",
+  "+office": "N 0793 HOB",
+  "all_ids": [
+    "MIL000150"
+  ],
+  "leg_id": "MIL000150",
+  "active": true,
+  "transparencydata_id": "60021d0609c04e5e8a85015ac747eca3",
+  "nickname": "",
+  "photo_url": "http://media.housedems.com/media_cache/bd/16/e5/9e/cd/6f/c1/5f/9d/83/56/d3/a8/6a/9a/26/74/91/f6/4e/Tim_Greimel_HD_29.jpg",
+  "+phone": "(517) 373-0475",
+  "roles": [
+    {
+      "term": "2017-2018",
+      "end_date": null,
+      "district": "29",
+      "chamber": "lower",
+      "state": "mi",
+      "party": "Democratic",
+      "type": "member",
+      "start_date": null
+    }
+  ],
+  "level": "state",
+  "url": "http://housedems.com/state-rep-tim-greimel",
+  "country": "us",
+  "created_at": "2012-03-21 01:27:10",
+  "chamber": "lower",
+  "offices": [
+    {
+      "fax": null,
+      "name": "Capitol Office",
+      "phone": "5173730475",
+      "address": "N0793 Anderson House Office Building\n124 North Capitol Avenue\nLansing, MI 48933",
+      "type": "capitol",
+      "email": "TimGreimel@house.mi.gov"
+    }
+  ],
+  "suffixes": ""
+}

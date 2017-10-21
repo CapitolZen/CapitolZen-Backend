@@ -1,0 +1,41 @@
+[
+  {
+    "created_at": "2017-04-16 06:22:56",
+    "updated_at": "2017-05-25 06:31:33",
+    "all_ids": [
+      "MIC000184"
+    ],
+    "parent_id": null,
+    "state": "mi",
+    "subcommittee": "Agriculture and Rural Development",
+    "committee": "Appropriations",
+    "chamber": "committee",
+    "id": "MIC000184"
+  },
+  {
+    "created_at": "2017-04-16 06:22:56",
+    "updated_at": "2017-05-25 06:31:33",
+    "all_ids": [
+      "MIC000185"
+    ],
+    "parent_id": null,
+    "state": "mi",
+    "subcommittee": "Environmental Quality",
+    "committee": "Appropriations",
+    "chamber": "committee",
+    "id": "MIC000185"
+  },
+  {
+    "created_at": "2017-04-16 06:22:56",
+    "updated_at": "2017-05-25 06:31:33",
+    "all_ids": [
+      "MIC000186"
+    ],
+    "parent_id": null,
+    "state": "mi",
+    "subcommittee": "Capital Outlay",
+    "committee": "Appropriations",
+    "chamber": "committee",
+    "id": "MIC000186"
+  }
+]
