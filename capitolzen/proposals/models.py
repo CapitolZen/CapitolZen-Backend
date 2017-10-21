@@ -21,7 +21,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
     history = JSONField(default=dict, blank=True, null=True)
     action_dates = JSONField(default=dict, blank=True, null=True)
     chamber = models.CharField(max_length=255, null=True)
-    type = JSONField(default=list, max_length=255, null=True)
+    type = models.CharField(default=None, max_length=255, null=True)
     status = models.TextField(null=True)
     current_committee = models.ForeignKey('proposals.Committee', null=True)
     sponsor = models.ForeignKey('proposals.Legislator', null=True)
