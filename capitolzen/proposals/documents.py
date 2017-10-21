@@ -31,7 +31,6 @@ class BillDocument(DocType):
     sources = fields.ObjectField()
     documents = fields.ObjectField()
     versions = fields.NestedField()
-    type = fields.NestedField()
     bill_text = fields.TextField(
         analyzer=html_strip,
         fields={'raw': Keyword()}
@@ -51,6 +50,7 @@ class BillDocument(DocType):
             'status',
             'title',
             'summary',
+            'type'
         ]
 
     def prepare_id(self, instance):
