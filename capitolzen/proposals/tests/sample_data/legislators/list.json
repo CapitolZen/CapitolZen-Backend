@@ -1,0 +1,125 @@
+[
+  {
+    "last_name": "Durhal",
+    "updated_at": "2017-10-20 06:53:48",
+    "full_name": "Frederick Durhal Jr.",
+    "id": "MIL000044",
+    "first_name": "Fred",
+    "middle_name": "",
+    "district": "5",
+    "state": "mi",
+    "votesmart_id": "20126",
+    "party": "Democratic",
+    "csrfmiddlewaretoken": "6W0EVxLP4KAC1iZ0gGYjHaREUO0HtFaK",
+    "email": "FredDurhal@house.mi.gov",
+    "+office": "S 0685 HOB",
+    "all_ids": [
+      "MIL000044",
+      "MIL000154",
+      "MIL000191"
+    ],
+    "leg_id": "MIL000044",
+    "+leg_url": "http://006.housedems.com/",
+    "active": true,
+    "transparencydata_id": "21bf75b05a4b4c7587ba06e823e616bf",
+    "nickname": "",
+    "photo_url": "http://media.housedems.com/media_cache/c5/89/40/5e/71/8c/76/d5/9e/7c/7b/e2/6e/fc/9f/20/84/12/50/5c/Durhal_Headshot.jpg",
+    "+phone": "(517) 373-0844",
+    "url": "http://housedems.com/state-rep-fred-durhal",
+    "country": "us",
+    "created_at": "2011-04-07 20:15:35",
+    "level": "state",
+    "chamber": "lower",
+    "offices": [
+      {
+        "fax": null,
+        "name": "Capitol Office",
+        "phone": "5173730844",
+        "address": "S0589 Anderson House Office Building\n124 North Capitol Avenue\nLansing, MI 48933",
+        "type": "capitol",
+        "email": "FredDurhal@house.mi.gov"
+      }
+    ],
+    "suffixes": "Jr."
+  },
+  {
+    "last_name": "Hughes",
+    "updated_at": "2017-10-20 06:53:48",
+    "full_name": "Holly Hughes",
+    "id": "MIL000129",
+    "first_name": "Holly",
+    "middle_name": "",
+    "district": "91",
+    "state": "mi",
+    "votesmart_id": "105635",
+    "party": "Republican",
+    "email": "HollyHughes@house.mi.gov",
+    "+office": "N 1195 HOB",
+    "all_ids": [
+      "MIL000129",
+      "MIL000303"
+    ],
+    "leg_id": "MIL000129",
+    "+leg_url": "http://www.gophouse.com/welcome.asp?District=091",
+    "active": true,
+    "transparencydata_id": "ef7fed7a25094551aaa3c153db76e117",
+    "photo_url": "http://gophouse.org/wp-content/uploads/2015/01/HUGHES_headshot500.jpg",
+    "+phone": "(517) 373-3436",
+    "url": "http://gophouse.org/representatives/westmi/hughes/",
+    "country": "us",
+    "created_at": "2011-04-07 20:15:35",
+    "level": "state",
+    "chamber": "lower",
+    "offices": [
+      {
+        "fax": null,
+        "name": "Capitol Office",
+        "phone": "5173733436",
+        "address": "N1195 Anderson House Office Building\n124 North Capitol Avenue\nLansing, MI 48933",
+        "type": "capitol",
+        "email": "HollyHughes@house.mi.gov"
+      }
+    ],
+    "suffixes": ""
+  },
+  {
+    "last_name": "Greimel",
+    "updated_at": "2017-10-20 06:53:48",
+    "full_name": "Tim Greimel",
+    "id": "MIL000150",
+    "first_name": "Tim",
+    "middle_name": "",
+    "district": "29",
+    "state": "mi",
+    "votesmart_id": "88580",
+    "party": "Democratic",
+    "csrfmiddlewaretoken": "6W0EVxLP4KAC1iZ0gGYjHaREUO0HtFaK",
+    "email": "TimGreimel@house.mi.gov",
+    "+office": "N 0793 HOB",
+    "all_ids": [
+      "MIL000150"
+    ],
+    "leg_id": "MIL000150",
+    "active": true,
+    "transparencydata_id": "60021d0609c04e5e8a85015ac747eca3",
+    "nickname": "",
+    "photo_url": "http://media.housedems.com/media_cache/bd/16/e5/9e/cd/6f/c1/5f/9d/83/56/d3/a8/6a/9a/26/74/91/f6/4e/Tim_Greimel_HD_29.jpg",
+    "+phone": "(517) 373-0475",
+    "level": "state",
+    "url": "http://housedems.com/state-rep-tim-greimel",
+    "country": "us",
+    "created_at": "2012-03-21 01:27:10",
+    "chamber": "lower",
+    "offices": [
+      {
+        "fax": null,
+        "name": "Capitol Office",
+        "phone": "5173730475",
+        "address": "N0793 Anderson House Office Building\n124 North Capitol Avenue\nLansing, MI 48933",
+        "type": "capitol",
+        "email": "TimGreimel@house.mi.gov"
+      }
+    ],
+    "suffixes": ""
+  }
+]
