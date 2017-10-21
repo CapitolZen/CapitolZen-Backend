@@ -124,6 +124,8 @@ class BillManager(CongressionalManager):
         bill_info = self._get_remote_detail(remote_id)
         if bill_info.get('versions'):
             bill_info['bill_versions'] = bill_info.pop('versions')
+        if isinstance(bill_info.get('type'), list):
+            bill_info['type'] = ",".join(bill_info.get('type'))
         bill_info = BillSerializer(data={
             'remote_id': remote_id,
             **bill_info

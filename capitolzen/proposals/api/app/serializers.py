@@ -42,11 +42,6 @@ class BillSerializer(BaseModelSerializer):
             'updated_at'
         )
 
-    def validate_type(self, data):
-        if isinstance(list, data):
-            return ",".join(data)
-        return data
-
     def create(self, validated_data):
         remote_id = validated_data.pop('remote_id')
         bill, created = Bill.objects.get_or_create(
