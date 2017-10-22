@@ -3,10 +3,9 @@ from requests import get
 from django.conf import settings
 from django.core.cache import cache
 
-from capitolzen.proposals.utils import time_convert
-from capitolzen.proposals.models import Legislator
-from capitolzen.proposals.models import Committee
-from capitolzen.proposals.api.app.serializers import BillSerializer
+from capitolzen.proposals.api.app.serializers import (
+    BillSerializer, LegislatorSerializer, CommitteeSerializer
+)
 
 
 class CongressionalManager(object):
@@ -26,7 +25,7 @@ class CongressionalManager(object):
         self.url = "%s%s/" % (self.domain, self.index)
 
     def _get_remote_detail_response(self, identifier):
-        return None
+        return get("%s%s/" % (self.url, identifier), headers=self.headers)
 
     def _get_remote_list_response(self):
         raise NotImplementedError()
@@ -41,8 +40,8 @@ class CongressionalManager(object):
         response = self._get_remote_detail_response(identifier)
         if response is not None:
             try:
-                responsejson = response.json()
-                return responsejson
+                response_json = response.json()
+                return response_json
             except ValueError as e:
                 return {}
         return {}
@@ -75,22 +74,15 @@ class CommitteeManager(CongressionalManager):
         )
 
     def update(self, local_id, remote_id, resource_info):
-        committee, created = Committee.objects.get_or_create(
-            remote_id=remote_id,
-            defaults={
-                'remote_id': remote_id,
-                'state': resource_info['state'],
-                'chamber': resource_info['chamber'],
-                'name': resource_info['committee'],
-                'subcommittee': resource_info.get('subcommittee', None),
-                'parent_id': resource_info['parent_id']
-            }
-        )
-        if committee.modified < time_convert(resource_info['updated_at']):
-            committee.name = resource_info['committee']
-            committee.subcommittee = resource_info.get('subcommittee', None)
-            committee.save()
-        return committee
+        source = self._get_remote_detail(remote_id)
+        source['name'] = source.pop('committee', None)
+        serializer = CommitteeSerializer(data={
+            'remote_id': remote_id,
+            **source
+        })
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return serializer
 
 
 class BillManager(CongressionalManager):
@@ -116,30 +108,23 @@ class BillManager(CongressionalManager):
 
         return full_list_of_bills
 
-    def _get_remote_detail_response(self, identifier):
-        url = "%s%s/" % (self.url, identifier)
-        return get(url, headers=self.headers)
-
     def update(self, local_id, remote_id, resource_info):
-        bill_info = self._get_remote_detail(remote_id)
-        if bill_info.get('versions'):
-            bill_info['bill_versions'] = bill_info.pop('versions')
-        if isinstance(bill_info.get('type'), list):
-            bill_info['type'] = ",".join(bill_info.get('type'))
-        bill_info = BillSerializer(data={
+        source = self._get_remote_detail(remote_id)
+        if source.get('versions'):
+            source['bill_versions'] = source.pop('versions')
+        if isinstance(source.get('type'), list):
+            source['type'] = ",".join(source.get('type'))
+        serializer = BillSerializer(data={
             'remote_id': remote_id,
-            **bill_info
+            **source
         })
-        bill_info.is_valid(raise_exception=True)
-        bill_info.save()
-        return bill_info
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return serializer
 
 
 class LegislatorManager(CongressionalManager):
     index = "legislators"
-
-    def _get_remote_detail_response(self, identifier):
-        return get("%s%s" % (self.url, identifier), headers=self.headers)
 
     def _get_remote_list_response(self):
         return get(
@@ -148,12 +133,14 @@ class LegislatorManager(CongressionalManager):
         )
 
     def update(self, local_id, remote_id, resource_info):
-        legislator = Legislator.objects.get_or_create(
-            remote_id=remote_id,
-            **resource_info
-        )
         source = self._get_remote_detail(remote_id)
-        legislator.update_from_source(source)
+        serializer = LegislatorSerializer(data={
+            'remote_id': remote_id,
+            **source
+        })
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return serializer
 
     def run(self):
         for human in self._get_remote_list():
