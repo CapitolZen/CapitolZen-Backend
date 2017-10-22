@@ -26,6 +26,13 @@ services:
       - "6379"
 
   #
+  # Tika Document Analysis
+  tika:
+    image: logicalspark/docker-tikaserver:latest
+    ports:
+      - "9998"
+
+  #
   # App
   django:
     restart: on-failure
@@ -50,6 +57,7 @@ services:
     links:
       - postgres
       - redis
+      - tika
       - elasticsearch
 
   #
@@ -71,6 +79,7 @@ services:
     links:
       - postgres
       - redis
+      - tika
       - elasticsearch
 
   #
@@ -90,6 +99,7 @@ services:
     links:
       - postgres
       - redis
+      - tika
       - elasticsearch
     command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch:9200", "--", celery, -A, capitolzen.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
     volumes:
@@ -112,6 +122,7 @@ services:
     links:
       - postgres
       - redis
+      - tika
       - elasticsearch
     command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch:9200", "--", celery, -A, capitolzen.tasks, beat, --workdir=/app, -l, INFO]
     volumes:

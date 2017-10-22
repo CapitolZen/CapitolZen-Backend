@@ -22,6 +22,7 @@ RUN chmod +x /start-dev.sh
 
 COPY ./utilities/wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
+RUN python -m nltk.downloader -d /usr/local/share/nltk_data all
 
 WORKDIR /app
 

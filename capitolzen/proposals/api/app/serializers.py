@@ -1,3 +1,7 @@
+import requests
+
+from tika import parser
+
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework.serializers import ValidationError
 
@@ -9,6 +13,7 @@ from config.serializers import (
 from capitolzen.organizations.models import Organization
 from capitolzen.groups.models import Group
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
+from capitolzen.proposals.utils import summarize
 
 
 class BillSerializer(BaseModelSerializer):
@@ -44,18 +49,31 @@ class BillSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         remote_id = validated_data.pop('remote_id')
-        bill, created = Bill.objects.get_or_create(
+
+        instance, created = Bill.objects.get_or_create(
             remote_id=remote_id,
             defaults={
                 **validated_data
             }
         )
-        if bill.modified < validated_data.get('updated_at') or created:
-            bill.update_from_source(validated_data)
-            if bill.bill_versions:
-                bill.current_version = bill.bill_versions[-1].get('url')
-            bill.save()
-        return bill
+        if instance.modified < validated_data.get('updated_at') or created:
+            instance.update_from_source(validated_data)
+            if instance.bill_versions:
+                instance.current_version = instance.bill_versions[-1].get('url')
+                response = requests.get(instance.current_version)
+                if 200 >= response.status_code < 300:
+                    # By using tika this should work out of the box
+                    # for pdf, html, and the majority of other document tools.
+                    parsed = parser.from_buffer(response.content)
+                    instance.content_metadata = parsed.get('metadata')
+                    instance.content = parsed.get(
+                        'content').replace(
+                        '\n', ' ').replace(
+                        '\r', '').replace(
+                        '\xa0', ' ').strip()
+                    instance.summary = summarize(instance.content)
+                instance.save()
+        return instance
 
 
 class LegislatorSerializer(BaseModelSerializer):
@@ -88,8 +106,9 @@ class LegislatorSerializer(BaseModelSerializer):
                 **validated_data
             }
         )
-        if instance.modified < validated_data.get('updated_at') or created:
-            instance.update_from_source(validated_data)
+        if instance.modified < validated_data.get('updated_at') or not created:
+            for attr, value in validated_data.iteritems():
+                setattr(instance, attr, value)
             instance.save()
         return instance
 
