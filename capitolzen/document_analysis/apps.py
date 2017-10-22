@@ -3,7 +3,6 @@ from logging import getLogger
 from tika import parser
 import nltk
 
-from django.conf import settings
 from django.apps import AppConfig
 
 logger = getLogger("cz_logger")

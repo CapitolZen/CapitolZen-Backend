@@ -1,5 +1,4 @@
 import json
-import base64
 import requests_mock
 from unittest import mock
 
@@ -81,7 +80,7 @@ class TestBillManager(TestCase):
             m.get('http://www.legislature.mi.gov/documents/2017-2018/'
                   'resolutionadopted/House/htm/2017-HAR-0003.htm',
                   content=data_file.read(), status_code=200)
-        response = self.manager(AVAILABLE_STATES[0].name).update(
+        self.manager(AVAILABLE_STATES[0].name).update(
             None, "MIB00012114", None
         )
         self.assertIn(
