@@ -1,13 +1,15 @@
 from __future__ import unicode_literals
-from json import dumps
+
 from django.db import models
-from config.models import AbstractBaseModel
+
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.postgres.fields import ArrayField, JSONField
-from capitolzen.meta.states import AvailableStateChoices, AVAILABLE_STATES
+
+from config.models import AbstractBaseModel
+
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
 from capitolzen.meta.notifications import admin_email
-from .mixins import MixinExternalData
+from capitolzen.proposals.mixins import MixinExternalData
 
 
 class Bill(AbstractBaseModel, MixinExternalData):
@@ -19,22 +21,30 @@ class Bill(AbstractBaseModel, MixinExternalData):
     history = JSONField(default=dict, blank=True, null=True)
     action_dates = JSONField(default=dict, blank=True, null=True)
     chamber = models.CharField(max_length=255, null=True)
-    type = models.CharField(max_length=255, null=True)
+    type = models.CharField(default=None, max_length=255, null=True)
     status = models.TextField(null=True)
     current_committee = models.ForeignKey('proposals.Committee', null=True)
     sponsor = models.ForeignKey('proposals.Legislator', null=True)
+    sponsors = JSONField(default=dict, blank=True, null=True)
     cosponsors = JSONField(default=list, null=True)
-    title = models.TextField()
-    companions = ArrayField(blank=True, default=list, base_field=models.TextField(blank=True))
+    title = models.TextField(null=True)
+    companions = ArrayField(
+        blank=True, null=True, default=list,
+        base_field=models.TextField(blank=True)
+    )
     categories = ArrayField(
         models.TextField(blank=True),
         default=list
     )
-    votes = JSONField(default=dict, blank=True)
+    votes = JSONField(default=dict, blank=True, null=True)
     summary = models.TextField(blank=True, null=True)
-    sources = JSONField(default=dict, blank=True)
-    documents = JSONField(default=dict, blank=True)
-    bill_versions = JSONField(default=dict, blank=True)
+    sources = JSONField(default=dict, blank=True, null=True)
+    documents = JSONField(default=dict, blank=True, null=True)
+    current_version = models.URLField(blank=True, null=True)
+    bill_versions = JSONField(default=dict, blank=True, null=True)
+    bill_text = models.TextField(null=True)
+    updated_at = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(null=True)
 
     # Properties
     @property
@@ -53,7 +63,8 @@ class Bill(AbstractBaseModel, MixinExternalData):
 
     @property
     def remote_url(self):
-        source = next((l for l in self.sources if l.get('url') is not False), None)
+        source = next((l for l in self.sources if l.get('url') is not False),
+                      None)
         if not source:
             return False
         return source.get('url', False)
@@ -77,7 +88,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
         for key, value in props.items():
             setattr(self, value, source.get(key, None))
 
-        for sponsor in source['sponsors']:
+        for sponsor in source.get('sponsors', []):
             if sponsor.get('leg_id', False):
                 q = {"remote_id": sponsor['leg_id']}
             else:
@@ -124,9 +135,11 @@ class Legislator(AbstractBaseModel, MixinExternalData):
     url = models.URLField(blank=True)
     photo_url = models.URLField(blank=True)
     first_name = models.CharField(max_length=255)
-    middle_name = models.CharField(max_length=255)
+    middle_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255)
     suffixes = models.CharField(max_length=255, blank=True, null=True)
+    updated_at = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(null=True)
 
     # Properties
     @property
@@ -171,9 +184,11 @@ class Committee(AbstractBaseModel, MixinExternalData):
     name = models.CharField(max_length=255)
     state = models.CharField(max_length=255)
     chamber = models.CharField(max_length=255)
-    remote_id = models.CharField(max_length=255)
+    remote_id = models.CharField(max_length=255, db_index=True)
     parent_id = models.CharField(max_length=255, null=True, blank=True)
     subcommittee = models.CharField(max_length=255, null=True, blank=True)
+    updated_at = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(null=True)
 
     class Meta:
         abstract = False

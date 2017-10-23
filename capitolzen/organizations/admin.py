@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from .models import Organization, OrganizationUser, OrganizationOwner, OrganizationInvite
+from capitolzen.organizations.models import (
+    Organization, OrganizationUser, OrganizationOwner, OrganizationInvite
+)
 
 
 class OwnerInline(admin.StackedInline):
@@ -33,6 +35,7 @@ class OrganizationInviteAdmin(admin.ModelAdmin):
     list_display = ['email', 'status', 'organization', 'created', 'modified']
     search_fields = ['email', 'status', 'organization']
     list_filter = ('status', 'organization')
+
 
 admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(OrganizationInvite, OrganizationInviteAdmin)

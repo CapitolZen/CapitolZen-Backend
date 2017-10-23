@@ -3,7 +3,13 @@ from .models import Group, Comment, Report
 
 
 class GroupAdmin(admin.ModelAdmin):
-    list_display = ['title', 'description', 'organization', 'created', 'modified']
+    list_display = [
+        'title',
+        'description',
+        'organization',
+        'created',
+        'modified'
+    ]
     search_fields = ['title', 'description', 'organization']
 
 
@@ -13,6 +19,7 @@ class CommentAdmin(admin.ModelAdmin):
 
 class ReportAdmin(admin.ModelAdmin):
     list_display = ['title', 'group', 'user']
+
 
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Comment, CommentAdmin)

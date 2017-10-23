@@ -3,6 +3,8 @@ version: '2'
 volumes:
   postgres_data_dev: {}
   postgres_backup_dev: {}
+  esdata1:
+    driver: local
 
 services:
 
@@ -32,10 +34,11 @@ services:
       dockerfile: ./compose/django/Dockerfile-dev
     env_file:
       - .env
-    command: ["./utilities/wait-for-it.sh -t 90", "postgres:5432", "--", "/start-dev.sh"]
+    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch:9200", "--", "/start-dev.sh"]
     depends_on:
       - postgres
       - mailhog
+      - elasticsearch
     environment:
       - POSTGRES_USER=capitolzen
       - POSTGRES_PASSWORD=capitolzen
@@ -47,6 +50,7 @@ services:
     links:
       - postgres
       - redis
+      - elasticsearch
 
   #
   # Local Development utility for running commands.
@@ -58,6 +62,7 @@ services:
       - .env
     depends_on:
       - postgres
+      - elasticsearch
     environment:
       - POSTGRES_USER=capitolzen
       - POSTGRES_PASSWORD=capitolzen
@@ -66,6 +71,7 @@ services:
     links:
       - postgres
       - redis
+      - elasticsearch
 
   #
   # Workers
@@ -80,10 +86,12 @@ services:
     depends_on:
      - postgres
      - redis
+     - elasticsearch
     links:
       - postgres
       - redis
-    command: ["./utilities/wait-for-it.sh -t 90", "postgres:5432", "--", celery, -A, capitolzen.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
+      - elasticsearch
+    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch:9200", "--", celery, -A, capitolzen.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
     volumes:
       - .:/app
 
@@ -100,10 +108,12 @@ services:
     depends_on:
       - postgres
       - redis
+      - elasticsearch
     links:
       - postgres
       - redis
-    command: ["./utilities/wait-for-it.sh -t 90", "postgres:5432", "--", celery, -A, capitolzen.tasks, beat, --workdir=/app, -l, INFO]
+      - elasticsearch
+    command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch:9200", "--", celery, -A, capitolzen.tasks, beat, --workdir=/app, -l, INFO]
     volumes:
       - .:/app
 
@@ -114,3 +124,22 @@ services:
     ports:
       - "8025:8025"
 
+  #
+  # Elastic Search
+  elasticsearch:
+    build:
+      context: .
+      dockerfile: ./compose/elastic/Dockerfile
+    container_name: elasticsearch
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200

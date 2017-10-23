@@ -12,7 +12,8 @@ import datetime
 from celery.schedules import crontab
 from django.utils import six
 
-ROOT_DIR = environ.Path(__file__) - 3  # (capitolzen/config/settings/base.py - 3 = capitolzen/)
+# (capitolzen/config/settings/base.py - 3 = capitolzen/)
+ROOT_DIR = environ.Path(__file__) - 3
 APPS_DIR = ROOT_DIR.path('capitolzen')
 
 env = environ.Env()
@@ -38,6 +39,7 @@ THIRD_PARTY_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_jwt',
+    'rest_framework_swagger',
     'dry_rest_permissions',
     'annoying',
     'storages',
@@ -46,6 +48,8 @@ THIRD_PARTY_APPS = [
     'health_check.cache',
     'rest_auth',
     'stream_django',
+    'thorn.django',
+    'django_elasticsearch_dsl'
 ]
 
 ADMIN_APPS = [
@@ -59,7 +63,8 @@ LOCAL_APPS = [
     'capitolzen.users.apps.UsersConfig',
     'capitolzen.organizations.apps.OrganizationsConfig',
     'capitolzen.groups.apps.GroupsConfig',
-    'capitolzen.proposals.apps.ProposalsConfig'
+    'capitolzen.proposals.apps.ProposalsConfig',
+    'capitolzen.es_ingest.apps.ESIngestConfig'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + ADMIN_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -383,30 +388,32 @@ AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 
 # Location of root django.contrib.admin URL, use {% url 'admin:index' %}
 ADMIN_URL = r'^admin/'
-
+API_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 
 # CELERY
 # ------------------------------------------------------------------------------
 INSTALLED_APPS += ('capitolzen.tasks.celery.CeleryConfig',)
-BROKER_URL = '{0}/{1}'.format(env('REDIS_URL', default='redis://127.0.0.1:6379'), 1)
-CELERY_RESULT_BACKEND = '{0}/{1}'.format(env('REDIS_URL', default='redis://127.0.0.1:6379'), 1)
+CELERY_BROKER_URL = '{0}/{1}'.format(
+    env('REDIS_URL', default='redis://redis:6379'), 1)
+CELERY_RESULT_BACKEND = '{0}/{1}'.format(
+    env('REDIS_URL', default='redis://redis:6379'), 1)
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Detroit'
 
-CELERYBEAT_SCHEDULE = {
+CELERY_BEAT_SCHEDULE = {
     'import_committee': {
-        'task': 'capitolzen.proposals.tasks.update_state_committees',
+        'task': 'capitolzen.proposals.tasks.spawn_committee_updates',
         'schedule': crontab(minute=0, hour=0, day_of_week='sun')
     },
     'import_legislators': {
-        'task': 'capitolzen.proposals.tasks.update_state_legislators',
+        'task': 'capitolzen.proposals.tasks.spawn_legislator_updates',
         'schedule': crontab(minute=0, hour=3, day_of_week='sat')
     },
     'import_bills': {
-        'task': 'capitolzen.proposals.tasks.update_all_bills',
+        'task': 'capitolzen.proposals.tasks.spawn_bill_updates',
         'schedule': crontab(minute=0, hour='*/6')
     }
 }
@@ -448,6 +455,11 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': False,
         },
+        'cz_logger': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propogate': False
+        }
     },
 }
 
@@ -461,14 +473,21 @@ AWS_SECRET_KEY = env("AWS_SECRETKEY", default='')
 AWS_REGION = env("AWS_REGION", default='us-east-1')
 AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
 AWS_TEMP_BUCKET_NAME = env("AWS_TEMP_BUCKET_NAME", default='')
-INDEX_LAMBDA = env("capitolzen_search_bills", default="capitolzen_search_bills")
+INDEX_LAMBDA = env(
+    "capitolzen_search_bills", default="capitolzen_search_bills")
 
 # OPEN STATES
 OPEN_STATES_KEY = env("OPEN_STATES_KEY", default='')
-OPEN_STATES_URL = env("OPEN_STATES_URL", default='https://openstates.org/api/v1/')
+OPEN_STATES_URL = env(
+    "OPEN_STATES_URL", default='https://openstates.org/api/v1/')
 
 # ELASTIC SEARCH
-ELASTIC_SEARCH_URL = env("ELASTIC_SEARCH_URL", default='')
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts':
+            env("ELASTIC_SEARCH_URL", default='elastic:changeme@elasticsearch')
+    },
+}
 
 # SLACK
 SLACK_URL = env("UPDRAFT_SLACK_URL", default='')

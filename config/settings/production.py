@@ -70,9 +70,6 @@ CACHES['default']['LOCATION'] = '{0}/{1}'.format(env('CACHE_APP_DEFAULT_URL',
 CACHEOPS_REDIS = '{0}/{1}'.format(env('CACHE_APP_OPCACHE_URL',
                                       default='redis://127.0.0.1:6379'), 0)
 
-BROKER_URL = '{0}/{1}'.format(env('CACHE_APP_CELERY_URL', default='redis://127.0.0.1:6379'), 0)
-CELERY_RESULT_BACKEND = '{0}/{1}'.format(env('CACHE_APP_CELERY_URL', default='redis://127.0.0.1:6379'), 0)
-
 # Static Assets
 # ------------------------
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

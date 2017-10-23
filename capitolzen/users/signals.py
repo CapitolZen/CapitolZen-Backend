@@ -1,20 +1,20 @@
 from django.db.models.signals import post_save, post_delete
-from organizations.signals import user_added, user_removed
+
 from django.dispatch import receiver
-from .models import User
-from .tasks import (intercom_manage_user_companies,
-                    intercom_manage_user
-                    )
-from stream_django.feed_manager import feed_manager
-from templated_email import send_templated_mail
-from django.conf import settings
 from django.conf import settings
 from django.db import transaction
 
+from organizations.signals import user_added, user_removed
+from capitolzen.users.models import User
+from capitolzen.users.tasks import (
+    intercom_manage_user_companies,
+    intercom_manage_user
+)
 
-################################################################################################
+
+################################################################################
 # INTERCOM
-################################################################################################
+################################################################################
 @receiver(post_save, sender=User)
 def intercom_update_user(sender, **kwargs):
     """
@@ -69,4 +69,3 @@ def user_removed_from_organization(sender, **kwargs):
             lambda: intercom_manage_user_companies.apply_async(kwargs={
                 "user_id": str(user.id),
             }))
-

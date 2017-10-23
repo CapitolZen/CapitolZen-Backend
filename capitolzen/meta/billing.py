@@ -7,4 +7,3 @@ PlanChoices = (
     (CHEAP, 'Lite'),
     (BASIC, 'Basic'),
 )
-

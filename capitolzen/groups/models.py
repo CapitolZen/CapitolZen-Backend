@@ -1,13 +1,15 @@
 from __future__ import unicode_literals
-from json import dumps
+
 from django.db import models
-from config.models import AbstractBaseModel
+
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django_fsm import FSMField, transition
+
+from config.models import AbstractBaseModel
+
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
-from stream_django.activity import Activity
 
 
 def avatar_directory_path(instance, filename):

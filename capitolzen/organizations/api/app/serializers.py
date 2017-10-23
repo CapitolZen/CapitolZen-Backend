@@ -1,11 +1,18 @@
 from rest_framework_json_api import serializers
 from rest_framework_json_api.relations import ResourceRelatedField
-from capitolzen.organizations.models import (Organization, OrganizationInvite, File)
+
+from config.serializers import BaseInternalModelSerializer, RemoteFileField
+from capitolzen.organizations.models import (
+    Organization,
+    OrganizationInvite,
+    File
+)
 from capitolzen.users.models import User
-from config.serializers import RemoteFileField
 
 
-class OrganizationSerializer(serializers.ModelSerializer):
+class OrganizationSerializer(BaseInternalModelSerializer):
+    user_is_member = serializers.ReadOnlyField()
+    id = serializers.ReadOnlyField()
     is_active = serializers.BooleanField(read_only=True)
     avatar = RemoteFileField(required=False)
 
@@ -35,7 +42,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         return org
 
 
-class OrganizationInviteSerializer(serializers.ModelSerializer):
+class OrganizationInviteSerializer(BaseInternalModelSerializer):
 
     def validate_username(self, value):
         """
@@ -43,9 +50,8 @@ class OrganizationInviteSerializer(serializers.ModelSerializer):
         :return:
         """
         try:
-            user = User.objects.get(username=value)
+            User.objects.get(username=value)
             raise serializers.ValidationError("Email Already In Use")
-
         except User.DoesNotExist:
             pass
 
@@ -53,19 +59,23 @@ class OrganizationInviteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrganizationInvite
-        fields = ('id',
-                  'metadata',
-                  'created',
-                  'modified',
-                  'organization',
-                  'organization_name',
-                  'email',
-                  'status')
+        fields = (
+            'id',
+            'metadata',
+            'created',
+            'modified',
+            'organization',
+            'organization_name',
+            'email',
+            'status'
+        )
 
 
 class FileSerializer(serializers.ModelSerializer):
     file = RemoteFileField()
-    organization = ResourceRelatedField(many=False, queryset=Organization.objects)
+    organization = ResourceRelatedField(
+        many=False, queryset=Organization.objects
+    )
     user = ResourceRelatedField(many=False, queryset=User.objects)
 
     class Meta:

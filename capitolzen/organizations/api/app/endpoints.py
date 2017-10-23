@@ -1,8 +1,9 @@
 from json import loads
 from django.db.models import Q
-from django_filters.rest_framework import DjangoFilterBackend
-from dry_rest_permissions.generics import (DRYPermissions,
-                                           DRYPermissionFiltersBase)
+
+from dry_rest_permissions.generics import (
+    DRYPermissions, DRYPermissionFiltersBase
+)
 
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as filters
@@ -12,13 +13,16 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.exceptions import NotAuthenticated, NotFound
+from rest_framework import mixins
 
 from capitolzen.meta.clients import DocManager
 from capitolzen.users.models import User
-from capitolzen.users.tasks import create_user_notification
-from capitolzen.organizations.models import (Organization, OrganizationInvite, File)
-from .serializers import (OrganizationSerializer, OrganizationInviteSerializer, FileSerializer)
-from rest_framework import mixins
+from capitolzen.organizations.models import (
+    Organization, OrganizationInvite, File
+)
+from capitolzen.organizations.api.app.serializers import (
+    OrganizationSerializer, OrganizationInviteSerializer, FileSerializer
+)
 
 
 class OrganizationFilter(filters.FilterSet):

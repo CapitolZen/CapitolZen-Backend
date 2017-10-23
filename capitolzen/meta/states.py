@@ -5,9 +5,11 @@ AvailableStateChoices = (
     ('OH', "Ohio")
 )
 
-StateData = namedtuple('StateData',
-                       'name title lower_bill_prefix upper_bill_prefix lower_chamber upper_chamber is_active'
-                       )
+StateData = namedtuple(
+    'StateData',
+    'name title lower_bill_prefix upper_bill_prefix '
+    'lower_chamber upper_chamber is_active'
+)
 
 mi = StateData(
     name='MI',
@@ -30,6 +32,3 @@ AVAILABLE_STATES = [mi]
 #     "upper_bill_start": "0001",
 #     "is_active": True
 # }
-
-
-
