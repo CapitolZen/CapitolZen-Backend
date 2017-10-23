@@ -1,0 +1,44 @@
+[
+  {
+    "title": "Employment security; benefits; individual to provide photo identification when applying for unemployment benefits; require. Amends sec. 28 of 1936 (Ex Sess) PA 1 (MCL 421.28).",
+    "created_at": "2017-09-27 06:48:23",
+    "updated_at": "2017-09-27 06:48:23",
+    "id": "MIB00013864",
+    "chamber": "lower",
+    "state": "mi",
+    "session": "2017-2018",
+    "type": [
+      "bill"
+    ],
+    "subjects": [],
+    "bill_id": "HB 5004"
+  },
+  {
+    "title": "Elections; recounts; aggrieved candidate for purposes of recount; clarify. Amends secs. 862 & 879 of 1954 PA 116 (MCL 168.862 & 168.879).",
+    "created_at": "2017-09-27 06:48:24",
+    "updated_at": "2017-09-27 06:48:24",
+    "id": "MIB00013865",
+    "chamber": "lower",
+    "state": "mi",
+    "session": "2017-2018",
+    "type": [
+      "bill"
+    ],
+    "subjects": [],
+    "bill_id": "HB 5012"
+  },
+  {
+    "title": "A resolution to provide for the Clerk of the House of Representatives for the Ninety-ninth Legislature.",
+    "created_at": "2017-01-25 06:04:24",
+    "updated_at": "2017-05-22 06:30:15",
+    "id": "MIB00012114",
+    "chamber": "lower",
+    "state": "mi",
+    "session": "2017-2018",
+    "type": [
+      "resolution"
+    ],
+    "subjects": [],
+    "bill_id": "HR 3"
+  }
+]

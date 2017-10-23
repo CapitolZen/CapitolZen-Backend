@@ -1,0 +1,163 @@
+{
+  "last_name": "Hughes",
+  "updated_at": "2017-10-20 06:53:48",
+  "sources": [
+    {
+      "url": "http://gophouse.org/representatives/westmi/hughes/"
+    }
+  ],
+  "full_name": "Holly Hughes",
+  "old_roles": {
+    "2015-2016": [
+      {
+        "term": "2015-2016",
+        "end_date": null,
+        "district": "91",
+        "chamber": "lower",
+        "state": "mi",
+        "party": "Republican",
+        "type": "member",
+        "start_date": null
+      },
+      {
+        "term": "2015-2016",
+        "committee_id": "MIC000029",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Health Policy",
+        "position": "member",
+        "type": "committee member"
+      },
+      {
+        "term": "2015-2016",
+        "committee_id": "MIC000166",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Commerce and Trade",
+        "position": "member",
+        "type": "committee member"
+      },
+      {
+        "term": "2015-2016",
+        "committee_id": "MIC000082",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Military and Veterans Affairs",
+        "position": "vice chair",
+        "type": "committee member"
+      },
+      {
+        "term": "2015-2016",
+        "committee_id": "MIC000156",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Energy Policy",
+        "position": "member",
+        "type": "committee member"
+      }
+    ],
+    "2011-2012": [
+      {
+        "term": "2011-2012",
+        "end_date": null,
+        "district": "91",
+        "chamber": "lower",
+        "state": "mi",
+        "party": "Republican",
+        "type": "member",
+        "start_date": null
+      },
+      {
+        "term": "2011-2012",
+        "committee_id": "MIC000029",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Health Policy",
+        "position": "member",
+        "type": "committee member"
+      },
+      {
+        "term": "2011-2012",
+        "committee_id": "MIC000032",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Local, Intergovernmental, and Regional Affairs",
+        "position": "member",
+        "type": "committee member"
+      },
+      {
+        "term": "2011-2012",
+        "committee_id": "MIC000033",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Military and Veterans Affairs and Homeland Security",
+        "position": "member",
+        "type": "committee member"
+      },
+      {
+        "term": "2011-2012",
+        "committee_id": "MIC000034",
+        "chamber": "lower",
+        "state": "mi",
+        "subcommittee": null,
+        "committee": "Natural Resources, Tourism, and Outdoor Recreation",
+        "position": "member",
+        "type": "committee member"
+      }
+    ]
+  },
+  "id": "MIL000129",
+  "first_name": "Holly",
+  "middle_name": "",
+  "district": "91",
+  "state": "mi",
+  "votesmart_id": "105635",
+  "party": "Republican",
+  "email": "HollyHughes@house.mi.gov",
+  "+office": "N 1195 HOB",
+  "all_ids": [
+    "MIL000129",
+    "MIL000303"
+  ],
+  "leg_id": "MIL000129",
+  "+leg_url": "http://www.gophouse.com/welcome.asp?District=091",
+  "active": true,
+  "transparencydata_id": "ef7fed7a25094551aaa3c153db76e117",
+  "photo_url": "http://gophouse.org/wp-content/uploads/2015/01/HUGHES_headshot500.jpg",
+  "+phone": "(517) 373-3436",
+  "roles": [
+    {
+      "term": "2017-2018",
+      "end_date": null,
+      "district": "91",
+      "chamber": "lower",
+      "state": "mi",
+      "party": "Republican",
+      "type": "member",
+      "start_date": null
+    }
+  ],
+  "url": "http://gophouse.org/representatives/westmi/hughes/",
+  "country": "us",
+  "created_at": "2011-04-07 20:15:35",
+  "level": "state",
+  "chamber": "lower",
+  "offices": [
+    {
+      "fax": null,
+      "name": "Capitol Office",
+      "phone": "5173733436",
+      "address": "N1195 Anderson House Office Building\n124 North Capitol Avenue\nLansing, MI 48933",
+      "type": "capitol",
+      "email": "HollyHughes@house.mi.gov"
+    }
+  ],
+  "suffixes": ""
+}
