@@ -33,6 +33,7 @@ class OrganizationSerializer(BaseInternalModelSerializer):
             'stripe_payment_tokens',
             'plan_name',
             'avatar',
+            'user_is_member'
         )
 
     def create(self, validated_data):
@@ -44,11 +45,17 @@ class OrganizationSerializer(BaseInternalModelSerializer):
 
 class OrganizationInviteSerializer(BaseInternalModelSerializer):
 
+    organization = ResourceRelatedField(
+        many=False,
+        queryset=Organization.objects
+    )
+
     def validate_username(self, value):
         """
         Check if email is currently in use
         :return:
         """
+        print('serializer')
         try:
             User.objects.get(username=value)
             raise serializers.ValidationError("Email Already In Use")

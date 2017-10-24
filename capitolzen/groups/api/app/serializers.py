@@ -24,7 +24,6 @@ class GroupSerializer(BaseInternalModelSerializer):
             'active',
             'contacts',
             'description',
-            'logo',
             'starred',
             'created',
             'avatar',

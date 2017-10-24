@@ -66,8 +66,8 @@ class BillFilter(BaseModelFilterSet):
         params[key] = [str(date_range), str(today)]
         return queryset.filter(**params)
 
-    introduced_range = CharFilter(name='first', method='action_date_range_filter')
-    active_range = CharFilter(name='last', method='action_date_range_filter')
+    introduced_range = filters.CharFilter(name='first', method='action_date_range_filter')
+    active_range = filters.CharFilter(name='last', method='action_date_range_filter')
 
     def action_date_range_filter(self, queryset, name, value):
         params = {}
