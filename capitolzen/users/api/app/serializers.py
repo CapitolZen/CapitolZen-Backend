@@ -44,10 +44,12 @@ class UserSerializer(BaseInternalModelSerializer):
             'name',
             'username',
             'is_staff',
+            'is_active',
             'is_superuser',
             'organizations',
             'date_joined',
             'avatar',
+            'metadata'
         )
         read_only_fields = (
             'id',

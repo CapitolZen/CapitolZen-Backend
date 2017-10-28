@@ -61,7 +61,6 @@ class RemoteFileField(serializers.Field):
             'allow_null': not required
         }
         super().__init__(**args)
-        print(self.allow_null)
 
     """
     Returns the full url to whatever file exists.

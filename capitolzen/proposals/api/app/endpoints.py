@@ -56,10 +56,7 @@ class BillFilter(BaseModelFilterSet):
     )
 
     def sponsor_full_name(self, queryset, name, value):
-        return queryset.filter(
-            Q(sponsor__first_name__contains=value) |
-            Q(sponsor__last_name__contains=value)
-        )
+        return queryset.filter(Q(sponsor__first_name__contains=value) | Q(sponsor__last_name__contains=value))
 
     def action_date_filter(self, queryset, name, value):
         today = datetime.today()
@@ -67,6 +64,16 @@ class BillFilter(BaseModelFilterSet):
         params = {}
         key = "action_dates__%s__range" % name
         params[key] = [str(date_range), str(today)]
+        return queryset.filter(**params)
+
+    introduced_range = filters.CharFilter(name='first', method='action_date_range_filter')
+    active_range = filters.CharFilter(name='last', method='action_date_range_filter')
+
+    def action_date_range_filter(self, queryset, name, value):
+        params = {}
+        key = "action_dates__%s__range" % name
+        parts = value.split(',')
+        params[key] = [parts[0], parts[1]]
         return queryset.filter(**params)
 
     class Meta(BaseModelFilterSet.Meta):
@@ -197,7 +204,8 @@ class WrapperFilter(OrganizationFilterSet):
             'organization': ['exact'],
             'position': ['exact'],
             'summary': ['in'],
-            'starred': ['exact']
+            'starred': ['exact'],
+            'group': ['exact']
         }
 
 
