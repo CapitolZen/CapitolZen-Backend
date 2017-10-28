@@ -43,7 +43,7 @@ class DocumentAnalysisConfig(AppConfig):
         try:
             parser.from_buffer("hello world")
         except Exception as e:
-            print(e)
+            logger.exception(e)
 
         # Populate nltk library
         try:
