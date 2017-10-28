@@ -81,8 +81,8 @@ class CommitteeManager(CongressionalManager):
             **source
         })
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return serializer
+        instance = serializer.save()
+        return instance
 
 
 class BillManager(CongressionalManager):
@@ -110,8 +110,14 @@ class BillManager(CongressionalManager):
 
     def update(self, local_id, remote_id, resource_info):
         source = self._get_remote_detail(remote_id)
+
+        if source.get('bill_id'):
+            source['state_id'] = source.pop('bill_id')
+        if source.get('actions'):
+            source['history'] = source.pop('actions')
         if source.get('versions'):
             source['bill_versions'] = source.pop('versions')
+
         if isinstance(source.get('type'), list):
             source['type'] = ",".join(source.get('type'))
         serializer = BillSerializer(data={
@@ -119,8 +125,8 @@ class BillManager(CongressionalManager):
             **source
         })
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return serializer
+        instance = serializer.save()
+        return instance
 
 
 class LegislatorManager(CongressionalManager):
@@ -139,8 +145,8 @@ class LegislatorManager(CongressionalManager):
             **source
         })
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return serializer
+        instance = serializer.save()
+        return instance
 
     def run(self):
         for human in self._get_remote_list():

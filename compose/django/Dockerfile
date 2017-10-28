@@ -22,7 +22,8 @@ RUN sed -i 's/\r//' /entrypoint.sh \
     && chmod +x /entrypoint.sh \
     && chown django /entrypoint.sh \
     && chmod +x /gunicorn.sh \
-    && chown django /gunicorn.sh
+    && chown django /gunicorn.sh \
+    && python -m nltk.downloader -d /usr/local/share/nltk_data all
 
 WORKDIR /app
 

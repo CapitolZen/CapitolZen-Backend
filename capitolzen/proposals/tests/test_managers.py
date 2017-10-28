@@ -69,6 +69,45 @@ class TestBillManager(TestCase):
             2
         )
 
+    @requests_mock.mock(real_http=True)
+    def test_get_remote_detail_summary_htm(self, m):
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  'MIB00012114.json') as data_file:
+            m.get('%s%s/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
+                  json=json.load(data_file), status_code=200)
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  '2017-HAR-0003.htm', 'rb') as data_file:
+            m.get('http://www.legislature.mi.gov/documents/2017-2018/'
+                  'resolutionadopted/House/htm/2017-HAR-0003.htm',
+                  content=data_file.read(), status_code=200)
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIB00012114", None
+        )
+        self.assertIn(
+            "House Resolution No. A resolution",
+            Bill.objects.get(remote_id='MIB00012114').summary
+        )
+
+    @requests_mock.mock(real_http=True)
+    def test_get_remote_detail_summary_pdf(self, m):
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  'ALB00011538.json') as data_file:
+            m.get('%s%s/ALB00011538/' % (settings.OPEN_STATES_URL, "bills"),
+                  json=json.load(data_file), status_code=200)
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  'SB4-enr.pdf', 'rb') as data_file:
+            m.get('http://alisondb.legislature.state.al.us/ALISON/'
+                  'SearchableInstruments/2017rs/PrintFiles/SB4-enr.pdf',
+                  content=data_file.read(), status_code=200)
+        self.manager("AL").update(
+            None, "ALB00011538", None
+        )
+        self.assertIn(
+            'Services shall serve as Secretary of the Legislative Council  '
+            '3 without salary other than his compensation as Director of the',
+            Bill.objects.get(remote_id='ALB00011538').summary
+        )
+
     @requests_mock.mock()
     def test_get_remote_detail_no_data(self, m):
         m.get('%s%s/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
@@ -79,7 +118,8 @@ class TestBillManager(TestCase):
         )
 
     @mock.patch(
-        'capitolzen.proposals.managers.BillManager._get_remote_list')
+        'capitolzen.proposals.managers.BillManager._get_remote_list',
+        real_http=True)
     def test_get_remote_list_population(self, m):
         cache.clear()
         with open('capitolzen/proposals/tests/sample_data/bills/'

@@ -16,7 +16,9 @@ class Bill(AbstractBaseModel, MixinExternalData):
     # External Data
     state = models.TextField(max_length=255, null=True)
     state_id = models.CharField(max_length=255, null=True)
-    remote_id = models.CharField(max_length=255, null=True)
+    remote_id = models.CharField(
+        max_length=255, null=True, unique=True, db_index=True
+    )
     session = models.CharField(max_length=255, null=True)
     history = JSONField(default=dict, blank=True, null=True)
     action_dates = JSONField(default=dict, blank=True, null=True)
@@ -37,6 +39,8 @@ class Bill(AbstractBaseModel, MixinExternalData):
         default=list
     )
     votes = JSONField(default=dict, blank=True, null=True)
+    content_metadata = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True)
     summary = models.TextField(blank=True, null=True)
     sources = JSONField(default=dict, blank=True, null=True)
     documents = JSONField(default=dict, blank=True, null=True)
@@ -70,24 +74,6 @@ class Bill(AbstractBaseModel, MixinExternalData):
         return source.get('url', False)
 
     def update_from_source(self, source):
-        props = {
-            "actions": "history",
-            "sources": "sources",
-            "session": "session",
-            "id": "remote_id",
-            "votes": "votes",
-            "documents": "documents",
-            "title": "title",
-            "state": "state",
-            "action_dates": "action_dates",
-            "bill_id": "state_id",
-            "chamber": "chamber",
-            "versions": "bill_versions"
-        }
-
-        for key, value in props.items():
-            setattr(self, value, source.get(key, None))
-
         for sponsor in source.get('sponsors', []):
             if sponsor.get('leg_id', False):
                 q = {"remote_id": sponsor['leg_id']}
@@ -148,27 +134,6 @@ class Legislator(AbstractBaseModel, MixinExternalData):
         if self.suffixes:
             fl = "%s %s" % (fl, self.suffixes)
         return fl
-
-    def update_from_source(self, source):
-        props = {
-            "state": "state",
-            "last_name": "last_name",
-            "first_name": "first_name",
-            "middle_name": "middle_name",
-            "suffixes": "suffixes",
-            "district": "district",
-            "active": "active",
-            "chamber": "chamber",
-            "party": "party",
-            "email": "email",
-            "url": "url",
-            "photo_url": "photo_url",
-        }
-
-        for key, value in props.items():
-            setattr(self, value, source.get(key, None))
-
-        self.save()
 
     class Meta:
         abstract = False
