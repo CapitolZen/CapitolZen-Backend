@@ -118,6 +118,13 @@ class ReportFilter(OrganizationFilterSet):
         help_text='Title of a Report',
         lookup_expr='exact')
 
+    group = filters.CharFilter(
+        name='group',
+        label='Group',
+        help_text='Id of group',
+        lookup_expr='exact'
+    )
+
     def filter_user(self, queryset, name, value):
         return queryset.filter(user__username=value)
 
