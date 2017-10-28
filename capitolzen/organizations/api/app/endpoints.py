@@ -107,8 +107,6 @@ class InviteFilter(filters.FilterSet):
 
 
 class OrganizationInviteFilterBackend(DRYPermissionFiltersBase):
-    def _get_org_by_consumer_id(self, consumer_id):
-        return Organization.objects.get(consumer_id=consumer_id)
 
     def filter_list_queryset(self, request, queryset, view):
         """
@@ -155,7 +153,6 @@ class OrganizationInviteViewSet(viewsets.ModelViewSet):
         """
         Send email and create user for the invite.
         """
-
         instance = serializer.save(status="unclaimed")
         user = User.objects.create(username=instance.email)
         instance.user = user
@@ -163,6 +160,20 @@ class OrganizationInviteViewSet(viewsets.ModelViewSet):
         # Double save is a little rough here...
         instance.save()
         instance.send_user_invite()
+
+    @detail_route(methods=['get'], permission_classes=(AllowAny,))
+    def preview(self, request, pk=None):
+        if request.user and request.user.is_authenticated:
+            return Response({"detail": "Cannot claim invite"},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        invite = self.get_object()
+        if invite.status != "unclaimed":
+            return Response({"detail": "Cannot claim invite"},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = OrganizationInviteSerializer(invite)
+        return Response(serializer.data)
 
     @detail_route(methods=['post'], permission_classes=(AllowAny,))
     def claim(self, request, pk=None):
@@ -178,10 +189,12 @@ class OrganizationInviteViewSet(viewsets.ModelViewSet):
 
         # Setup the user's password.
         password = request.data.get('password')
-        invite.user.update_provider({'password': password})
+        invite.user.name = request.data.get('name')
+        invite.user.set_password(password)
+        invite.user.save()
 
         # Add user to organization.
-        organization_role = invite.meta_data.get('organization_role', "Member")
+        organization_role = invite.metadata.get('organization_role', "Member")
 
         if organization_role == "Admin":
             is_admin = True

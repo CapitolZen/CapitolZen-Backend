@@ -12,7 +12,7 @@ class AbstractNoIDModel(models.Model):
     # in tests and some core devs have a thread open to eliminate them
     # https://code.djangoproject.com/ticket/22995
     created = models.DateTimeField(default=timezone.now, db_index=True)
-    modified = models.DateTimeField(db_index=True)
+    modified = models.DateTimeField(db_index=True, default=timezone.now)
     metadata = JSONField(blank=True, null=True)
 
     class Meta:

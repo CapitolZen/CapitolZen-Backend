@@ -29,7 +29,7 @@ class GroupFilter(OrganizationFilterSet):
     starred = filters.CharFilter(
         name='starred',
         label="Starred",
-        help_text="Starred Bills",
+        help_text="Starred groups",
         lookup_expr='exact'
     )
 
@@ -61,8 +61,6 @@ class GroupViewSet(OwnerBasedViewSet):
     serializer_class = GroupSerializer
     filter_class = GroupFilter
     queryset = Group.objects.all()
-    # TODO there isn't a bill foreign key on this model?
-    ordering = ('bill__state', 'bill__state_id')
 
     @list_route(methods=['GET'], serializer_class=BillSerializer)
     def bills(self, request):
@@ -120,11 +118,18 @@ class ReportFilter(OrganizationFilterSet):
         help_text='Title of a Report',
         lookup_expr='exact')
 
+    group = filters.CharFilter(
+        name='group',
+        label='Group',
+        help_text='Id of group',
+        lookup_expr='exact'
+    )
+
     def filter_user(self, queryset, name, value):
         return queryset.filter(user__username=value)
 
     class Meta(OrganizationFilterSet.Meta):
-        model = Group
+        model = Report
 
 
 class ReportViewSet(OwnerBasedViewSet):
