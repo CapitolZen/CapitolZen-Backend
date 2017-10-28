@@ -204,7 +204,8 @@ class WrapperFilter(OrganizationFilterSet):
             'organization': ['exact'],
             'position': ['exact'],
             'summary': ['in'],
-            'starred': ['exact']
+            'starred': ['exact'],
+            'group': ['exact']
         }
 
 
