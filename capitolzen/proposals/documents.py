@@ -75,11 +75,6 @@ class BillDocument(DocType):
             id=instance.pk
         )
         if not doc_exists:
-            # TODO need to handle updated versions and whether or not
-            # we want to update the bill or append. Also need to determine
-            # if we want to continue to use the ingest pipeline or just
-            # use our own tika analysis since we need to do it for the
-            # summarization anyways
             self.connection.create(
                 index=str(self._doc_type.index),
                 doc_type=self._doc_type.mapping.doc_type,

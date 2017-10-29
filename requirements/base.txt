@@ -61,7 +61,6 @@ thorn==1.5.0
 #
 # Other
 pyopenstates==1.1.0
-tika==1.15
 sumy==0.7.0
 beautifulsoup4==4.6.0
 numpy==1.11.0
