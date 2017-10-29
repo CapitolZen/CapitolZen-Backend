@@ -45,7 +45,14 @@ class User(AbstractUser, AbstractNoIDModel):
         return True
 
     def has_object_read_permission(self, request):
-        return request.user.id == self.id
+
+        # Can be read if user is current user
+        if request.user == self:
+            return True
+
+        # Can be read if user is in same organization as current organization
+        # request.organization already validates the request.user is in the org.
+        return request.organization and request.organization.organization_users.filter(user=self)
 
     @staticmethod
     @allow_staff_or_superuser
@@ -56,7 +63,7 @@ class User(AbstractUser, AbstractNoIDModel):
         return True
 
     def has_object_write_permission(self, request):
-        return request.user.id == self.id
+        return request.user == self
 
     @staticmethod
     def has_create_permission(request):
@@ -73,7 +80,57 @@ class User(AbstractUser, AbstractNoIDModel):
         return True
 
     def has_object_change_password_permission(self, request):
-        return request.user.id == self.id
+        return request.user == self
+
+    @staticmethod
+    def has_change_status_permission(request):
+        if request.user.is_anonymous:
+            return False
+
+        if not request.organization:
+            return False
+
+        return True
+
+    def has_object_change_status_permission(self, request):
+        if request.user.is_anonymous:
+            return False
+
+        if not request.organization:
+            return False
+
+        if request.user == self:
+            return False
+
+        if request.organization.is_admin(request.user) or request.organization.is_owner(request.user):
+            return True
+
+        return False
+
+    @staticmethod
+    def has_change_organization_role_permission(request):
+        if request.user.is_anonymous:
+            return False
+
+        if not request.organization:
+            return False
+
+        return True
+
+    def has_object_change_organization_role_permission(self, request):
+        if request.user.is_anonymous:
+            return False
+
+        if not request.organization:
+            return False
+
+        if request.user == self:
+            return False
+
+        if request.organization.is_admin(request.user) or request.organization.is_owner(request.user):
+            return True
+
+        return False
 
 
 class Notification(AbstractBaseModel):
@@ -108,11 +165,17 @@ class Notification(AbstractBaseModel):
 
     @allow_staff_or_superuser
     def has_object_read_permission(self, request):
-        return self.user == request.user
+        if self == request.user:
+            return True
+
+        return False
 
     @allow_staff_or_superuser
     def has_object_write_permission(self, request):
-        return self.user == request.user
+        if self.user == request.user:
+            return True
+
+        return False
 
     @allow_staff_or_superuser
     def has_object_create_permission(self, request):

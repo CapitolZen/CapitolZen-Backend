@@ -18,7 +18,8 @@ from capitolzen.organizations.models import Organization, OrganizationInvite
 from capitolzen.users.api.app.serializers import (
     ChangePasswordSerializer,
     RegistrationSerializer, ResetPasswordRequestSerializer,
-    ResetPasswordSerializer
+    ResetPasswordSerializer,
+    ChangeUserOrganizationRoleSerializer, ChangeUserStatusSerializer
 )
 from capitolzen.users.api.app.serializers import UserSerializer
 from capitolzen.users.models import User
@@ -76,15 +77,6 @@ class UserViewSet(mixins.RetrieveModelMixin,
     filter_backends = (UserFilterBackend, DjangoFilterBackend)
     filter_class = UserFilter
     lookup_field = 'id'
-
-    @list_route(methods=['GET'])
-    def current(self, request):
-        """
-        Return the currently logged in user.
-        :param request:
-        :return:
-        """
-        return Response(UserSerializer(request.user).data)
 
     @detail_route(methods=['POST'])
     def login(self, request, id=None):
@@ -186,6 +178,53 @@ class UserViewSet(mixins.RetrieveModelMixin,
         user = self.get_object()
         data = request.data
         data['user'] = user.id
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+
+        if instance:
+            return Response({"status": status.HTTP_200_OK})
+        else:
+            return Response(
+                {"status": status.HTTP_400_BAD_REQUEST},
+                status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], serializer_class=ChangeUserStatusSerializer)
+    def change_status(self, request, id=None):
+        """
+        Change status of user.
+        :param request:
+        :param pk:
+        :return:
+        """
+        user = self.get_object()
+        data = request.data
+        data['user'] = user.id
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+
+        if instance:
+            return Response({"status": status.HTTP_200_OK})
+        else:
+            return Response(
+                {"status": status.HTTP_400_BAD_REQUEST},
+                status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], serializer_class=ChangeUserOrganizationRoleSerializer)
+    def change_organization_role(self, request, id=None):
+        """
+        Change status of user.
+        :param request:
+        :param pk:
+        :return:
+        """
+        user = self.get_object()
+        data = request.data
+        data['user'] = user.id
+        data['organization'] = request.organization.id
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)

@@ -10,7 +10,7 @@ from capitolzen.organizations.api.app.serializers import OrganizationSerializer
 from capitolzen.organizations.notifications import email_owner_welcome
 from capitolzen.users.utils import token_decode, token_encode
 from capitolzen.users.notifications import email_user_password_reset_request
-
+from capitolzen.organizations.models import Organization
 
 User = get_user_model()
 
@@ -34,6 +34,36 @@ class UserSerializer(BaseInternalModelSerializer):
             )]
     )
     avatar = RemoteFileField(required=False)
+    organization_role = serializers.SerializerMethodField()
+
+    def get_organization_role(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return None
+
+        if not hasattr(request, 'organization'):
+            return None
+
+        organization = request.organization
+
+        if not organization:
+            return None
+
+        if organization.is_owner(obj):
+            return "Owner"
+
+        if organization.is_admin(obj):
+            return "Admin"
+
+        if organization.organization_users.filter(user=obj):
+            return "Member"
+
+        return None
+
+    def validate(self, attrs):
+        from pprint import pprint
+        pprint(attrs)
+        return attrs
 
     class Meta:
         model = User
@@ -49,7 +79,8 @@ class UserSerializer(BaseInternalModelSerializer):
             'organizations',
             'date_joined',
             'avatar',
-            'metadata'
+            'metadata',
+            'organization_role',
         )
         read_only_fields = (
             'id',
@@ -59,6 +90,8 @@ class UserSerializer(BaseInternalModelSerializer):
             'date_joined',
         )
         lookup_field = 'id'
+
+
 
 
 class RegistrationSerializer(serializers.Serializer):
@@ -241,6 +274,59 @@ class ChangePasswordSerializer(serializers.Serializer):
         user = self.validated_data['user']
         user.set_password(self.validated_data['password'])
         user.save()
+        return True
+
+    class Meta:
+        model = User
+
+
+class ChangeUserStatusSerializer(serializers.Serializer):
+    """
+    TODO: Can we merge this with the actual UserSerializer?
+    """
+    status = serializers.BooleanField()
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.get_queryset()
+    )
+
+    def save(self, **kwargs):
+        user = self.validated_data['user']
+        user.is_active = self.validated_data['status']
+        user.save()
+        return True
+
+    class Meta:
+        model = User
+
+
+class ChangeUserOrganizationRoleSerializer(serializers.Serializer):
+    """
+    TODO: Can we merge this with the actual UserSerializer?
+    """
+    role = serializers.ChoiceField(
+        choices=['Member', 'Admin']
+    )
+
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.get_queryset()
+    )
+
+    organization = serializers.PrimaryKeyRelatedField(
+        queryset=Organization.objects.get_queryset()
+    )
+
+    def save(self, **kwargs):
+        role = self.validated_data['role']
+        user = self.validated_data['user']
+        organization = self.validated_data['organization']
+        org_user, _ = organization.get_or_add_user(user)
+
+        if role == "Admin":
+            org_user.is_admin = True
+        else:
+            org_user.is_admin = False
+        org_user.save()
+
         return True
 
     class Meta:
