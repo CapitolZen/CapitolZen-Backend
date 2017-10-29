@@ -175,10 +175,8 @@ class WrapperFilter(OrganizationFilterSet):
     )
 
     bill_id = UUIDInFilter(
-        name='bill_id',
-        lookup_expr='exact',
+        name='bill__id',
         label='Bill ID',
-        method='filter_bill_by_id',
         help_text='ID of Bill'
     )
 
