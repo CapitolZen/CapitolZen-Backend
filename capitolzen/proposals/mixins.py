@@ -3,7 +3,8 @@ from dry_rest_permissions.generics import allow_staff_or_superuser, authenticate
 
 class MixinExternalData:
     """
-    A mixin to set permissions and various other common functionality for data created from external data sources
+    A mixin to set permissions and various other common
+    functionality for data created from external data sources
     """
 
     @staticmethod
