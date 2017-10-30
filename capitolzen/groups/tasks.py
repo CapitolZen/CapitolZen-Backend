@@ -76,15 +76,7 @@ def email_report(report, user):
 
 def update_report_docs(report, new_url):
     attachments = getattr(report, 'attachments')
-    doc_list = getattr(report, 'reportlist', [])
-
-    curr_url = attachments.get('output_url', False)
-    if curr_url:
-        doc_list.append(curr_url)
-
     attachments['output_url'] = new_url
-    attachments['reportlist'] = doc_list
-
     setattr(report, 'attachments', attachments)
     report.save()
 
