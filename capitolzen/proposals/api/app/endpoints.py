@@ -187,6 +187,13 @@ class WrapperFilter(OrganizationFilterSet):
         help_text='Group associated with the Bill'
     )
 
+    group_title = filters.CharFilter(
+        name='group__title',
+        lookup_expr='contains',
+        label='Group Title',
+        help_text='title of group'
+    )
+
     def filter_bill_by_state(self, queryset, name, value):
         return queryset.filter(bill__state=value)
 
@@ -195,6 +202,17 @@ class WrapperFilter(OrganizationFilterSet):
 
     def filter_bill_by_id(self, queryset, name, value):
         return queryset.filter(bill__id=value)
+
+    def action_date_filter(self, queryset, name, value):
+        today = datetime.today()
+        date_range = today - timedelta(days=int(value))
+        params = {}
+        key = "bill__action_dates__%s__range" % name
+        params[key] = [str(date_range), str(today)]
+        return queryset.filter(**params)
+
+    introduced_range = filters.CharFilter(name='first', method='action_date_range_filter')
+    active_range = filters.CharFilter(name='last', method='action_date_range_filter')
 
     class Meta(OrganizationFilterSet.Meta):
         model = Wrapper
