@@ -40,19 +40,6 @@ class BaseInternalModelSerializer(BaseModelSerializer):
     )
 
 
-class NoByteCharField(serializers.CharField):
-    def to_internal_value(self, data):
-        data = data.replace(
-            '\\0x00', '').replace(
-            '\0x00', '').replace(
-            '0x00', '').replace(
-            '\0', '').replace(
-            '\x00', '').replace(
-            '0x04', '')
-
-        return super(NoByteCharField, self).to_internal_value(data)
-
-
 class RemoteFileField(serializers.Field):
 
     def __init__(self, required=True):

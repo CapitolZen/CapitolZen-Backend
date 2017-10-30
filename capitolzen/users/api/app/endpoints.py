@@ -2,7 +2,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from dry_rest_permissions.generics import DRYPermissionFiltersBase
 from dry_rest_permissions.generics import DRYPermissions
+from django_filters import rest_framework as filters
 
+from rest_framework.exceptions import APIException
 from rest_framework import viewsets
 from rest_framework.decorators import list_route, detail_route
 from rest_framework.exceptions import NotAuthenticated
@@ -11,15 +13,36 @@ from rest_framework.permissions import AllowAny
 from rest_framework import mixins
 from rest_framework import status
 
-from capitolzen.organizations.models import Organization
+from capitolzen.organizations.models import Organization, OrganizationInvite
 
 from capitolzen.users.api.app.serializers import (
     ChangePasswordSerializer,
     RegistrationSerializer, ResetPasswordRequestSerializer,
-    ResetPasswordSerializer
+    ResetPasswordSerializer,
+    ChangeUserOrganizationRoleSerializer, ChangeUserStatusSerializer
 )
 from capitolzen.users.api.app.serializers import UserSerializer
 from capitolzen.users.models import User
+
+
+class UserFilter(filters.FilterSet):
+
+    current = filters.BooleanFilter(
+        name="current",
+        label="Current",
+        method="filter_current"
+    )
+
+    def filter_current(self, queryset, name, value):
+        if value:
+            return queryset.filter(id=self.request.user.id)
+        else:
+            return queryset
+
+    class Meta:
+        model = User
+        ordering = ['name']
+        fields = {}
 
 
 class UserFilterBackend(DRYPermissionFiltersBase):
@@ -32,10 +55,13 @@ class UserFilterBackend(DRYPermissionFiltersBase):
         if request.user.is_anonymous():
             raise NotAuthenticated()
 
-        current_user_organizations = Organization.objects.for_user(request.user)
-        return queryset.filter(
-            organizations_organization=current_user_organizations
-        )
+        if hasattr(request, 'organization') and request.organization:
+            return queryset.filter(organizations_organization=request.organization)
+
+        if request.user.is_superuser or request.user.is_staff:
+            return queryset
+        else:
+            return queryset.filter(id=request.user.id)
 
 
 class UserViewSet(mixins.RetrieveModelMixin,
@@ -49,16 +75,38 @@ class UserViewSet(mixins.RetrieveModelMixin,
     permission_classes = (DRYPermissions,)
     serializer_class = UserSerializer
     filter_backends = (UserFilterBackend, DjangoFilterBackend)
-    lookup_field = "id"
+    filter_class = UserFilter
+    lookup_field = 'id'
 
-    @list_route(methods=['GET'])
-    def current(self, request):
+    @detail_route(methods=['POST'])
+    def login(self, request, id=None):
         """
-        Return the currently logged in user.
+        Upon user login, we do a couple of things.
+
+        2) Claim invites.
         :param request:
+        :param pk:
         :return:
         """
-        return Response(UserSerializer(request.user).data)
+        user = self.get_object()
+
+        #
+        # Claim invite
+        invite_id = request.data.get('invite')
+        if invite_id:
+            try:
+                invite = OrganizationInvite.objects.get(id=invite_id)
+            except OrganizationInvite.DoesNotExist:
+                raise APIException(detail="Unable to load invite")
+
+            organization_role = \
+                invite.meta_data.get('organization_role', "Member")
+            is_admin = True if organization_role == "Admin" else False
+            invite.organization.add_user(request.user, is_admin=is_admin)
+            invite.status = "claimed"
+            invite.save()
+
+        return Response(data={'status': 'login'})
 
     @list_route(methods=['post'],
                 serializer_class=RegistrationSerializer,
@@ -130,6 +178,53 @@ class UserViewSet(mixins.RetrieveModelMixin,
         user = self.get_object()
         data = request.data
         data['user'] = user.id
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+
+        if instance:
+            return Response({"status": status.HTTP_200_OK})
+        else:
+            return Response(
+                {"status": status.HTTP_400_BAD_REQUEST},
+                status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], serializer_class=ChangeUserStatusSerializer)
+    def change_status(self, request, id=None):
+        """
+        Change status of user.
+        :param request:
+        :param pk:
+        :return:
+        """
+        user = self.get_object()
+        data = request.data
+        data['user'] = user.id
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+
+        if instance:
+            return Response({"status": status.HTTP_200_OK})
+        else:
+            return Response(
+                {"status": status.HTTP_400_BAD_REQUEST},
+                status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], serializer_class=ChangeUserOrganizationRoleSerializer)
+    def change_organization_role(self, request, id=None):
+        """
+        Change status of user.
+        :param request:
+        :param pk:
+        :return:
+        """
+        user = self.get_object()
+        data = request.data
+        data['user'] = user.id
+        data['organization'] = request.organization.id
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)

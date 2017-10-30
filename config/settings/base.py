@@ -12,6 +12,7 @@ import environ
 import datetime
 from celery.schedules import crontab
 from django.utils import six
+from corsheaders.defaults import default_headers
 
 # (capitolzen/config/settings/base.py - 3 = capitolzen/)
 ROOT_DIR = environ.Path(__file__) - 3
@@ -80,9 +81,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'config.middleware.ActiveOrganizationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'capitolzen.meta.middleware.AuthenticationMiddlewareJWT',
+    #'capitolzen.meta.middleware.AuthenticationMiddlewareJWT',
 ]
 
 # DEBUG
@@ -362,12 +364,25 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-
 CORS_ORIGIN_WHITELIST = (
     'app.capitolzen.com',
     'capitolzen.com',
     'localhost:4200',
     'localhost:3000',
+)
+
+# methods allowed within CORS
+CORS_ALLOW_METHODS = (
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS'
+)
+
+CORS_ALLOW_HEADERS = default_headers + (
+    'X-Organization',
 )
 
 # Some really nice defaults
