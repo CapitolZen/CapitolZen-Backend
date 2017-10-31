@@ -2,7 +2,7 @@ from json import dumps, loads
 from celery import shared_task
 from django.conf import settings
 from capitolzen.meta.clients import aws_client
-from capitolzen.meta.notifications import send_report
+from capitolzen.meta.notifications import email_user_report_link
 from capitolzen.proposals.models import Wrapper
 from capitolzen.users.models import User
 from .models import Report
@@ -13,9 +13,8 @@ REPORT_FUNCTION = "capitolzen_search_reportify"
 @shared_task
 def generate_report(report):
     wrappers = Wrapper.objects.filter(group=report.group)
-    filters = report.filter
+    filters = report.prepared_filters()
     if filters:
-        filters = loads(filters)
         wrappers = wrappers.filter(**filters)
 
     bill_list = normalize_data(wrappers)
@@ -71,20 +70,13 @@ def email_report(report, user):
     if not url:
         return False
     else:
-        send_report(user, url)
+        context = {'report_title': report.title, 'url': url}
+        email_user_report_link(user.username, context)
 
 
 def update_report_docs(report, new_url):
     attachments = getattr(report, 'attachments')
-    doc_list = getattr(report, 'reportlist', [])
-
-    curr_url = attachments.get('output_url', False)
-    if curr_url:
-        doc_list.append(curr_url)
-
     attachments['output_url'] = new_url
-    attachments['reportlist'] = doc_list
-
     setattr(report, 'attachments', attachments)
     report.save()
 

@@ -17,7 +17,7 @@ from common.utils.filters.sets import OrganizationFilterSet, BaseModelFilterSet
 from common.utils.filters.filters import UUIDInFilter
 
 from config.viewsets import OwnerBasedViewSet, GenericBaseViewSet
-from capitolzen.groups.models import Group
+from capitolzen.groups.models import Group, prepare_report_filters
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
 from capitolzen.proposals.documents import BillDocument
 from capitolzen.proposals.api.app.serializers import (
@@ -203,12 +203,11 @@ class WrapperFilter(OrganizationFilterSet):
     def filter_bill_by_id(self, queryset, name, value):
         return queryset.filter(bill__id=value)
 
-    def action_date_filter(self, queryset, name, value):
-        today = datetime.today()
-        date_range = today - timedelta(days=int(value))
+    def action_date_range_filter(self, queryset, name, value):
         params = {}
         key = "bill__action_dates__%s__range" % name
-        params[key] = [str(date_range), str(today)]
+        parts = value.split(',')
+        params[key] = [parts[0], parts[1]]
         return queryset.filter(**params)
 
     introduced_range = filters.CharFilter(name='first', method='action_date_range_filter')
@@ -248,8 +247,10 @@ class WrapperViewSet(OwnerBasedViewSet):
         group = Group.objects.get(pk=data['group'])
         wrappers = Wrapper.objects.filter(group=group)
         wrapper_filters = data.get('filters', False)
+        print(type(wrapper_filters))
         if wrapper_filters:
-            wrappers = wrappers.filter(**wrapper_filters)
+            prepared_filters = prepare_report_filters(wrapper_filters, True)
+            wrappers = wrappers.filter(**prepared_filters)
 
         serialized = WrapperSerializer(wrappers, many=True)
         return Response(serialized.data)
