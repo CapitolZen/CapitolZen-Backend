@@ -1,9 +1,9 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from .models import Report
+from .models import Group, Report
 
 
-@receiver(post_save, sender=Report)
+@receiver(post_save, sender=Group)
 def create_group_default_report(sender, **kwargs):
     group = kwargs.get('instance')
     organization = group.organization
