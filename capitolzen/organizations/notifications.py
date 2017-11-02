@@ -51,3 +51,18 @@ def email_owner_welcome(to, **extra_context):
         from_email='hello@capitolzen.com',
         recipient_list=to,
         context=context)
+
+
+def email_update_bills(subject, message, organization, bills, **extra_context):
+    context = {
+        'url': settings.APP_FRONTEND,
+        'bills': bills,
+        **extra_context
+    }
+    send_templated_mail(
+        template_name='bill_list',
+        from_email='hello@capitolzen.com',
+        recipient_list=organization.users.all(),
+        message=message,
+        context=context
+    )

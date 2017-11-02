@@ -26,7 +26,7 @@ class BillSerializer(BaseModelSerializer):
             'session',
             'chamber',
             'remote_id',
-            'status',
+            'remote_status',
             'history',
             'current_committee',
             'sponsor',
