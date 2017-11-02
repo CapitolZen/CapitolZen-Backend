@@ -1,12 +1,15 @@
 from celery import shared_task
-
+import inflect
+from string import capwords
+from datetime import datetime, timedelta
 from capitolzen.proposals.managers import (
     BillManager, LegislatorManager, CommitteeManager
 )
-from capitolzen.proposals.utils import iterate_states
+from capitolzen.proposals.utils import iterate_states, normalize_data
 from capitolzen.organizations.models import Organization
-from capitolzen.proposals.models import Wrapper, Bill
-
+from capitolzen.proposals.models import Wrapper
+from capitolzen.groups.models import Group
+from capitolzen.organizations.notifications import email_update_bills
 
 @shared_task
 def bill_manager(state):
@@ -40,4 +43,24 @@ def spawn_committee_updates():
 
 @shared_task
 def run_organization_updates():
-    pass
+    organizations = Organization.objects.filter(is_active=True)
+    today = datetime.today()
+    date_range = today - timedelta(days=1)
+    for org in organizations:
+        groups = Group.objects.filter(organization=org, active=True)
+
+        for group in groups:
+            wrappers = Wrapper.objects.filter(
+                bill__action_dates__range=[str(date_range), str(today)],
+                group=group
+            )
+            count = len(wrappers)
+            p = inflect.engine()
+            count = p.number_to_words(count)
+            output = normalize_data(wrappers)
+            if count:
+                subject = '%s Bills Have Updates for %s' % (count, group.title)
+                message = 'Bills for %s have new action or information.' % group.title
+                message = capwords(message)
+                email_update_bills(message=message, organization=org, subject=subject, bills=output)
+

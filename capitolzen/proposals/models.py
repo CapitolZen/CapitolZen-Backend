@@ -74,7 +74,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
 
     @property
     def remote_status(self):
-        if not len(self.history):
+        if not self.history or not len(self.history):
             return 'no history available'
         latest = self.history[-1]
         return latest['action']

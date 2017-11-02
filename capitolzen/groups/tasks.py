@@ -1,9 +1,12 @@
 from json import dumps, loads
+
 from celery import shared_task
 from django.conf import settings
+
 from capitolzen.meta.clients import aws_client
 from capitolzen.meta.notifications import email_user_report_link
 from capitolzen.proposals.models import Wrapper
+from capitolzen.proposals.utils import normalize_data
 from capitolzen.users.models import User
 from .models import Report
 
@@ -81,22 +84,3 @@ def update_report_docs(report, new_url):
     report.save()
 
 
-def normalize_data(wrapper_list):
-    output = []
-    for w in wrapper_list:
-        data = {
-            "state_id": w.bill.state_id,
-            "state": w.bill.state,
-            "id": str(w.id),
-            "sponsor": w.display_sponsor,
-            "summary": w.display_summary,
-            "current_committee": w.bill.current_committee,
-            "status": w.bill.remote_status,
-            "position": w.position,
-            "position_detail": w.position_detail,
-            "last_action_date": w.bill.last_action_date,
-            "remote_url": w.bill.remote_url
-        }
-
-        output.append(data)
-    return output
