@@ -4,6 +4,8 @@ from capitolzen.proposals.managers import (
     BillManager, LegislatorManager, CommitteeManager
 )
 from capitolzen.proposals.utils import iterate_states
+from capitolzen.organizations.models import Organization
+from capitolzen.proposals.models import Wrapper, Bill
 
 
 @shared_task
@@ -34,3 +36,8 @@ def spawn_legislator_updates():
 @shared_task
 def spawn_committee_updates():
     return iterate_states(CommitteeManager, committee_manager)
+
+
+@shared_task
+def run_organization_updates():
+    pass

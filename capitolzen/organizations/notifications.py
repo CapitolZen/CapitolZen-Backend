@@ -51,3 +51,7 @@ def email_owner_welcome(to, **extra_context):
         from_email='hello@capitolzen.com',
         recipient_list=to,
         context=context)
+
+
+def email_update_bills(to, organization, **extra_context):
+    pass

@@ -1,0 +1,42 @@
+<mjml>
+  <mj-body>
+    <mj-container>
+      <mj-include path="./partials/header" /> <!-- or 'header.mjml' -->
+
+      <!-- Intro text -->
+      <mj-section background-color="#f5f5f5">
+        <mj-column>
+
+          <mj-text color="#525252">
+            {{ message |safe }}
+          </mj-text>
+
+        </mj-column>
+      </mj-section>
+      <mj-section background-color="#f5f5f5">
+        <mj-column>
+            <mj-table>
+                <tr style="border-bottom:1px solid #ecedee;text-align:left;padding:15px 0;">
+                  <th style="padding: 0 15px 0 0;">ID</th>
+                  <th style="padding: 0 15px;">State</th>
+                  <th style="padding: 0 15px;">Sponsor</th>
+                  <th style="padding: 0 0 0 15px;">View</th>
+                </tr>
+                {% for bill in bills %}
+                    <tr>
+                      <td style="padding: 0 15px 0 0;">bill.state_id</td>
+                      <td style="padding: 0 15px;">bill.state</td>
+                      <td style="padding: 0 0 0 15px;">bill.sponsor.full_name</td>
+                      <td style="padding: 0 0 0 15px;">bill.link</td>
+                    </tr>
+                {% endfor %}
+            </mj-table>
+        </mj-column>
+
+      </mj-section>
+
+      <mj-include path="./partials/footer" /> <!-- or 'footer.mjml' -->
+
+    </mj-container>
+  </mj-body>
+</mjml>
