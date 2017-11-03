@@ -247,7 +247,6 @@ class WrapperViewSet(OwnerBasedViewSet):
         group = Group.objects.get(pk=data['group'])
         wrappers = Wrapper.objects.filter(group=group)
         wrapper_filters = data.get('filters', False)
-        print(type(wrapper_filters))
         if wrapper_filters:
             prepared_filters = prepare_report_filters(wrapper_filters, True)
             wrappers = wrappers.filter(**prepared_filters)
