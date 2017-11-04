@@ -1,6 +1,5 @@
 from logging import getLogger
 
-from tika import parser
 import nltk
 
 from django.apps import AppConfig
@@ -39,11 +38,6 @@ class DocumentAnalysisConfig(AppConfig):
             'averaged_perceptron_tagger', 'hmm_treebank_pos_tagger',
             'maxent_treebank_pos_tagger', 'universal_tagset', 'punkt'
         ]
-        # Do initial loading of Tika
-        try:
-            parser.from_buffer("hello world")
-        except Exception as e:
-            logger.exception(e)
 
         # Populate nltk library
         try:

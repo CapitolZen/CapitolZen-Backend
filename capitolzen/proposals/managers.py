@@ -117,7 +117,6 @@ class BillManager(CongressionalManager):
             source['history'] = source.pop('actions')
         if source.get('versions'):
             source['bill_versions'] = source.pop('versions')
-
         if isinstance(source.get('type'), list):
             source['type'] = ",".join(source.get('type'))
         serializer = BillSerializer(data={
