@@ -1,3 +1,8 @@
+import base64
+import requests
+
+from django.db import transaction
+
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework.serializers import ValidationError
 
@@ -9,7 +14,6 @@ from config.serializers import (
 from capitolzen.organizations.models import Organization
 from capitolzen.groups.models import Group
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
-from capitolzen.proposals.utils import summarize
 
 
 class BillSerializer(BaseModelSerializer):
@@ -26,6 +30,7 @@ class BillSerializer(BaseModelSerializer):
             'history',
             'current_committee',
             'sponsor',
+            'sponsors',
             'title',
             'categories',
             'remote_url',
@@ -44,8 +49,10 @@ class BillSerializer(BaseModelSerializer):
         )
 
     def create(self, validated_data):
+        from capitolzen.proposals.tasks import ingest_attachment
         remote_id = validated_data.pop('remote_id')
-
+        if validated_data.get('state'):
+            validated_data['state'] = validated_data.get('state').upper()
         instance, created = Bill.objects.get_or_create(
             remote_id=remote_id,
             defaults={
@@ -56,8 +63,16 @@ class BillSerializer(BaseModelSerializer):
             instance.update_from_source(validated_data)
             if instance.bill_versions:
                 instance.current_version = instance.bill_versions[-1].get('url')
-                instance.save()
-
+            if instance.current_version:
+                response = requests.get(instance.current_version)
+                if 200 >= response.status_code < 300:
+                    instance.bill_raw_text = base64.b64encode(
+                        response.content).decode('ascii')
+            instance.save()
+        transaction.on_commit(
+            lambda: ingest_attachment.apply_async(kwargs={
+                "identifier": str(instance.pk)
+            }))
         return instance
 
 
