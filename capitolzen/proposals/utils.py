@@ -56,3 +56,30 @@ def summarize(content):
                 and len(word_list) > 1:
             summary += " " + sentence
     return summary.replace('&gt;', '').strip()
+
+
+def normalize_data(wrapper_list):
+    """
+    Take a list of wrappers and standardize data for output purposes
+    returns a flattened dict of data for wrappers
+    :param wrapper_list:
+    :return dict:
+    """
+    output = []
+    for w in wrapper_list:
+        data = {
+            "state_id": w.bill.state_id,
+            "state": w.bill.state,
+            "id": str(w.id),
+            "sponsor": w.display_sponsor,
+            "summary": w.display_summary,
+            "current_committee": w.bill.current_committee,
+            "status": w.bill.remote_status,
+            "position": w.position,
+            "position_detail": w.position_detail,
+            "last_action_date": w.bill.last_action_date,
+            "remote_url": w.bill.remote_url
+        }
+
+        output.append(data)
+    return output

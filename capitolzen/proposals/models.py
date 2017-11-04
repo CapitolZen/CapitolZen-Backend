@@ -24,7 +24,6 @@ class Bill(AbstractBaseModel, MixinExternalData):
     action_dates = JSONField(default=dict, blank=True, null=True)
     chamber = models.CharField(max_length=255, null=True)
     type = models.CharField(default=None, max_length=255, null=True)
-    status = models.TextField(null=True)
     current_committee = models.ForeignKey('proposals.Committee', null=True)
     sponsor = models.ForeignKey('proposals.Legislator', null=True)
     sponsors = JSONField(default=dict, blank=True, null=True)
@@ -77,6 +76,13 @@ class Bill(AbstractBaseModel, MixinExternalData):
         if not source:
             return False
         return source.get('url', False)
+
+    @property
+    def remote_status(self):
+        if not self.history or not len(self.history):
+            return 'no history available'
+        latest = self.history[-1]
+        return latest['action']
 
     def update_from_source(self, source):
         for sponsor in source.get('sponsors', []):

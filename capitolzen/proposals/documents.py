@@ -41,7 +41,6 @@ class BillDocument(DocType):
             'remote_id',
             'session',
             'chamber',
-            'status',
             'title',
             'summary',
             'type',

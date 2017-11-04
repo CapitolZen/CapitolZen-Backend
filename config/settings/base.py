@@ -84,7 +84,6 @@ MIDDLEWARE = [
     'config.middleware.ActiveOrganizationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #'capitolzen.meta.middleware.AuthenticationMiddlewareJWT',
 ]
 
 # DEBUG
@@ -431,7 +430,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     'import_bills': {
         'task': 'capitolzen.proposals.tasks.spawn_bill_updates',
-        'schedule': crontab(minute=0, hour='*/6')
+        'schedule': crontab(minute=0, hour='2,6')
     }
 }
 

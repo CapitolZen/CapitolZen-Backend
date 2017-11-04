@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, ArrayField
 
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
@@ -79,6 +79,7 @@ class Organization(AbstractOrganization, AbstractBaseModel):
         blank=True, null=True, max_length=255, upload_to=avatar_directory_path
     )
     contacts = JSONField(blank=True, default=dict)
+    available_states = ArrayField(models.CharField(max_length=255, blank=True, null=True), default=['MI'])
 
     def owner_user_account(self):
         """Because I can never remember how to get this"""

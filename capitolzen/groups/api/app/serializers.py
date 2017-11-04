@@ -10,9 +10,10 @@ from capitolzen.groups.models import Group, Report, Comment
 class GroupSerializer(BaseInternalModelSerializer):
     organization = ResourceRelatedField(
         many=False,
-        queryset=Organization.objects
+        queryset=Organization.objects,
+        required=False
     )
-    avatar = RemoteFileField()
+    avatar = RemoteFileField(required=False)
 
     class Meta:
         model = Group

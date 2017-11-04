@@ -92,8 +92,6 @@ class UserSerializer(BaseInternalModelSerializer):
         lookup_field = 'id'
 
 
-
-
 class RegistrationSerializer(serializers.Serializer):
     """
     User registration serializer. Creates a user and an org.

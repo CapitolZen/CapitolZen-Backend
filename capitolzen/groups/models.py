@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
-
+from json import loads
 from django.db import models
-
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -50,6 +49,15 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         return self.title
 
 
+def report_diretory_path(instance, filename):
+    """
+    :param instance:
+    :param filename:
+    :return:
+    """
+    return '{0}/reports/{1}'.format(instance.organization.id, filename)
+
+
 # TODO Permissions
 class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     user = models.ForeignKey('users.User', blank=True)
@@ -66,7 +74,6 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     description = models.TextField(blank=True, null=True)
     template = JSONField(default=dict)
     recurring = models.BooleanField(default=False)
-    update_frequency = models.CharField(blank=True, max_length=255, null=True)
     preferences = JSONField(default=dict)
     static_list = ArrayField(models.TextField(), blank=True, null=True)
 
@@ -82,6 +89,11 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     def publish(self):
         # TODO notifications
         pass
+
+    def prepared_filters(self):
+        if not self.filter:
+            return None
+        return prepare_report_filters(self.filter)
 
 
 class Comment(AbstractBaseModel):
@@ -112,3 +124,23 @@ class Comment(AbstractBaseModel):
         abstract = False
         verbose_name = "comment"
         verbose_name_plural = "comments"
+
+
+def prepare_report_filters(data, is_dict=False):
+    output = {}
+
+    if is_dict:
+        filters = data
+    else:
+        filters = loads(data)
+
+    for key, value in filters.items():
+        if key.endswith('__range'):
+            output[key] = value.split(',')
+            continue
+        if value.startswith('{') and value.endswith('}'):
+            output[key] = '2006-01-01'
+            continue
+        output[key] = value
+
+    return output
