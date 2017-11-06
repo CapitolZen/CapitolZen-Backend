@@ -16,7 +16,7 @@ jobs:
       - run:
           name: Pull NLTK Data
           command: |
-            python -m nltk.downloader -d ~/app/nltk_data all
+            pip install nltk && python -m nltk.downloader -d ~/app/nltk_data all
 
       - run:
           name: Setup Environment
