@@ -16,6 +16,7 @@ from capitolzen.proposals.managers import (
 )
 from capitolzen.proposals.models import Bill, Legislator, Committee
 from capitolzen.proposals.documents import BillDocument
+from capitolzen.proposals.tasks import ingest_attachment
 
 
 class TestBillManager(TestCase):
@@ -83,6 +84,7 @@ class TestBillManager(TestCase):
         self.manager(AVAILABLE_STATES[0].name).update(
             None, "MIB00012114", None
         )
+        ingest_attachment(str(Bill.objects.get(remote_id='MIB00012114').id))
         self.assertIn(
             "House Resolution No. A resolution",
             Bill.objects.get(remote_id='MIB00012114').summary
@@ -102,6 +104,7 @@ class TestBillManager(TestCase):
         self.manager("AL").update(
             None, "ALB00011538", None
         )
+        ingest_attachment(str(Bill.objects.get(remote_id='ALB00011538').id))
         self.assertIn(
             'Services shall serve as Secretary of the Legislative Council  '
             '3 without salary other than his compensation as Director of the',
@@ -142,6 +145,57 @@ class TestBillManager(TestCase):
         count = self.es_client.count(
             index="bills", doc_type="bill_document",
             body={"query": {"match_all": {}}}
+        )
+        bill_check = Bill.objects.get(remote_id="MIB00013864")
+        self.assertEqual(bill_check.state_id, "HB 5004")
+        self.assertEqual(bill_check.state, "MI")
+        self.assertEqual(bill_check.state, "MI")
+        self.assertEqual(bill_check.state_id, "HB 5004")
+        self.assertEqual(bill_check.state, "MI")
+        self.assertEqual(bill_check.state, "MI")
+        self.assertEqual(bill_check.history, [
+            {
+                "date": "2017-09-26 04:00:00",
+                "action": "introduced by Representative Michele Hoitenga",
+                "type": [
+                    "bill:introduced"
+                ],
+                "related_entities": [],
+                "actor": "lower"
+            },
+            {
+                "date": "2017-09-26 04:00:00",
+                "action": "read a first time",
+                "type": [
+                    "bill:reading:1"
+                ],
+                "related_entities": [],
+                "actor": "lower"
+            },
+            {
+                "date": "2017-09-26 04:00:00",
+                "action": "referred to Committee on Commerce and Trade",
+                "type": [
+                    "committee:referred"
+                ],
+                "related_entities": [],
+                "actor": "lower"
+            },
+            {
+                "date": "2017-09-27 04:00:00",
+                "action": "bill electronically reproduced 09/26/2017",
+                "type": [
+                    "other"
+                ],
+                "related_entities": [],
+                "actor": "lower"
+            }
+        ])
+        self.assertEqual(
+            bill_check.title, "Employment security; benefits; individual to "
+                              "provide photo identification when applying "
+                              "for unemployment benefits; require. Amends "
+                              "sec. 28 of 1936 (Ex Sess) PA 1 (MCL 421.28)."
         )
         self.assertEqual(count.get('count'), 3)
 

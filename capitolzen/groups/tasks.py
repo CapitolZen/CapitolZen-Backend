@@ -70,6 +70,7 @@ def email_report(report, user):
     report = Report.objects.get(pk=report)
     user = User.objects.get(pk=user)
     url = generate_report(report)
+    print(report)
     if not url:
         return False
     else:

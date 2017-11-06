@@ -430,7 +430,11 @@ CELERY_BEAT_SCHEDULE = {
     },
     'import_bills': {
         'task': 'capitolzen.proposals.tasks.spawn_bill_updates',
-        'schedule': crontab(minute=0, hour='2,6')
+        'schedule': crontab(minute=0, hour='3,5,8')
+    },
+    'email_bill_updates': {
+        'task': 'capitolzen.proposals.tasks.run_organization_bill_updates',
+        'schedule': crontab(minute=0, hour='4,6')
     }
 }
 

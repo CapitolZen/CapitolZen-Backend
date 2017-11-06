@@ -46,8 +46,13 @@ class Bill(AbstractBaseModel, MixinExternalData):
     current_version = models.URLField(blank=True, null=True)
     bill_versions = JSONField(default=dict, blank=True, null=True)
     bill_text = models.TextField(null=True)
+
     updated_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(null=True)
+
+    # ES Ingest Attachment Pipeline Enablers
+    bill_text_analysis = JSONField(default=None, null=True)
+    bill_raw_text = models.TextField(default=None, null=True)
 
     # Properties
     @property
@@ -85,8 +90,10 @@ class Bill(AbstractBaseModel, MixinExternalData):
                 q = {"remote_id": sponsor['leg_id']}
             else:
                 parts = sponsor['name'].split(' ', 1)
-
-                q = {"first_name": parts[0], "last_name": parts[1]}
+                if len(parts) > 1:
+                    q = {"first_name": parts[0], "last_name": parts[1]}
+                else:
+                    q = {"last_name": parts[0]}
 
             try:
                 leg = Legislator.objects.get(**q)
