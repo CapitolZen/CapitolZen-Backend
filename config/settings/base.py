@@ -148,8 +148,8 @@ CACHES = {
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
-CACHEOPS_REDIS = '{0}/{1}'.format(env('REDIS_URL',
-                                      default='redis://127.0.0.1:6379'), 2)
+CACHEOPS_REDIS = '{0}/{1}'.format(
+    env('REDIS_URL', default='redis://127.0.0.1:6379'), 2)
 
 CACHEOPS_DEFAULTS = {
     'timeout': 60*60
@@ -412,12 +412,12 @@ API_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 INSTALLED_APPS += ('capitolzen.tasks.celery.CeleryConfig',)
 CELERY_BROKER_URL = '{0}/{1}'.format(
     env('REDIS_URL', default='redis://redis:6379'), 1)
-CELERY_RESULT_BACKEND = '{0}/{1}'.format(
-    env('REDIS_URL', default='redis://redis:6379'), 1)
+CELERY_RESULT_BACKEND = None
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Detroit'
+
 
 CELERY_BEAT_SCHEDULE = {
     'import_committee': {
