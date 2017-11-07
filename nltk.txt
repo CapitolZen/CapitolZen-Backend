@@ -11,6 +11,8 @@ city_database
 cmudict
 comparative_sentences
 comtrans
+conll2000
+conll2002
 conll2007
 crubadan
 dependency_treebank
@@ -79,13 +81,16 @@ wordnet
 wordnet_ic
 words
 ycoe
+basque_grammars
 book_grammars
 large_grammars
 sample_grammars
+spanish_grammars
 tagsets
 perluniprops
 bllip_wsj_no_aux
 moses_sample
+word2vec_sample
 vader_lexicon
 rslp
 snowball_data
