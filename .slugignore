@@ -1,0 +1,4 @@
+.circleci/*
+compose/*
+utilities/*
+*tests/*

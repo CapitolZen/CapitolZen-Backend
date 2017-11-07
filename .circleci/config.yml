@@ -14,6 +14,11 @@ jobs:
             docker-compose --version
 
       - run:
+          name: Pull NLTK Data
+          command: |
+            pip install nltk && python -m nltk.downloader -d ~/app/nltk_data all
+
+      - run:
           name: Setup Environment
           command: |
             env > ~/app/.env
