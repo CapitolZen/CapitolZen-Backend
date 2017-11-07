@@ -6,9 +6,8 @@ from celery import shared_task
 from capitolzen.proposals.managers import (
     BillManager, LegislatorManager, CommitteeManager
 )
-from capitolzen.proposals.utils import iterate_states, normalize_data
 from capitolzen.organizations.models import Organization
-from capitolzen.proposals.models import Wrapper
+from capitolzen.proposals.models import Wrapper, Bill
 from capitolzen.groups.models import Group
 from capitolzen.organizations.notifications import email_update_bills
 from capitolzen.proposals.utils import (
