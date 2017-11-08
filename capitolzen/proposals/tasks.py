@@ -65,7 +65,8 @@ def run_organization_bill_updates():
             output = normalize_data(wrappers)
             if count:
                 subject = '%s Bills Have Updates for %s' % (count, group.title)
-                message = 'Bills for %s have new action or information.' % group.title
+                message = 'Bills for %s have new action or information.' % (
+                    group.title)
                 message = capwords(message)
                 email_update_bills(message=message, organization=org, subject=subject, bills=output)
 

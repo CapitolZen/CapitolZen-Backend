@@ -24,7 +24,7 @@ RUN sed -i 's/\r//' /entrypoint.sh \
     && chmod +x /gunicorn.sh \
     && chown django /gunicorn.sh \
     && mkdir /app/nltk_data \
-    && python -m nltk.downloader -d /app/nltk_data all
+    && python -m nltk.downloader -d /app/nltk_data punkt abc city_database cmudict comparative_sentences inaugural names paradigms pros_cons sentence_polarity shakespeare state_union stopwords subjectivity words book_grammars large_grammars
 
 WORKDIR /app
 
