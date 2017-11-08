@@ -70,6 +70,29 @@ def run_organization_bill_updates():
                 email_update_bills(message=message, organization=org, subject=subject, bills=output)
 
 
+@shared_task
+def new_introduction_email():
+    organizations = Organization.objects.filter(is_active=True)
+    today = datetime.today()
+    date_range = today - timedelta(days=1)
+    bills = Bill.objects.filter(action_dates_range=date_range)
+    if len(bills):
+        output = []
+        for bill in bills:
+            data = {
+                "state_id": bill.state_id,
+                "state": bill.state,
+                "id": str(bill.id),
+                "sponsor": bill.sponsor.full_name,
+                "summary": bill.title,
+                "status": bill.remote_status,
+            }
+            output.append(data)
+
+
+
+
+
 @shared_task(retry_kwargs={'max_retries': 20})
 def ingest_attachment(identifier):
     instance = Bill.objects.get(id=identifier)

@@ -56,6 +56,7 @@ def email_owner_welcome(to, **extra_context):
 def email_update_bills(subject, message, organization, bills, **extra_context):
     context = {
         'url': settings.APP_FRONTEND,
+        'subject': subject,
         'bills': bills,
         **extra_context
     }

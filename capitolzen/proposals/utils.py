@@ -73,7 +73,6 @@ def normalize_data(wrapper_list):
             "id": str(w.id),
             "sponsor": w.display_sponsor,
             "summary": w.display_summary,
-            "current_committee": w.bill.current_committee,
             "status": w.bill.remote_status,
             "position": w.position,
             "position_detail": w.position_detail,
