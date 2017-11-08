@@ -86,7 +86,8 @@ class TestBillManager(TestCase):
         )
         ingest_attachment(str(Bill.objects.get(remote_id='MIB00012114').id))
         self.assertIn(
-            "House Resolution No. A resolution",
+            "Reps. Lauwers and Greig offered the following resolution: "
+            "House Resolution No.",
             Bill.objects.get(remote_id='MIB00012114').summary
         )
 
@@ -106,9 +107,11 @@ class TestBillManager(TestCase):
         )
         ingest_attachment(str(Bill.objects.get(remote_id='ALB00011538').id))
         self.assertIn(
-            'Services shall serve as Secretary of the Legislative Council  '
-            '3 without salary other than his compensation as Director of the',
+            'Director of Legislative Services shall have all powers',
             Bill.objects.get(remote_id='ALB00011538').summary
+        )
+        self.assertTrue(
+            len(Bill.objects.get(remote_id='ALB00011538').summary) < 240
         )
 
     @requests_mock.mock()
