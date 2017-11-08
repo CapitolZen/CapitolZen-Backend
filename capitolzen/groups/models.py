@@ -4,7 +4,12 @@ from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
+from model_utils import Choices
+
+from capitolzen.organizations.models import Organization
+from capitolzen.users.models import User
 
 from config.models import AbstractBaseModel
 
@@ -144,3 +149,38 @@ def prepare_report_filters(data, is_dict=False):
         output[key] = value
 
     return output
+
+
+def file_directory_path(instance, filename):
+    """
+    format directory path for file library
+    :param instance:
+    :param filename:
+    :return string:
+    """
+    return '{0}/files/{1}'.format(instance.id, filename)
+
+
+class File(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+    organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE)
+    user = models.ForeignKey('users.User')
+    file = models.FileField(max_length=255, null=True, blank=True, upload_to=file_directory_path)
+    user_path = models.CharField(default='', max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+
+    visibility_choices = Choices(
+        ('public', 'Public'),
+        ('org', 'Private to organization')
+    )
+
+    visibility = models.CharField(
+        choices=visibility_choices, max_length=225, default='org', db_index=True
+    )
+
+    class Meta:
+        verbose_name = _("file")
+        verbose_name_plural = _("files")
+
+    class JSONAPIMeta:
+        resource_name = "files"

@@ -5,8 +5,8 @@ from django.template.loader import render_to_string
 
 class JSONEditorWidget(forms.Widget):
     """
-    Adds https://github.com/josdejong/jsoneditor to any json 
-    field in the admin area.
+    Adds https://github.com/josdejong/jsoneditor to any json
+    field in the admin.py area.
     """
     template_name = 'widgets/jsoneditor.html'
 

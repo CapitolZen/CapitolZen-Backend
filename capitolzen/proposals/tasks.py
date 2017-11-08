@@ -65,9 +65,42 @@ def run_organization_bill_updates():
             output = normalize_data(wrappers)
             if count:
                 subject = '%s Bills Have Updates for %s' % (count, group.title)
-                message = 'Bills for %s have new action or information.' % group.title
+                message = 'Bills for %s have new action or information.' % (
+                    group.title)
                 message = capwords(message)
                 email_update_bills(message=message, organization=org, subject=subject, bills=output)
+
+
+@shared_task
+def new_introduction_email():
+    organizations = Organization.objects.filter(is_active=True)
+    today = datetime.today()
+    date_range = today - timedelta(days=1)
+    bills = Bill.objects.filter(action_dates_range=date_range)
+    count = len(bills)
+    if count:
+        p = inflect.engine()
+        count = p.number_to_words(count)
+        bill_list = []
+        for bill in bills:
+            data = {
+                "state_id": bill.state_id,
+                "state": bill.state,
+                "id": str(bill.id),
+                "sponsor": bill.sponsor.full_name,
+                "summary": bill.title,
+                "status": bill.remote_status,
+            }
+            bill_list.append(data)
+
+        for org in organizations:
+            subject = '%s New Bills Have Been Introduced' % (count,)
+            message = 'There were %s new bills introduced yesterday. ' \
+                      'Login into your Capitol Zen account to view them all.'
+            email_update_bills(message=message, subject=subject, bills=bill_list, organization=org)
+
+
+
 
 
 @shared_task(retry_kwargs={'max_retries': 20})

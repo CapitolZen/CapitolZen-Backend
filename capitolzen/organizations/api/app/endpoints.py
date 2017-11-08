@@ -18,10 +18,10 @@ from rest_framework import mixins
 from capitolzen.meta.clients import DocManager
 from capitolzen.users.models import User
 from capitolzen.organizations.models import (
-    Organization, OrganizationInvite, File
+    Organization, OrganizationInvite
 )
 from capitolzen.organizations.api.app.serializers import (
-    OrganizationSerializer, OrganizationInviteSerializer, FileSerializer
+    OrganizationSerializer, OrganizationInviteSerializer
 )
 
 
@@ -230,26 +230,3 @@ class OrganizationInviteViewSet(viewsets.ModelViewSet):
 
         return Response({"status_code": status.HTTP_400_BAD_REQUEST,
                          "detail": "Invalid request"})
-
-
-class FileFilter(filters.FilterSet):
-    class Meta:
-        model = File
-        ordering = ['name']
-        fields = {
-            'id': ['exact'],
-            'created': ['lt', 'gt'],
-            'modified': ['lt', 'gt'],
-            'name': ['icontains'],
-        }
-
-
-class FileViewSet(viewsets.ModelViewSet):
-
-    def get_queryset(self):
-        return File.objects.filter(organization__users=self.request.user)
-
-    filter_class = FileFilter
-    filter_backends = (DjangoFilterBackend, )
-    permission_classes = (DRYPermissions, )
-    serializer_class = FileSerializer
