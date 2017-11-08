@@ -3,6 +3,7 @@ from requests import get
 from django.conf import settings
 from django.core.cache import cache
 
+from capitolzen.proposals.models import Bill
 from capitolzen.proposals.api.app.serializers import (
     BillSerializer, LegislatorSerializer, CommitteeSerializer
 )
@@ -119,7 +120,11 @@ class BillManager(CongressionalManager):
             source['bill_versions'] = source.pop('versions')
         if isinstance(source.get('type'), list):
             source['type'] = ",".join(source.get('type'))
-        serializer = BillSerializer(data={
+        try:
+            instance = Bill.objects.get(remote_id=remote_id)
+        except Bill.DoesNotExist:
+            instance = None
+        serializer = BillSerializer(instance, data={
             'remote_id': remote_id,
             **source
         })

@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+import base64
+import requests
 
 from django.db import models
 
@@ -84,7 +86,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
         latest = self.history[-1]
         return latest['action']
 
-    def update_from_source(self, source):
+    def update(self, source):
         for sponsor in source.get('sponsors', []):
             if sponsor.get('leg_id', False):
                 q = {"remote_id": sponsor['leg_id']}
@@ -111,7 +113,16 @@ class Bill(AbstractBaseModel, MixinExternalData):
         for cat in source.get('categories', []):
             self.categories.append(cat)
 
+        if self.bill_versions:
+            self.current_version = self.bill_versions[-1].get('url')
+        if self.current_version:
+            response = requests.get(self.current_version)
+            if 200 >= response.status_code < 300:
+                self.bill_raw_text = base64.b64encode(
+                    response.content).decode('ascii')
         self.save()
+
+        return self
 
     class Meta:
         abstract = False

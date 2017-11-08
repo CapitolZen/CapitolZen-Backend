@@ -1,11 +1,14 @@
 import json
+import pytz
 import requests_mock
 from unittest import mock
+from datetime import datetime
 
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch_dsl import Search
 
+from django.utils import timezone
 from django.test import TestCase
 from django.conf import settings
 from django.core.cache import cache
@@ -89,6 +92,38 @@ class TestBillManager(TestCase):
             "Reps. Lauwers and Greig offered the following resolution: "
             "House Resolution No.",
             Bill.objects.get(remote_id='MIB00012114').summary
+        )
+
+    @requests_mock.mock(real_http=True)
+    def test_get_remote_detail_updates(self, m):
+        """
+        We want to make sure that if we have updates to actions that we're
+        actually updating the history and not failing out due to the bill
+        already existing.
+        :param m:
+        :return:
+        """
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  'MIB00012114.json') as data_file:
+            m.get('%s%s/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
+                  json=json.load(data_file), status_code=200)
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  '2017-HAR-0003.htm', 'rb') as data_file:
+            m.get('http://www.legislature.mi.gov/documents/2017-2018/'
+                  'resolutionadopted/House/htm/2017-HAR-0003.htm',
+                  content=data_file.read(), status_code=200)
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIB00012114", None
+        )
+        bill = Bill.objects.get(remote_id="MIB00012114")
+        bill.modified = pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
+        bill.save(skip_modified="True")
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIB00012114", None
+        )
+        self.assertTrue(
+            Bill.objects.get(remote_id='MIB00012114').modified >
+            pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
         )
 
     @requests_mock.mock(real_http=True)
