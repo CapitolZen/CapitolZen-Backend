@@ -159,7 +159,8 @@ class WrapperSerializer(BaseInternalModelSerializer):
             'notes',
             'position',
             'summary',
-            'position_detail'
+            'position_detail',
+            'files',
         )
 
     def create(self, validated_data):

@@ -213,9 +213,10 @@ class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
 
     position = models.CharField(blank=True, max_length=255)
     position_detail = models.TextField(blank=True, null=True)
-    notes = JSONField(blank=True, default=dict)
+    notes = JSONField(blank=True, default=list)
     starred = models.BooleanField(default=False)
     summary = models.TextField(blank=True, null=True)
+    files = JSONField(blank=True, default=list)
 
     @property
     def display_summary(self):

@@ -402,7 +402,7 @@ LOGIN_URL = 'account_login'
 # SLUGLIFIER
 AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 
-# Location of root django.contrib.admin URL, use {% url 'admin:index' %}
+# Location of root django.contrib.admin.py URL, use {% url 'admin.py:index' %}
 ADMIN_URL = r'^admin/'
 API_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -430,7 +430,15 @@ CELERY_BEAT_SCHEDULE = {
     },
     'import_bills': {
         'task': 'capitolzen.proposals.tasks.spawn_bill_updates',
-        'schedule': crontab(minute=0, hour='2,6')
+        'schedule': crontab(minute=0, hour='3,5,8')
+    },
+    'email_bill_updates': {
+        'task': 'capitolzen.proposals.tasks.run_organization_bill_updates',
+        'schedule': crontab(minute=0, hour='4,6')
+    },
+    'email_bill_introductions': {
+        'task': 'capitolzen.proposals.tasks.new_introduction_email',
+        'schedule': crontab(minute=30, hour='6')
     }
 }
 

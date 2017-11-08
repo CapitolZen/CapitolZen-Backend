@@ -12,7 +12,6 @@ psycopg2==2.7.3.2
 celery[redis]==4.1.0
 boto3==1.4.7
 ipython==6.2.1
-asana==0.6.5
 stripe==1.62.0
 python-intercom==3.1.0
 elasticsearch>=5.0.0,<6.0.0

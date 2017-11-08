@@ -9,5 +9,5 @@ router.register(r'activities', ActivityViewSet, base_name="activities")
 
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^files/$', FileManagerView.as_view(), name="action-list"),
+    url(r'^file_manager/$', FileManagerView.as_view(), name="action-list"),
 ]
