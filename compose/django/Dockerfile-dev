@@ -26,5 +26,4 @@ RUN chmod +x /wait-for-it.sh
 
 
 WORKDIR /app
-RUN mkdir /app/nltk_data && python -m nltk.downloader -d /app/nltk_data all
 ENTRYPOINT ["/entrypoint-dev.sh"]
