@@ -5,11 +5,10 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, ArrayField
 
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
-from model_utils import Choices
 
 from config.models import AbstractBaseModel
 from organizations.abstract import (
@@ -79,6 +78,9 @@ class Organization(AbstractOrganization, AbstractBaseModel):
         blank=True, null=True, max_length=255, upload_to=avatar_directory_path
     )
     contacts = JSONField(blank=True, default=dict)
+    available_states = ArrayField(models.CharField(
+        max_length=255, blank=True, null=True), default=['MI']
+    )
 
     def owner_user_account(self):
         """Because I can never remember how to get this"""
@@ -134,7 +136,7 @@ class Organization(AbstractOrganization, AbstractBaseModel):
         self.save()
 
     def update_subscription(self, plan, **kwargs):
-        sub = self.stripe_subscription_id
+        # sub = self.stripe_subscription_id
         return True
 
 
@@ -234,27 +236,3 @@ def file_directory_path(instance, filename):
     :return string:
     """
     return '{0}/files/{1}'.format(instance.id, filename)
-
-
-class File(AbstractBaseModel):
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    user = models.ForeignKey('users.User')
-    file = models.FileField(max_length=255, upload_to=file_directory_path)
-    user_path = models.CharField(default='', max_length=255)
-    name = models.CharField(max_length=255)
-
-    visibility_choices = Choices(
-        ('public', 'Public'),
-        ('org', 'Private to organization')
-    )
-
-    visibility = models.CharField(
-        choices=visibility_choices, max_length=225, default='org', db_index=True
-    )
-
-    class Meta:
-        verbose_name = _("file")
-        verbose_name_plural = _("files")
-
-    class JSONAPIMeta:
-        resource_name = "files"

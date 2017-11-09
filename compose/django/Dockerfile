@@ -1,6 +1,6 @@
 FROM python:3.6
 ENV PYTHONUNBUFFERED 1
-
+ENV NLTK_DATA /app/nltk_data/
 RUN echo 'deb http://ftp.debian.org/debian jessie-backports main' >> /etc/apt/sources.list
 RUN apt-get update && apt-get -t jessie-backports install -y \
   postgresql-client
@@ -22,7 +22,9 @@ RUN sed -i 's/\r//' /entrypoint.sh \
     && chmod +x /entrypoint.sh \
     && chown django /entrypoint.sh \
     && chmod +x /gunicorn.sh \
-    && chown django /gunicorn.sh
+    && chown django /gunicorn.sh \
+    && mkdir /app/nltk_data \
+    && python -m nltk.downloader -d /app/nltk_data punkt abc city_database cmudict comparative_sentences inaugural names paradigms pros_cons sentence_polarity shakespeare state_union stopwords subjectivity words book_grammars large_grammars
 
 WORKDIR /app
 

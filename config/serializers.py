@@ -65,7 +65,6 @@ class RemoteFileField(serializers.Field):
         """
 
         url = urlparse(data)
-
         if '.s3.amazonaws.com' in url.netloc:
             bucket = url.netloc.replace('.s3.amazonaws.com', '')
             if bucket in [settings.AWS_TEMP_BUCKET_NAME, settings.AWS_BUCKET_NAME]:
@@ -98,13 +97,8 @@ class RemoteFileField(serializers.Field):
             return None
 
         info = self._parse_incoming_file_data(data)
-
         instance = self.parent.instance
-        attr = getattr(instance, self.field_name)
-
-        # Don't do anything if it's the same file
-        if attr and attr.file.name and attr.file.name == info['file']:
-            return attr.file.name
+        print(self)
 
         source = {
             'key': info['file'],
@@ -116,8 +110,17 @@ class RemoteFileField(serializers.Field):
             'bucket': settings.AWS_BUCKET_NAME
         }
 
-        if attr.field.upload_to:
-            destination['key'] = attr.field.upload_to(instance, info['file'])
+        # Don't do anything if it's the same file
+        if instance:
+            attr = getattr(instance, self.field_name)
+
+            if attr and attr.file.name and attr.file.name == info['file']:
+                return attr.file.name
+
+            if attr.field.upload_to:
+                destination['key'] = attr.field.upload_to(instance, info['file'])
+            else:
+                destination['key'] = info['file']
         else:
             destination['key'] = info['file']
 

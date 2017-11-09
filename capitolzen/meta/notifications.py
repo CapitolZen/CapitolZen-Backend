@@ -1,9 +1,14 @@
+from logging import getLogger
 from sparkpost import SparkPost
 from celery import shared_task
-from django.conf import settings
 from requests import post
 
-SP_API = settings.SPARKPOST_KEY
+from django.conf import settings
+
+from templated_email import send_templated_mail
+
+
+logger = getLogger('app_logger')
 
 
 @shared_task
@@ -21,28 +26,37 @@ def admin_slack(message):
     }
     try:
         post(settings.SLACK_URL, data=data)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.info(e)
 
 
-@shared_task
-def send_report(user, url):
+def email_user_report_link(to, **extra_context):
     """
-    TODO: Convert to templated email. see other examples.
-    :param message:
-    :param subject:
+    When: A user requests "email" report
+    :param user:
+    :param url:
     :return:
     """
+    if to is not list:
+        to = [to]
 
-    recipients = [user.username]
-    html = "<p>Your report is now available.<p><p><a href='%s'>Download</a><p>Or copy this link</p><p>%s</p>" % \
-           (url, url)
-    sp = client()
-    sp.transmissions.send(
-        recipients=recipients,
-        html=html,
-        from_email="donald@capitolzen.com",
-        subject="Your report"
+    message = "<p>You requested a copy of %s</p>" % extra_context['report_title']
+    message += "<p>Click the button below or copy this link:</p>"
+    message += "<p>%s</p>" % extra_context['url']
+
+    context = {
+        "message": message,
+        "subject": "Download %s" % extra_context['report_title'],
+        "action_cta": "Download Report",
+        "action_url": extra_context['url'],
+        **extra_context
+    }
+
+    send_templated_mail(
+        template_name='simple_action',
+        from_email='hello@capitolzen.com',
+        recipient_list=to,
+        context=context,
     )
 
 
@@ -91,6 +105,6 @@ def api_email(recpients, subject, message):
 
 def client():
     if not settings.CI:
-        return SparkPost(api_key=SP_API)
+        return SparkPost(api_key=settings.SPARKPOST_KEY)
     else:
         return False

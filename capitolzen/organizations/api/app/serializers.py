@@ -5,7 +5,6 @@ from config.serializers import BaseInternalModelSerializer, RemoteFileField
 from capitolzen.organizations.models import (
     Organization,
     OrganizationInvite,
-    File
 )
 from capitolzen.users.models import User
 
@@ -55,7 +54,6 @@ class OrganizationInviteSerializer(BaseInternalModelSerializer):
         Check if email is currently in use
         :return:
         """
-        print('serializer')
         try:
             User.objects.get(username=value)
             raise serializers.ValidationError("Email Already In Use")
@@ -76,24 +74,3 @@ class OrganizationInviteSerializer(BaseInternalModelSerializer):
             'email',
             'status'
         )
-
-
-class FileSerializer(serializers.ModelSerializer):
-    file = RemoteFileField()
-    organization = ResourceRelatedField(
-        many=False, queryset=Organization.objects
-    )
-    user = ResourceRelatedField(many=False, queryset=User.objects)
-
-    class Meta:
-        model = File
-        fields = ('id',
-                  'metadata',
-                  'created',
-                  'modified',
-                  'visibility',
-                  'user_path',
-                  'organization',
-                  'user',
-                  'name')
-        read_only_fields = ('id',)

@@ -93,8 +93,6 @@ def intercom_manage_user_companies(user_id):
 
 @shared_task
 def create_notification_task(title, categories, bill):
-
-    temp = categories
     users = User.objects.all()
 
     for user in users:

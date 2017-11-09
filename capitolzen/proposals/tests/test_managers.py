@@ -1,6 +1,8 @@
 import json
+import pytz
 import requests_mock
 from unittest import mock
+from datetime import datetime
 
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from elasticsearch.exceptions import NotFoundError
@@ -16,6 +18,7 @@ from capitolzen.proposals.managers import (
 )
 from capitolzen.proposals.models import Bill, Legislator, Committee
 from capitolzen.proposals.documents import BillDocument
+from capitolzen.proposals.tasks import ingest_attachment
 
 
 class TestBillManager(TestCase):
@@ -69,6 +72,82 @@ class TestBillManager(TestCase):
             2
         )
 
+    @requests_mock.mock(real_http=True)
+    def test_get_remote_detail_summary_htm(self, m):
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  'MIB00012114.json') as data_file:
+            m.get('%s%s/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
+                  json=json.load(data_file), status_code=200)
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  '2017-HAR-0003.htm', 'rb') as data_file:
+            m.get('http://www.legislature.mi.gov/documents/2017-2018/'
+                  'resolutionadopted/House/htm/2017-HAR-0003.htm',
+                  content=data_file.read(), status_code=200)
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIB00012114", None
+        )
+        ingest_attachment(str(Bill.objects.get(remote_id='MIB00012114').id))
+        self.assertIn(
+            "Reps. Lauwers and Greig offered the following resolution: "
+            "House Resolution No.",
+            Bill.objects.get(remote_id='MIB00012114').summary
+        )
+
+    @requests_mock.mock(real_http=True)
+    def test_get_remote_detail_updates(self, m):
+        """
+        We want to make sure that if we have updates to actions that we're
+        actually updating the history and not failing out due to the bill
+        already existing.
+        :param m:
+        :return:
+        """
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  'MIB00012114.json') as data_file:
+            m.get('%s%s/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
+                  json=json.load(data_file), status_code=200)
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  '2017-HAR-0003.htm', 'rb') as data_file:
+            m.get('http://www.legislature.mi.gov/documents/2017-2018/'
+                  'resolutionadopted/House/htm/2017-HAR-0003.htm',
+                  content=data_file.read(), status_code=200)
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIB00012114", None
+        )
+        instance = Bill.objects.get(remote_id="MIB00012114")
+        instance.modified = pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
+        instance.save(skip_modified="True")
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIB00012114", None
+        )
+        self.assertTrue(
+            Bill.objects.get(remote_id='MIB00012114').modified >
+            pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
+        )
+
+    @requests_mock.mock(real_http=True)
+    def test_get_remote_detail_summary_pdf(self, m):
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  'ALB00011538.json') as data_file:
+            m.get('%s%s/ALB00011538/' % (settings.OPEN_STATES_URL, "bills"),
+                  json=json.load(data_file), status_code=200)
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  'SB4-enr.pdf', 'rb') as data_file:
+            m.get('http://alisondb.legislature.state.al.us/ALISON/'
+                  'SearchableInstruments/2017rs/PrintFiles/SB4-enr.pdf',
+                  content=data_file.read(), status_code=200)
+        self.manager("AL").update(
+            None, "ALB00011538", None
+        )
+        ingest_attachment(str(Bill.objects.get(remote_id='ALB00011538').id))
+        self.assertIn(
+            'Director of Legislative Services shall have all powers',
+            Bill.objects.get(remote_id='ALB00011538').summary
+        )
+        self.assertTrue(
+            len(Bill.objects.get(remote_id='ALB00011538').summary) < 240
+        )
+
     @requests_mock.mock()
     def test_get_remote_detail_no_data(self, m):
         m.get('%s%s/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
@@ -79,7 +158,8 @@ class TestBillManager(TestCase):
         )
 
     @mock.patch(
-        'capitolzen.proposals.managers.BillManager._get_remote_list')
+        'capitolzen.proposals.managers.BillManager._get_remote_list',
+        real_http=True)
     def test_get_remote_list_population(self, m):
         cache.clear()
         with open('capitolzen/proposals/tests/sample_data/bills/'
@@ -103,7 +183,58 @@ class TestBillManager(TestCase):
             index="bills", doc_type="bill_document",
             body={"query": {"match_all": {}}}
         )
-        self.assertEqual(count.get('count'), 3)
+        bill_check = Bill.objects.get(remote_id="MIB00013864")
+        self.assertEqual(bill_check.state_id, "HB 5004")
+        self.assertEqual(bill_check.state, "MI")
+        self.assertEqual(bill_check.state, "MI")
+        self.assertEqual(bill_check.state_id, "HB 5004")
+        self.assertEqual(bill_check.state, "MI")
+        self.assertEqual(bill_check.state, "MI")
+        self.assertEqual(bill_check.history, [
+            {
+                "date": "2017-09-26 04:00:00",
+                "action": "introduced by Representative Michele Hoitenga",
+                "type": [
+                    "bill:introduced"
+                ],
+                "related_entities": [],
+                "actor": "lower"
+            },
+            {
+                "date": "2017-09-26 04:00:00",
+                "action": "read a first time",
+                "type": [
+                    "bill:reading:1"
+                ],
+                "related_entities": [],
+                "actor": "lower"
+            },
+            {
+                "date": "2017-09-26 04:00:00",
+                "action": "referred to Committee on Commerce and Trade",
+                "type": [
+                    "committee:referred"
+                ],
+                "related_entities": [],
+                "actor": "lower"
+            },
+            {
+                "date": "2017-09-27 04:00:00",
+                "action": "bill electronically reproduced 09/26/2017",
+                "type": [
+                    "other"
+                ],
+                "related_entities": [],
+                "actor": "lower"
+            }
+        ])
+        self.assertEqual(
+            bill_check.title, "Employment security; benefits; individual to "
+                              "provide photo identification when applying "
+                              "for unemployment benefits; require. Amends "
+                              "sec. 28 of 1936 (Ex Sess) PA 1 (MCL 421.28)."
+        )
+        self.assertTrue(count.get('count') <= 4)
 
 
 class TestLegislatorsManager(TestCase):
@@ -150,6 +281,26 @@ class TestLegislatorsManager(TestCase):
         )
 
     @requests_mock.mock()
+    def test_update_record(self, m):
+        with open('capitolzen/proposals/tests/sample_data/legislators/'
+                  'MIL000044.json') as data_file:
+            m.get('%s%s/MIL000044/' % (settings.OPEN_STATES_URL, "legislators"),
+                  json=json.load(data_file), status_code=200)
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIL000044", None
+        )
+        instance = Legislator.objects.get(remote_id="MIL000044")
+        instance.modified = pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
+        instance.save(skip_modified="True")
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIL000044", None
+        )
+        self.assertTrue(
+            Legislator.objects.get(remote_id='MIL000044').modified >
+            pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
+        )
+
+    @requests_mock.mock()
     def test_get_remote_detail_no_data(self, m):
         m.get('%s%s/MIL000044/' % (settings.OPEN_STATES_URL, "legislators"),
               json={}, status_code=200)
@@ -178,7 +329,7 @@ class TestLegislatorsManager(TestCase):
             m.get('%s%s/MIL000150/' % (settings.OPEN_STATES_URL, "legislators"),
                   json=json.load(data_file), status_code=200)
         self.manager(AVAILABLE_STATES[0].name).run()
-        self.assertEqual(Legislator.objects.count(), 3)
+        self.assertTrue(Legislator.objects.count() <= 4)
 
 
 class TestCommitteeManager(TestCase):
@@ -225,6 +376,26 @@ class TestCommitteeManager(TestCase):
         )
 
     @requests_mock.mock()
+    def test_update_record(self, m):
+        with open('capitolzen/proposals/tests/sample_data/committees/'
+                  'MIC000184.json') as data_file:
+            m.get('%s%s/MIC000184/' % (settings.OPEN_STATES_URL, "committees"),
+                  json=json.load(data_file), status_code=200)
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIC000184", None
+        )
+        instance = Committee.objects.get(remote_id="MIC000184")
+        instance.modified = pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
+        instance.save(skip_modified="True")
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIC000184", None
+        )
+        self.assertTrue(
+            Committee.objects.get(remote_id='MIC000184').modified >
+            pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
+        )
+
+    @requests_mock.mock()
     def test_get_remote_detail_no_data(self, m):
         m.get('%s%s/MIC000184/' % (settings.OPEN_STATES_URL, "committees"),
               json={}, status_code=200)
@@ -253,4 +424,4 @@ class TestCommitteeManager(TestCase):
             m.get('%s%s/MIC000186/' % (settings.OPEN_STATES_URL, "committees"),
                   json=json.load(data_file), status_code=200)
         self.manager(AVAILABLE_STATES[0].name).run()
-        self.assertEqual(Committee.objects.count(), 3)
+        self.assertTrue(Committee.objects.count() <= 4)

@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+import base64
+import requests
 
 from django.db import models
 
@@ -16,13 +18,14 @@ class Bill(AbstractBaseModel, MixinExternalData):
     # External Data
     state = models.TextField(max_length=255, null=True)
     state_id = models.CharField(max_length=255, null=True)
-    remote_id = models.CharField(max_length=255, null=True)
+    remote_id = models.CharField(
+        max_length=255, null=True, unique=True, db_index=True
+    )
     session = models.CharField(max_length=255, null=True)
     history = JSONField(default=dict, blank=True, null=True)
     action_dates = JSONField(default=dict, blank=True, null=True)
     chamber = models.CharField(max_length=255, null=True)
     type = models.CharField(default=None, max_length=255, null=True)
-    status = models.TextField(null=True)
     current_committee = models.ForeignKey('proposals.Committee', null=True)
     sponsor = models.ForeignKey('proposals.Legislator', null=True)
     sponsors = JSONField(default=dict, blank=True, null=True)
@@ -37,14 +40,21 @@ class Bill(AbstractBaseModel, MixinExternalData):
         default=list
     )
     votes = JSONField(default=dict, blank=True, null=True)
+    content_metadata = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True)
     summary = models.TextField(blank=True, null=True)
     sources = JSONField(default=dict, blank=True, null=True)
     documents = JSONField(default=dict, blank=True, null=True)
     current_version = models.URLField(blank=True, null=True)
     bill_versions = JSONField(default=dict, blank=True, null=True)
     bill_text = models.TextField(null=True)
+
     updated_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(null=True)
+
+    # ES Ingest Attachment Pipeline Enablers
+    bill_text_analysis = JSONField(default=None, null=True)
+    bill_raw_text = models.TextField(default=None, null=True)
 
     # Properties
     @property
@@ -69,32 +79,23 @@ class Bill(AbstractBaseModel, MixinExternalData):
             return False
         return source.get('url', False)
 
-    def update_from_source(self, source):
-        props = {
-            "actions": "history",
-            "sources": "sources",
-            "session": "session",
-            "id": "remote_id",
-            "votes": "votes",
-            "documents": "documents",
-            "title": "title",
-            "state": "state",
-            "action_dates": "action_dates",
-            "bill_id": "state_id",
-            "chamber": "chamber",
-            "versions": "bill_versions"
-        }
+    @property
+    def remote_status(self):
+        if not self.history or not len(self.history):
+            return 'no history available'
+        latest = self.history[-1]
+        return latest['action']
 
-        for key, value in props.items():
-            setattr(self, value, source.get(key, None))
-
+    def update(self, source):
         for sponsor in source.get('sponsors', []):
             if sponsor.get('leg_id', False):
                 q = {"remote_id": sponsor['leg_id']}
             else:
                 parts = sponsor['name'].split(' ', 1)
-
-                q = {"first_name": parts[0], "last_name": parts[1]}
+                if len(parts) > 1:
+                    q = {"first_name": parts[0], "last_name": parts[1]}
+                else:
+                    q = {"last_name": parts[0]}
 
             try:
                 leg = Legislator.objects.get(**q)
@@ -112,7 +113,16 @@ class Bill(AbstractBaseModel, MixinExternalData):
         for cat in source.get('categories', []):
             self.categories.append(cat)
 
+        if self.bill_versions:
+            self.current_version = self.bill_versions[-1].get('url')
+        if self.current_version:
+            response = requests.get(self.current_version)
+            if 200 >= response.status_code < 300:
+                self.bill_raw_text = base64.b64encode(
+                    response.content).decode('ascii')
         self.save()
+
+        return self
 
     class Meta:
         abstract = False
@@ -148,27 +158,6 @@ class Legislator(AbstractBaseModel, MixinExternalData):
         if self.suffixes:
             fl = "%s %s" % (fl, self.suffixes)
         return fl
-
-    def update_from_source(self, source):
-        props = {
-            "state": "state",
-            "last_name": "last_name",
-            "first_name": "first_name",
-            "middle_name": "middle_name",
-            "suffixes": "suffixes",
-            "district": "district",
-            "active": "active",
-            "chamber": "chamber",
-            "party": "party",
-            "email": "email",
-            "url": "url",
-            "photo_url": "photo_url",
-        }
-
-        for key, value in props.items():
-            setattr(self, value, source.get(key, None))
-
-        self.save()
 
     class Meta:
         abstract = False
@@ -224,9 +213,10 @@ class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
 
     position = models.CharField(blank=True, max_length=255)
     position_detail = models.TextField(blank=True, null=True)
-    notes = JSONField(blank=True, default=dict)
+    notes = JSONField(blank=True, default=list)
     starred = models.BooleanField(default=False)
     summary = models.TextField(blank=True, null=True)
+    files = JSONField(blank=True, default=list)
 
     @property
     def display_summary(self):

@@ -1,11 +1,14 @@
 from __future__ import unicode_literals
+from json import loads
 
 from django.db import models
-
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import ugettext_lazy as _
+
 from django_fsm import FSMField, transition
+from model_utils import Choices
 
 from config.models import AbstractBaseModel
 
@@ -27,7 +30,9 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     title = models.CharField(blank=False, max_length=225)
     description = models.TextField(blank=True, null=True)
     contacts = JSONField(blank=True, null=True)
-    avatar = models.FileField(blank=True, null=True, max_length=255, upload_to=avatar_directory_path)
+    avatar = models.FileField(
+        blank=True, null=True, max_length=255, upload_to=avatar_directory_path
+    )
     starred = models.BooleanField(default=False)
     attachments = JSONField(blank=True, null=True)
     saved_filters = JSONField(default=dict)
@@ -50,10 +55,22 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         return self.title
 
 
+def report_diretory_path(instance, filename):
+    """
+    :param instance:
+    :param filename:
+    :return:
+    """
+    return '{0}/reports/{1}'.format(instance.organization.id, filename)
+
+
 # TODO Permissions
 class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     user = models.ForeignKey('users.User', blank=True)
-    organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE)
+    organization = models.ForeignKey(
+        'organizations.Organization',
+        on_delete=models.CASCADE
+    )
     group = models.ForeignKey('groups.Group')
     attachments = JSONField(blank=True, default=dict)
     filter = JSONField(blank=True, default=dict)
@@ -66,7 +83,6 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     description = models.TextField(blank=True, null=True)
     template = JSONField(default=dict)
     recurring = models.BooleanField(default=False)
-    update_frequency = models.CharField(blank=True, max_length=255, null=True)
     preferences = JSONField(default=dict)
     static_list = ArrayField(models.TextField(), blank=True, null=True)
 
@@ -82,6 +98,11 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     def publish(self):
         # TODO notifications
         pass
+
+    def prepared_filters(self):
+        if not self.filter:
+            return None
+        return prepare_report_filters(self.filter)
 
 
 class Comment(AbstractBaseModel):
@@ -112,3 +133,65 @@ class Comment(AbstractBaseModel):
         abstract = False
         verbose_name = "comment"
         verbose_name_plural = "comments"
+
+
+def prepare_report_filters(data, is_dict=False):
+    output = {}
+
+    if is_dict:
+        filters = data
+    else:
+        filters = loads(data)
+
+    for key, value in filters.items():
+        if key.endswith('__range'):
+            output[key] = value.split(',')
+            continue
+        if value.startswith('{') and value.endswith('}'):
+            output[key] = '2006-01-01'
+            continue
+        output[key] = value
+
+    return output
+
+
+def file_directory_path(instance, filename):
+    """
+    format directory path for file library
+    :param instance:
+    :param filename:
+    :return string:
+    """
+    return '{0}/files/{1}'.format(instance.id, filename)
+
+
+class File(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+    organization = models.ForeignKey(
+        'organizations.Organization', on_delete=models.CASCADE
+    )
+    user = models.ForeignKey('users.User')
+    file = models.FileField(
+        max_length=255, null=True, blank=True,
+        upload_to=file_directory_path
+    )
+    user_path = models.CharField(
+        default='', max_length=255, blank=True, null=True
+    )
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+
+    visibility_choices = Choices(
+        ('public', 'Public'),
+        ('org', 'Private to organization')
+    )
+
+    visibility = models.CharField(
+        choices=visibility_choices, max_length=225, default='org', db_index=True
+    )
+
+    class Meta:
+        verbose_name = _("file")
+        verbose_name_plural = _("files")
+
+    class JSONAPIMeta:
+        resource_name = "files"

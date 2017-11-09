@@ -28,8 +28,8 @@ class ESIngestConfig(AppConfig):
                     "processors": [
                         {
                             "attachment": {
-                                "field": "data",
-                                "target_field": "bill_text",
+                                "field": "bill_raw_text",
+                                "target_field": "bill_text_analysis",
                                 "indexed_chars": -1
                             }
                         }

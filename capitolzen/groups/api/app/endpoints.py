@@ -10,13 +10,13 @@ from common.utils.filters.sets import OrganizationFilterSet
 from config.viewsets import OwnerBasedViewSet
 from capitolzen.proposals.models import Bill, Wrapper
 from capitolzen.proposals.api.app.serializers import BillSerializer
-from capitolzen.groups.models import Group, Report
+from capitolzen.groups.models import Group, Report, File
 from capitolzen.groups.tasks import generate_report, email_report
 from capitolzen.groups.api.app.serializers import (
-    GroupSerializer, ReportSerializer
+    GroupSerializer, ReportSerializer, FileSerializer
 )
 
-logger = getLogger('cz_logger')
+logger = getLogger('app_logger')
 
 
 class GroupFilter(OrganizationFilterSet):
@@ -39,7 +39,7 @@ class GroupFilter(OrganizationFilterSet):
         help_text="Filter Groups based on Organziation"
     )
 
-    active = filters.CharFilter(
+    active = filters.BooleanFilter(
         name="active",
         label="Active",
         help_text="Filter Groups based on whether or not they are active"
@@ -175,3 +175,25 @@ class ReportViewSet(OwnerBasedViewSet):
             "status_code": status.HTTP_200_OK,
             "message": "Report hopefully emailed"
         })
+
+
+class FileFilter(OrganizationFilterSet):
+    class Meta:
+        model = File
+        ordering = ['name']
+        fields = {
+            'id': ['exact'],
+            'created': ['lt', 'gt'],
+            'modified': ['lt', 'gt'],
+            'name': ['icontains'],
+        }
+    search_fields = ('file', 'name', 'description')
+
+
+class FileViewSet(OwnerBasedViewSet):
+
+    def get_queryset(self):
+        return File.objects.filter(organization__users=self.request.user)
+
+    filter_class = FileFilter
+    serializer_class = FileSerializer

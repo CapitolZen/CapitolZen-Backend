@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework.serializers import ValidationError
 
@@ -21,10 +23,11 @@ class BillSerializer(BaseModelSerializer):
             'session',
             'chamber',
             'remote_id',
-            'status',
+            'remote_status',
             'history',
             'current_committee',
             'sponsor',
+            'sponsors',
             'title',
             'categories',
             'remote_url',
@@ -43,19 +46,31 @@ class BillSerializer(BaseModelSerializer):
         )
 
     def create(self, validated_data):
+        from capitolzen.proposals.tasks import ingest_attachment
         remote_id = validated_data.pop('remote_id')
-        bill, created = Bill.objects.get_or_create(
+        if validated_data.get('state'):
+            validated_data['state'] = validated_data.get('state').upper()
+        instance, _ = Bill.objects.get_or_create(
             remote_id=remote_id,
             defaults={
                 **validated_data
             }
         )
-        if bill.modified < validated_data.get('updated_at') or created:
-            bill.update_from_source(validated_data)
-            if bill.bill_versions:
-                bill.current_version = bill.bill_versions[-1].get('url')
-            bill.save()
-        return bill
+        instance = instance.update(validated_data)
+        transaction.on_commit(
+            lambda: ingest_attachment.apply_async(kwargs={
+                "identifier": str(instance.pk)
+            }))
+        return instance
+
+    def update(self, instance, validated_data):
+        from capitolzen.proposals.tasks import ingest_attachment
+        instance = instance.update(validated_data)
+        transaction.on_commit(
+            lambda: ingest_attachment.apply_async(kwargs={
+                "identifier": str(instance.pk)
+            }))
+        return instance
 
 
 class LegislatorSerializer(BaseModelSerializer):
@@ -82,15 +97,19 @@ class LegislatorSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         remote_id = validated_data.pop('remote_id')
-        instance, created = Legislator.objects.get_or_create(
+        instance, _ = Legislator.objects.get_or_create(
             remote_id=remote_id,
             defaults={
                 **validated_data
             }
         )
-        if instance.modified < validated_data.get('updated_at') or created:
-            instance.update_from_source(validated_data)
-            instance.save()
+
+        return instance
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
         return instance
 
 
@@ -110,16 +129,19 @@ class CommitteeSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         remote_id = validated_data.pop('remote_id')
-        instance, created = Committee.objects.get_or_create(
+        instance, _ = Committee.objects.get_or_create(
             remote_id=remote_id,
             defaults={
                 **validated_data
             }
         )
-        if instance.modified < validated_data.get('updated_at') and not created:
-            for attr, value in validated_data.iteritems():
-                setattr(instance, attr, value)
-            instance.save()
+
+        return instance
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
         return instance
 
 
@@ -139,17 +161,14 @@ class WrapperSerializer(BaseInternalModelSerializer):
             'notes',
             'position',
             'summary',
-            'position_detail'
+            'position_detail',
+            'files',
         )
 
     def create(self, validated_data):
-        print(validated_data)
         bill = validated_data.get('bill')
         group = validated_data.get('group')
-        print(bill.id)
-        print(group.id)
         queryset = Wrapper.objects.filter(bill_id=bill.id, group_id=group.id)
-        print(queryset)
         if queryset.exists():
             raise ValidationError('Wrapper already exists for this data')
         return Wrapper.objects.create(**validated_data)

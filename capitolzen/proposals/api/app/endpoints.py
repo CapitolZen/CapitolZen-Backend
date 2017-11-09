@@ -17,7 +17,7 @@ from common.utils.filters.sets import OrganizationFilterSet, BaseModelFilterSet
 from common.utils.filters.filters import UUIDInFilter
 
 from config.viewsets import OwnerBasedViewSet, GenericBaseViewSet
-from capitolzen.groups.models import Group
+from capitolzen.groups.models import Group, prepare_report_filters
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
 from capitolzen.proposals.documents import BillDocument
 from capitolzen.proposals.api.app.serializers import (
@@ -101,17 +101,6 @@ class BillViewSet(mixins.RetrieveModelMixin,
     )
     ordering = ('state', 'state_id', )
 
-    @list_route(methods=['GET'])
-    def list_saved(self, request):
-        wrappers = Wrapper.objects.filter(organization__users=request.user).prefetch_related('bill')
-        bill_list = []
-        for wrapper in wrappers:
-            if any(b.id == wrapper.bill.id for b in bill_list):
-                bill_list.append(wrapper.bil)
-
-        serializer = BillSerializer(bill_list, many=True)
-        return Response(serializer.data)
-
 
 class BillSearchView(es_views.ListElasticAPIView):
     es_client = Elasticsearch(
@@ -187,6 +176,13 @@ class WrapperFilter(OrganizationFilterSet):
         help_text='Group associated with the Bill'
     )
 
+    group_title = filters.CharFilter(
+        name='group__title',
+        lookup_expr='contains',
+        label='Group Title',
+        help_text='title of group'
+    )
+
     def filter_bill_by_state(self, queryset, name, value):
         return queryset.filter(bill__state=value)
 
@@ -195,6 +191,16 @@ class WrapperFilter(OrganizationFilterSet):
 
     def filter_bill_by_id(self, queryset, name, value):
         return queryset.filter(bill__id=value)
+
+    def action_date_range_filter(self, queryset, name, value):
+        params = {}
+        key = "bill__action_dates__%s__range" % name
+        parts = value.split(',')
+        params[key] = [parts[0], parts[1]]
+        return queryset.filter(**params)
+
+    introduced_range = filters.CharFilter(name='first', method='action_date_range_filter')
+    active_range = filters.CharFilter(name='last', method='action_date_range_filter')
 
     class Meta(OrganizationFilterSet.Meta):
         model = Wrapper
@@ -231,7 +237,8 @@ class WrapperViewSet(OwnerBasedViewSet):
         wrappers = Wrapper.objects.filter(group=group)
         wrapper_filters = data.get('filters', False)
         if wrapper_filters:
-            wrappers = wrappers.filter(**wrapper_filters)
+            prepared_filters = prepare_report_filters(wrapper_filters, True)
+            wrappers = wrappers.filter(**prepared_filters)
 
         serialized = WrapperSerializer(wrappers, many=True)
         return Response(serialized.data)
