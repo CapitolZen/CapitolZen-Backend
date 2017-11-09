@@ -1,4 +1,4 @@
-from logging import get_logger
+from logging import getLogger
 from sparkpost import SparkPost
 from celery import shared_task
 from requests import post
@@ -8,7 +8,7 @@ from django.conf import settings
 from templated_email import send_templated_mail
 
 
-logger = get_logger('app_logger')
+logger = getLogger('app_logger')
 
 
 @shared_task
