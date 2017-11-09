@@ -78,7 +78,9 @@ class Organization(AbstractOrganization, AbstractBaseModel):
         blank=True, null=True, max_length=255, upload_to=avatar_directory_path
     )
     contacts = JSONField(blank=True, default=dict)
-    available_states = ArrayField(models.CharField(max_length=255, blank=True, null=True), default=['MI'])
+    available_states = ArrayField(models.CharField(
+        max_length=255, blank=True, null=True), default=['MI']
+    )
 
     def owner_user_account(self):
         """Because I can never remember how to get this"""
@@ -134,7 +136,7 @@ class Organization(AbstractOrganization, AbstractBaseModel):
         self.save()
 
     def update_subscription(self, plan, **kwargs):
-        sub = self.stripe_subscription_id
+        # sub = self.stripe_subscription_id
         return True
 
 

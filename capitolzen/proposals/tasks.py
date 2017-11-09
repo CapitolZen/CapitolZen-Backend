@@ -68,7 +68,12 @@ def run_organization_bill_updates():
                 message = 'Bills for %s have new action or information.' % (
                     group.title)
                 message = capwords(message)
-                email_update_bills(message=message, organization=org, subject=subject, bills=output)
+                email_update_bills(
+                    message=message,
+                    organization=org,
+                    subject=subject,
+                    bills=output
+                )
 
 
 @shared_task
@@ -97,10 +102,12 @@ def new_introduction_email():
             subject = '%s New Bills Have Been Introduced' % (count,)
             message = 'There were %s new bills introduced yesterday. ' \
                       'Login into your Capitol Zen account to view them all.'
-            email_update_bills(message=message, subject=subject, bills=bill_list, organization=org)
-
-
-
+            email_update_bills(
+                message=message,
+                subject=subject,
+                bills=bill_list,
+                organization=org
+            )
 
 
 @shared_task(retry_kwargs={'max_retries': 20})

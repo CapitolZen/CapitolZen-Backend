@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Group, Comment, Report, File
+from capitolzen.groups.models import Group, Comment, Report, File
 
 
 class GroupAdmin(admin.ModelAdmin):
@@ -23,6 +23,7 @@ class ReportAdmin(admin.ModelAdmin):
 
 class FileAdmin(admin.ModelAdmin):
     list_display = ['name', 'created', 'modified']
+
 
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Comment, CommentAdmin)

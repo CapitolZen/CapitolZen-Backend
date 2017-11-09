@@ -1,5 +1,4 @@
 from dry_rest_permissions.generics import DRYPermissionFiltersBase
-from rest_framework.exceptions import NotAuthenticated
 
 
 class FilterOnActiveOrganization(DRYPermissionFiltersBase):

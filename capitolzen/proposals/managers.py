@@ -3,6 +3,7 @@ from requests import get
 from django.conf import settings
 from django.core.cache import cache
 
+from capitolzen.proposals.models import Bill, Legislator, Committee
 from capitolzen.proposals.api.app.serializers import (
     BillSerializer, LegislatorSerializer, CommitteeSerializer
 )
@@ -76,7 +77,11 @@ class CommitteeManager(CongressionalManager):
     def update(self, local_id, remote_id, resource_info):
         source = self._get_remote_detail(remote_id)
         source['name'] = source.pop('committee', None)
-        serializer = CommitteeSerializer(data={
+        try:
+            instance = Committee.objects.get(remote_id=remote_id)
+        except Committee.DoesNotExist:
+            instance = None
+        serializer = CommitteeSerializer(instance, data={
             'remote_id': remote_id,
             **source
         })
@@ -119,7 +124,11 @@ class BillManager(CongressionalManager):
             source['bill_versions'] = source.pop('versions')
         if isinstance(source.get('type'), list):
             source['type'] = ",".join(source.get('type'))
-        serializer = BillSerializer(data={
+        try:
+            instance = Bill.objects.get(remote_id=remote_id)
+        except Bill.DoesNotExist:
+            instance = None
+        serializer = BillSerializer(instance, data={
             'remote_id': remote_id,
             **source
         })
@@ -139,7 +148,11 @@ class LegislatorManager(CongressionalManager):
 
     def update(self, local_id, remote_id, resource_info):
         source = self._get_remote_detail(remote_id)
-        serializer = LegislatorSerializer(data={
+        try:
+            instance = Legislator.objects.get(remote_id=remote_id)
+        except Legislator.DoesNotExist:
+            instance = None
+        serializer = LegislatorSerializer(instance, data={
             'remote_id': remote_id,
             **source
         })

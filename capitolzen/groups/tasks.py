@@ -8,7 +8,7 @@ from capitolzen.meta.notifications import email_user_report_link
 from capitolzen.proposals.models import Wrapper
 from capitolzen.proposals.utils import normalize_data
 from capitolzen.users.models import User
-from .models import Report
+from capitolzen.groups.models import Report
 
 REPORT_FUNCTION = "capitolzen_search_reportify"
 
@@ -74,7 +74,9 @@ def email_report(report, user):
     if not url:
         return False
     else:
-        email_user_report_link(to=user.username, report_title=report.title, url=url)
+        email_user_report_link(
+            to=user.username, report_title=report.title, url=url
+        )
 
 
 def update_report_docs(report, new_url):
@@ -82,5 +84,3 @@ def update_report_docs(report, new_url):
     attachments['output_url'] = new_url
     setattr(report, 'attachments', attachments)
     report.save()
-
-

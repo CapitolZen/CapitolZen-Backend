@@ -1,15 +1,14 @@
 from __future__ import unicode_literals
 from json import loads
+
 from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
+
 from django_fsm import FSMField, transition
 from model_utils import Choices
-
-from capitolzen.organizations.models import Organization
-from capitolzen.users.models import User
 
 from config.models import AbstractBaseModel
 
@@ -31,7 +30,9 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     title = models.CharField(blank=False, max_length=225)
     description = models.TextField(blank=True, null=True)
     contacts = JSONField(blank=True, null=True)
-    avatar = models.FileField(blank=True, null=True, max_length=255, upload_to=avatar_directory_path)
+    avatar = models.FileField(
+        blank=True, null=True, max_length=255, upload_to=avatar_directory_path
+    )
     starred = models.BooleanField(default=False)
     attachments = JSONField(blank=True, null=True)
     saved_filters = JSONField(default=dict)
@@ -66,7 +67,10 @@ def report_diretory_path(instance, filename):
 # TODO Permissions
 class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     user = models.ForeignKey('users.User', blank=True)
-    organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE)
+    organization = models.ForeignKey(
+        'organizations.Organization',
+        on_delete=models.CASCADE
+    )
     group = models.ForeignKey('groups.Group')
     attachments = JSONField(blank=True, default=dict)
     filter = JSONField(blank=True, default=dict)
@@ -162,10 +166,17 @@ def file_directory_path(instance, filename):
 
 
 class File(AbstractBaseModel, MixinResourcedOwnedByOrganization):
-    organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE)
+    organization = models.ForeignKey(
+        'organizations.Organization', on_delete=models.CASCADE
+    )
     user = models.ForeignKey('users.User')
-    file = models.FileField(max_length=255, null=True, blank=True, upload_to=file_directory_path)
-    user_path = models.CharField(default='', max_length=255, blank=True, null=True)
+    file = models.FileField(
+        max_length=255, null=True, blank=True,
+        upload_to=file_directory_path
+    )
+    user_path = models.CharField(
+        default='', max_length=255, blank=True, null=True
+    )
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
 

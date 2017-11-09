@@ -479,7 +479,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': False,
         },
-        'cz_logger': {
+        'app_logger': {
             'handlers': ['console'],
             'level': 'ERROR',
             'propogate': False

@@ -1,6 +1,8 @@
 import json
+import pytz
 import requests_mock
 from unittest import mock
+from datetime import datetime
 
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from elasticsearch.exceptions import NotFoundError
@@ -89,6 +91,38 @@ class TestBillManager(TestCase):
             "Reps. Lauwers and Greig offered the following resolution: "
             "House Resolution No.",
             Bill.objects.get(remote_id='MIB00012114').summary
+        )
+
+    @requests_mock.mock(real_http=True)
+    def test_get_remote_detail_updates(self, m):
+        """
+        We want to make sure that if we have updates to actions that we're
+        actually updating the history and not failing out due to the bill
+        already existing.
+        :param m:
+        :return:
+        """
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  'MIB00012114.json') as data_file:
+            m.get('%s%s/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
+                  json=json.load(data_file), status_code=200)
+        with open('capitolzen/proposals/tests/sample_data/bills/'
+                  '2017-HAR-0003.htm', 'rb') as data_file:
+            m.get('http://www.legislature.mi.gov/documents/2017-2018/'
+                  'resolutionadopted/House/htm/2017-HAR-0003.htm',
+                  content=data_file.read(), status_code=200)
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIB00012114", None
+        )
+        instance = Bill.objects.get(remote_id="MIB00012114")
+        instance.modified = pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
+        instance.save(skip_modified="True")
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIB00012114", None
+        )
+        self.assertTrue(
+            Bill.objects.get(remote_id='MIB00012114').modified >
+            pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
         )
 
     @requests_mock.mock(real_http=True)
@@ -247,6 +281,26 @@ class TestLegislatorsManager(TestCase):
         )
 
     @requests_mock.mock()
+    def test_update_record(self, m):
+        with open('capitolzen/proposals/tests/sample_data/legislators/'
+                  'MIL000044.json') as data_file:
+            m.get('%s%s/MIL000044/' % (settings.OPEN_STATES_URL, "legislators"),
+                  json=json.load(data_file), status_code=200)
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIL000044", None
+        )
+        instance = Legislator.objects.get(remote_id="MIL000044")
+        instance.modified = pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
+        instance.save(skip_modified="True")
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIL000044", None
+        )
+        self.assertTrue(
+            Legislator.objects.get(remote_id='MIL000044').modified >
+            pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
+        )
+
+    @requests_mock.mock()
     def test_get_remote_detail_no_data(self, m):
         m.get('%s%s/MIL000044/' % (settings.OPEN_STATES_URL, "legislators"),
               json={}, status_code=200)
@@ -319,6 +373,26 @@ class TestCommitteeManager(TestCase):
             self.manager(AVAILABLE_STATES[0].name)._get_remote_detail(
                 "MIC000184").get('id'),
             "MIC000184"
+        )
+
+    @requests_mock.mock()
+    def test_update_record(self, m):
+        with open('capitolzen/proposals/tests/sample_data/committees/'
+                  'MIC000184.json') as data_file:
+            m.get('%s%s/MIC000184/' % (settings.OPEN_STATES_URL, "committees"),
+                  json=json.load(data_file), status_code=200)
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIC000184", None
+        )
+        instance = Committee.objects.get(remote_id="MIC000184")
+        instance.modified = pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
+        instance.save(skip_modified="True")
+        self.manager(AVAILABLE_STATES[0].name).update(
+            None, "MIC000184", None
+        )
+        self.assertTrue(
+            Committee.objects.get(remote_id='MIC000184').modified >
+            pytz.utc.localize(datetime(2017, 1, 10, 0, 00))
         )
 
     @requests_mock.mock()

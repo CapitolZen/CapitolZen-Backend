@@ -4,7 +4,7 @@ import nltk
 
 from django.apps import AppConfig
 
-logger = getLogger("cz_logger")
+logger = getLogger("app_logger")
 
 
 class DocumentAnalysisConfig(AppConfig):
