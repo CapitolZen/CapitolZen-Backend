@@ -65,12 +65,11 @@ class BillSerializer(BaseModelSerializer):
 
     def update(self, instance, validated_data):
         from capitolzen.proposals.tasks import ingest_attachment
-        if instance.modified < validated_data.get('updated_at'):
-            instance = instance.update(validated_data)
-            transaction.on_commit(
-                lambda: ingest_attachment.apply_async(kwargs={
-                    "identifier": str(instance.pk)
-                }))
+        instance = instance.update(validated_data)
+        transaction.on_commit(
+            lambda: ingest_attachment.apply_async(kwargs={
+                "identifier": str(instance.pk)
+            }))
         return instance
 
 
@@ -108,10 +107,9 @@ class LegislatorSerializer(BaseModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        if instance.modified < validated_data.get('updated_at'):
-            for attr, value in validated_data.items():
-                setattr(instance, attr, value)
-            instance.save()
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
         return instance
 
 
@@ -141,10 +139,9 @@ class CommitteeSerializer(BaseModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        if instance.modified < validated_data.get('updated_at'):
-            for attr, value in validated_data.items():
-                setattr(instance, attr, value)
-            instance.save()
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
         return instance
 
 
