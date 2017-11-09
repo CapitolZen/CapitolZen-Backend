@@ -1,4 +1,4 @@
-from elasticsearch_dsl import analyzer, Keyword
+from elasticsearch_dsl import analyzer
 from django_elasticsearch_dsl import Index, fields, DocType
 
 from capitolzen.proposals.models import Bill

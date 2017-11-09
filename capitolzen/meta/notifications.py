@@ -1,11 +1,14 @@
+from logging import get_logger
 from sparkpost import SparkPost
 from celery import shared_task
-from django.conf import settings
 from requests import post
+
+from django.conf import settings
+
 from templated_email import send_templated_mail
 
 
-SP_API = settings.SPARKPOST_KEY
+logger = get_logger('app_logger')
 
 
 @shared_task
@@ -23,8 +26,8 @@ def admin_slack(message):
     }
     try:
         post(settings.SLACK_URL, data=data)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.info(e)
 
 
 def email_user_report_link(to, **extra_context):
@@ -55,8 +58,6 @@ def email_user_report_link(to, **extra_context):
         recipient_list=to,
         context=context,
     )
-
-
 
 
 @shared_task
@@ -104,6 +105,6 @@ def api_email(recpients, subject, message):
 
 def client():
     if not settings.CI:
-        return SparkPost(api_key=SP_API)
+        return SparkPost(api_key=settings.SPARKPOST_KEY)
     else:
         return False

@@ -10,4 +10,3 @@ class GroupsConfig(AppConfig):
 
     def ready(self):
         import capitolzen.groups.signals  # noqa
-
