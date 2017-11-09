@@ -120,6 +120,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
             if 200 >= response.status_code < 300:
                 self.bill_raw_text = base64.b64encode(
                     response.content).decode('ascii')
+        self.history = source.get('history', [])
         self.save()
 
         return self
