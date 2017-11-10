@@ -17,6 +17,12 @@ from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
 
 
 class BillSerializer(BaseModelSerializer):
+
+    current_committee = ResourceRelatedField(
+        many=False,
+        queryset=Legislator.objects
+    )
+
     class Meta:
         model = Bill
         fields = (
@@ -68,12 +74,34 @@ class BillSerializer(BaseModelSerializer):
                 if 200 >= response.status_code < 300:
                     instance.bill_raw_text = base64.b64encode(
                         response.content).decode('ascii')
+
+            committee = self.get_current_committee(instance)
+            if committee:
+                instance.current_committee = committee
             instance.save()
         transaction.on_commit(
             lambda: ingest_attachment.apply_async(kwargs={
                 "identifier": str(instance.pk)
             }))
         return instance
+
+    @staticmethod
+    def get_current_committee(instance):
+        committee = None
+        chamber = None
+        for action in instance.history:
+            if action.type == 'committee:referred':
+                action_parts = action.action.lower().split('referred to committee ')
+                committee = action_parts[0]
+                chamber = action.actor
+            if action.type == 'committee:passed':
+                committee = None
+                chamber = None
+
+        if committee and chamber:
+            return Committee.objects.filter(name__icontains=committee, chamber=chamber).first()
+        else:
+            return None
 
 
 class LegislatorSerializer(BaseModelSerializer):
