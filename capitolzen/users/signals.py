@@ -56,7 +56,7 @@ def user_removed_from_organization(sender, **kwargs):
     """
     Note: This is only called when we use the add_user / etc
     methods directly (which we do via the api) however it doesn't
-    get called when using things like the django admin.py area to
+    get called when using things like the django admin area to
     add or remove users from an organization see:
     https://github.com/bennylope/django-organizations/issues/123
     :param sender:
