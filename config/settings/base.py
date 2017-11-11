@@ -402,7 +402,7 @@ LOGIN_URL = 'account_login'
 # SLUGLIFIER
 AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 
-# Location of root django.contrib.admin URL, use {% url 'admin:index' %}
+# Location of root django.contrib.admin.py URL, use {% url 'admin.py:index' %}
 ADMIN_URL = r'^admin/'
 API_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -479,7 +479,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': False,
         },
-        'cz_logger': {
+        'app_logger': {
             'handlers': ['console'],
             'level': 'ERROR',
             'propogate': False

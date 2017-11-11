@@ -13,7 +13,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework import mixins
 from rest_framework import status
 
-from capitolzen.organizations.models import Organization, OrganizationInvite
+from capitolzen.organizations.models import OrganizationInvite
 
 from capitolzen.users.api.app.serializers import (
     ChangePasswordSerializer,
@@ -88,7 +88,7 @@ class UserViewSet(mixins.RetrieveModelMixin,
         :param pk:
         :return:
         """
-        user = self.get_object()
+        self.get_object()
 
         #
         # Claim invite

@@ -1,6 +1,3 @@
-import base64
-import requests
-
 from django.db import transaction
 
 from rest_framework_json_api.relations import ResourceRelatedField
@@ -59,50 +56,27 @@ class BillSerializer(BaseModelSerializer):
         remote_id = validated_data.pop('remote_id')
         if validated_data.get('state'):
             validated_data['state'] = validated_data.get('state').upper()
-        instance, created = Bill.objects.get_or_create(
+        instance, _ = Bill.objects.get_or_create(
             remote_id=remote_id,
             defaults={
                 **validated_data
             }
         )
-        if instance.modified < validated_data.get('updated_at') or created:
-            instance.update_from_source(validated_data)
-            if instance.bill_versions:
-                instance.current_version = instance.bill_versions[-1].get('url')
-            if instance.current_version:
-                response = requests.get(instance.current_version)
-                if 200 >= response.status_code < 300:
-                    instance.bill_raw_text = base64.b64encode(
-                        response.content).decode('ascii')
-
-            committee = self.get_current_committee(instance)
-            if committee:
-                instance.current_committee = committee
-            instance.save()
+        instance = instance.update(validated_data)
         transaction.on_commit(
             lambda: ingest_attachment.apply_async(kwargs={
                 "identifier": str(instance.pk)
             }))
         return instance
 
-    @staticmethod
-    def get_current_committee(instance):
-        committee = None
-        chamber = None
-        for action in instance.history:
-            if action.type[0] == 'committee:referred':
-                action_parts = action.action.lower().split('referred to committee on ')
-                if len(action_parts) > 1:
-                    committee = action_parts[0]
-                    chamber = action.actor
-            if action.type[0] == 'committee:passed':
-                committee = None
-                chamber = None
-
-        if committee and chamber:
-            return Committee.objects.filter(name__icontains=committee, chamber=chamber).first()
-        else:
-            return None
+    def update(self, instance, validated_data):
+        from capitolzen.proposals.tasks import ingest_attachment
+        instance = instance.update(validated_data)
+        transaction.on_commit(
+            lambda: ingest_attachment.apply_async(kwargs={
+                "identifier": str(instance.pk)
+            }))
+        return instance
 
 
 class LegislatorSerializer(BaseModelSerializer):
@@ -129,16 +103,19 @@ class LegislatorSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         remote_id = validated_data.pop('remote_id')
-        instance, created = Legislator.objects.get_or_create(
+        instance, _ = Legislator.objects.get_or_create(
             remote_id=remote_id,
             defaults={
                 **validated_data
             }
         )
-        if instance.modified < validated_data.get('updated_at') or not created:
-            for attr, value in validated_data.iteritems():
-                setattr(instance, attr, value)
-            instance.save()
+
+        return instance
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
         return instance
 
 
@@ -158,16 +135,19 @@ class CommitteeSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         remote_id = validated_data.pop('remote_id')
-        instance, created = Committee.objects.get_or_create(
+        instance, _ = Committee.objects.get_or_create(
             remote_id=remote_id,
             defaults={
                 **validated_data
             }
         )
-        if instance.modified < validated_data.get('updated_at') and not created:
-            for attr, value in validated_data.iteritems():
-                setattr(instance, attr, value)
-            instance.save()
+
+        return instance
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
         return instance
 
 

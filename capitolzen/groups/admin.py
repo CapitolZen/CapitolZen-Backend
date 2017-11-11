@@ -24,6 +24,7 @@ class ReportAdmin(admin.ModelAdmin):
 class FileAdmin(admin.ModelAdmin):
     list_display = ['name', 'created', 'modified']
 
+
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(Report, ReportAdmin)
