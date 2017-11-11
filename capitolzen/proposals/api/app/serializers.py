@@ -90,11 +90,12 @@ class BillSerializer(BaseModelSerializer):
         committee = None
         chamber = None
         for action in instance.history:
-            if action.type == 'committee:referred':
-                action_parts = action.action.lower().split('referred to committee ')
-                committee = action_parts[0]
-                chamber = action.actor
-            if action.type == 'committee:passed':
+            if action.type[0] == 'committee:referred':
+                action_parts = action.action.lower().split('referred to committee on ')
+                if len(action_parts) > 1:
+                    committee = action_parts[0]
+                    chamber = action.actor
+            if action.type[0] == 'committee:passed':
                 committee = None
                 chamber = None
 
