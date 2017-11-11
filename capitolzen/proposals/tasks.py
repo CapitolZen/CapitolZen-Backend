@@ -60,10 +60,10 @@ def run_organization_bill_updates():
                 group=group
             )
             count = len(wrappers)
-            p = inflect.engine()
-            count = p.number_to_words(count)
-            output = normalize_data(wrappers)
             if count:
+                p = inflect.engine()
+                count = p.number_to_words(count)
+                output = normalize_data(wrappers)
                 subject = '%s Bills Have Updates for %s' % (count, group.title)
                 message = 'Bills for %s have new action or information.' % (
                     group.title)

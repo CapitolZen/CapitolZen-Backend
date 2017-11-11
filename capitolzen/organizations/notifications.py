@@ -58,12 +58,12 @@ def email_update_bills(subject, message, organization, bills, **extra_context):
         'url': settings.APP_FRONTEND,
         'subject': subject,
         'bills': bills,
+        'message': message,
         **extra_context
     }
     send_templated_mail(
         template_name='bill_list',
         from_email='hello@capitolzen.com',
         recipient_list=organization.users.all(),
-        message=message,
         context=context
     )
