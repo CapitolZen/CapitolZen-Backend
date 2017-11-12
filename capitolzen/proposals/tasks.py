@@ -64,7 +64,7 @@ def run_organization_bill_updates():
                 p = inflect.engine()
                 count = p.number_to_words(count)
                 output = normalize_data(wrappers)
-                subject = '%s Bills Have Updates for %s' % (count, group.title)
+                subject = '%s Bills Have Updates for %s' % (count.title(), group.title)
                 message = 'Bills for %s have new action or information.' % (
                     group.title)
                 message = capwords(message)
@@ -99,7 +99,7 @@ def new_introduction_email():
             bill_list.append(data)
 
         for org in organizations:
-            subject = '%s New Bills Have Been Introduced' % (count,)
+            subject = '%s New Bills Have Been Introduced' % (count.title(),)
             message = 'There were %s new bills introduced yesterday. ' \
                       'Login into your Capitol Zen account to view them all.'
             email_update_bills(
