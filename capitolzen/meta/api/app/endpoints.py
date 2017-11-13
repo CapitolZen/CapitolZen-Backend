@@ -131,3 +131,5 @@ class ActivityViewSet(viewsets.ViewSet):
         response = feed.get(limit=limit)
 
         return Response(response)
+
+

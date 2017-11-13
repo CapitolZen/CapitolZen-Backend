@@ -10,6 +10,9 @@ from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 from model_utils import Choices
 
+from capitolzen.organizations.models import Organization
+from capitolzen.users.models import User
+
 from config.models import AbstractBaseModel
 
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization

@@ -55,6 +55,12 @@ class BillFilter(BaseModelFilterSet):
         name='last', method='action_date_filter'
     )
 
+    committee = UUIDInFilter(
+        name='current_committee__id',
+        label='Committee ID',
+        help_text='ID of Committee'
+    )
+
     def sponsor_full_name(self, queryset, name, value):
         return queryset.filter(Q(sponsor__first_name__contains=value) | Q(sponsor__last_name__contains=value))
 
@@ -97,7 +103,8 @@ class BillViewSet(mixins.RetrieveModelMixin,
         'title',
         'sponsor__last_name',
         'sponsor__first_name',
-        'state_id'
+        'state_id',
+        'current_committee__title'
     )
     ordering = ('state', 'state_id', )
 

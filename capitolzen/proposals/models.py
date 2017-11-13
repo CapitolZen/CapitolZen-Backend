@@ -122,8 +122,28 @@ class Bill(AbstractBaseModel, MixinExternalData):
                     response.content).decode('ascii')
         self.history = source.get('history', [])
         self.save()
+        self.set_current_committee()
 
         return self
+
+    def set_current_committee(self):
+        committee = None
+        chamber = None
+        for action in self.history:
+            committee = None
+            chamber = None
+            if action['type'][0] == 'committee:referred':
+                action_parts = action['action'].lower().split('referred to committee on ')
+                if len(action_parts) > 1:
+                    committee = action_parts[1]
+                    chamber = action['actor']
+            if action['type'][0] == 'committee:passed':
+                committee = None
+                chamber = None
+
+            if committee and chamber:
+                self.current_committee = Committee.objects.filter(name__icontains=committee, chamber=chamber).first()
+                self.save()
 
     class Meta:
         abstract = False

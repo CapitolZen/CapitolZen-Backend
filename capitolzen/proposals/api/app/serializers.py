@@ -14,6 +14,13 @@ from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
 
 
 class BillSerializer(BaseModelSerializer):
+
+    current_committee = ResourceRelatedField(
+        many=False,
+        queryset=Legislator.objects,
+        required=False
+    )
+
     class Meta:
         model = Bill
         fields = (

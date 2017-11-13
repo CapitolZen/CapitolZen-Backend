@@ -1,5 +1,5 @@
 from django.contrib import admin
-from capitolzen.groups.models import Group, Comment, Report, File
+from .models import Group, Comment, Report, File
 
 
 class GroupAdmin(admin.ModelAdmin):
