@@ -6,7 +6,7 @@ from django.db import migrations
 
 def forwards(apps, schema_editor):
     Bill = apps.get_model('proposals', 'Bill')
-    
+
     for bill in Bill.objects.all().iterator():
         if bill.cosponsors:
             cosponsors = bill.cosponsors

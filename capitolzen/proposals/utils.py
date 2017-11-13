@@ -39,6 +39,7 @@ def normalize_data(wrapper_list, time_format='%m/%d/%Y'):
     """
     output = []
     for w in wrapper_list:
+        action_time = datetime.strptime(w.bill.last_action_date, '%Y-%m-%d %H:%M:%S')
         data = {
             "state_id": w.bill.state_id,
             "state": w.bill.state,
@@ -48,7 +49,7 @@ def normalize_data(wrapper_list, time_format='%m/%d/%Y'):
             "status": w.bill.remote_status,
             "position": w.position,
             "position_detail": w.position_detail,
-            "last_action_date": w.bill.last_action_date.strftime(time_format),
+            "last_action_date": action_time.strftime(time_format),
             "remote_url": w.bill.remote_url
         }
 
