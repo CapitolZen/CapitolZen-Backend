@@ -104,7 +104,7 @@ class BillViewSet(mixins.RetrieveModelMixin,
         'sponsor__last_name',
         'sponsor__first_name',
         'state_id',
-        'current_committee__title'
+        'current_committee__name'
     )
     ordering = ('state', 'state_id', )
 

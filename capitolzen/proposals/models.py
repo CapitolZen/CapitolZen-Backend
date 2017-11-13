@@ -102,7 +102,10 @@ class Bill(AbstractBaseModel, MixinExternalData):
                 if sponsor['type'] == "primary":
                     self.sponsor = leg
                 else:
-                    self.cosponsors.append(str(leg.id))
+                    # Need to prevent duplicate entries
+                    if leg.id not in self.cosponsors:
+                        self.cosponsors.append(str(leg.id))
+
             except (ObjectDoesNotExist, MultipleObjectsReturned):
                 msg = "id: %s does not match sponsor" % self.id
                 admin_email.delay(msg)
