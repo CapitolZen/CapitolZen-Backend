@@ -17,7 +17,8 @@ class BillSerializer(BaseModelSerializer):
 
     current_committee = ResourceRelatedField(
         many=False,
-        queryset=Legislator.objects
+        queryset=Legislator.objects,
+        required=False
     )
 
     class Meta:
