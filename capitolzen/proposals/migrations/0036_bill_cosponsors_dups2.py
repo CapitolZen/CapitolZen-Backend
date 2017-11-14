@@ -17,7 +17,7 @@ def forwards(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('proposals', '0035_bill_cosponsors_dups2'),
+        ('proposals', '0035_bill_cosponsors_dups'),
     ]
 
     operations = [
