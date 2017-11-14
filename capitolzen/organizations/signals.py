@@ -106,9 +106,6 @@ def create_group_for_new_organization(sender, **kwargs):
     :return:
     """
 
-
-    print('org post-save signal////////////////////////////')
-
     created = kwargs.get('created')
     organization = kwargs.get('instance')
 
