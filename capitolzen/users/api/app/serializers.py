@@ -7,7 +7,6 @@ from rest_framework.validators import UniqueValidator
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
 
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
-from capitolzen.organizations.notifications import email_owner_welcome
 from capitolzen.users.utils import token_decode, token_encode
 from capitolzen.users.notifications import email_user_password_reset_request
 from capitolzen.organizations.models import Organization
@@ -160,7 +159,7 @@ class RegistrationSerializer(serializers.Serializer):
         organization = organization_serializer.instance
         organization.add_user(user)
 
-        email_owner_welcome(user.username, name=user.name)
+        # Let Intercom send the new organization email
 
         return True
 

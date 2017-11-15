@@ -124,8 +124,8 @@ class Bill(AbstractBaseModel, MixinExternalData):
                 self.bill_raw_text = base64.b64encode(
                     response.content).decode('ascii')
         self.history = source.get('history', [])
-        self.save()
         self.set_current_committee()
+        self.save()
 
         return self
 
@@ -144,9 +144,8 @@ class Bill(AbstractBaseModel, MixinExternalData):
                 committee = None
                 chamber = None
 
-            if committee and chamber:
-                self.current_committee = Committee.objects.filter(name__icontains=committee, chamber=chamber).first()
-                self.save()
+        if committee and chamber:
+            self.current_committee = Committee.objects.filter(name__icontains=committee, chamber=chamber).first()
 
     class Meta:
         abstract = False
