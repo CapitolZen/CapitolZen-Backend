@@ -153,7 +153,7 @@ class CommitteeSerializer(BaseModelSerializer):
 
 
 class WrapperSerializer(BaseInternalModelSerializer):
-    bill = ResourceRelatedField(many=False, queryset=Bill.objects)
+    bill = ResourceRelatedField(many=False, queryset=Bill.objects, required=False, allow_null=True)
     organization = ResourceRelatedField(
         many=False, queryset=Organization.objects
     )
@@ -170,12 +170,14 @@ class WrapperSerializer(BaseInternalModelSerializer):
             'summary',
             'position_detail',
             'files',
+            'metadata'
         )
 
     def create(self, validated_data):
         bill = validated_data.get('bill')
         group = validated_data.get('group')
-        queryset = Wrapper.objects.filter(bill_id=bill.id, group_id=group.id)
-        if queryset.exists():
-            raise ValidationError('Wrapper already exists for this data')
+        if bill:
+            queryset = Wrapper.objects.filter(bill_id=bill.id, group_id=group.id)
+            if queryset.exists():
+                raise ValidationError('Wrapper already exists for this data')
         return Wrapper.objects.create(**validated_data)
