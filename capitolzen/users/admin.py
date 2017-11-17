@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.utils.translation import ugettext_lazy as _
 
 from config.admin import BaseModelAdmin
-from capitolzen.users.models import User, Notification
+from capitolzen.users.models import User
 
 
 class MyUserChangeForm(UserChangeForm):
@@ -44,10 +44,3 @@ class MyUserAdmin(AuthUserAdmin):
     )
     list_display = ('username', 'name', 'email', 'is_active', 'is_superuser')
     search_fields = ['name', 'email']
-
-
-class NotificationAdmin(BaseModelAdmin):
-    list_display = ['message', 'is_read', 'created', 'user']
-
-
-admin.site.register(Notification, NotificationAdmin)
