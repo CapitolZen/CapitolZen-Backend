@@ -39,7 +39,7 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     attachments = JSONField(blank=True, null=True)
     saved_filters = JSONField(default=dict)
     active = models.BooleanField(default=True)
-
+    group_label = models.CharField(default="Client", max_length=255)
     user_list = ArrayField(
         models.TextField(blank=True, null=True),
         default=list,
