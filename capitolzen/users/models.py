@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
+from model_utils import Choices
+
 
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
@@ -133,3 +136,78 @@ class User(AbstractUser, AbstractNoIDModel):
         return False
 
 
+class Action(AbstractBaseModel):
+
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE
+    )
+    priority = models.IntegerField(
+        default=0,
+        validators=[MaxValueValidator(10), MinValueValidator(-10)]
+    )
+    bill = models.ForeignKey(
+        'proposals.Bill',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
+    committee = models.ForeignKey(
+        'proposals.Committee'
+    )
+
+    state_choices = Choices(
+        ('active', 'Active'),
+        ('dismissed', 'Dismissed'),
+        ('snoozed', 'Snoozed'),
+        ('flagged', 'Flagged')
+    )
+
+    state = models.CharField(
+        choices=state_choices, max_length=225, db_index=True
+    )
+
+    type_choices = Choices(
+        ('bill:introduced', 'Bill Introduced'),
+        ('bill:updated', 'Bill Updated'),
+        ('organization:user-add', 'User Joined'),
+        ('organization:user-invite', 'User Invited'),
+        ('organization:mention', 'Mentioned')
+    )
+
+    title = models.CharField(
+        choices=type_choices,
+        max_length=225,
+        db_index=True
+    )
+
+    class Meta:
+        abstract = False
+        verbose_name = "action"
+        verbose_name_plural = "actions"
+
+    class JSONAPIMeta:
+        resource_name = "action"
+
+    @staticmethod
+    @allow_staff_or_superuser
+    def has_write_permission(request):
+        return False
+
+    @allow_staff_or_superuser
+    def has_object_write_permission(self, request):
+        return request.user == self.user
+
+    @staticmethod
+    @allow_staff_or_superuser
+    def has_create_permission(request):
+        return False
+
+    @allow_staff_or_superuser
+    def has_object_create_permission(self, request):
+        return False
+
+    @allow_staff_or_superuser
+    def has_object_read_permission(self, request):
+        return request.user == self.user

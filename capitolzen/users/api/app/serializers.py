@@ -7,9 +7,12 @@ from rest_framework.validators import UniqueValidator
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
 
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
+from capitolzen.proposals.models import Committee
+from capitolzen.proposals.models import Bill, Legislator
 from capitolzen.users.utils import token_decode, token_encode
 from capitolzen.users.notifications import email_user_password_reset_request
 from capitolzen.organizations.models import Organization
+from capitolzen.users.models import Action
 
 User = get_user_model()
 
@@ -328,3 +331,35 @@ class ChangeUserOrganizationRoleSerializer(serializers.Serializer):
 
     class Meta:
         model = User
+
+
+class ActionSerializer(BaseInternalModelSerializer):
+    user = ResourceRelatedField(
+        many=False,
+        queryset=User.objects,
+    )
+
+    bill = ResourceRelatedField(
+        many=False,
+        queryset=Bill.objects,
+        required=False
+    )
+
+    committee = ResourceRelatedField(
+        many=False,
+        queryset=Committee.objects,
+        required=False,
+    )
+
+    class Meta:
+        model = Action
+        fields = (
+            'id',
+            'committee',
+            'bill',
+            'user',
+            'state',
+            'title',
+            'priority',
+            'created'
+        )

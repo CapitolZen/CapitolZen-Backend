@@ -28,7 +28,7 @@ class GroupSerializer(BaseInternalModelSerializer):
             'created',
             'avatar',
         )
-        read_only_fields = ('id',)
+        read_only_fields = ('id', 'created')
 
 
 class ReportSerializer(BaseInternalModelSerializer):
