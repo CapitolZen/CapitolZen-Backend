@@ -432,12 +432,8 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'capitolzen.proposals.tasks.spawn_bill_updates',
         'schedule': crontab(minute=0, hour='3,5,8')
     },
-    'email_bill_updates': {
-        'task': 'capitolzen.proposals.tasks.run_organization_bill_updates',
-        'schedule': crontab(minute=0, hour='4,6')
-    },
-    'email_bill_introductions': {
-        'task': 'capitolzen.proposals.tasks.new_introduction_email',
+    'create_intro_actions': {
+        'task': 'capitolzen.proposals.tasks.create_bill_introduction_actions',
         'schedule': crontab(minute=30, hour='6')
     }
 }
