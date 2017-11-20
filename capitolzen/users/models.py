@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -146,17 +149,10 @@ class Action(AbstractBaseModel):
         default=0,
         validators=[MaxValueValidator(10), MinValueValidator(-10)]
     )
-    bill = models.ForeignKey(
-        'proposals.Bill',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
 
-    committee = models.ForeignKey(
-        'proposals.Committee'
-    )
-
+    object_id = models.UUIDField(null=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    action_object = GenericForeignKey('content_type', 'object_id')
     state_choices = Choices(
         ('active', 'Active'),
         ('dismissed', 'Dismissed'),
@@ -165,12 +161,12 @@ class Action(AbstractBaseModel):
     )
 
     state = models.CharField(
-        choices=state_choices, max_length=225, db_index=True
+        choices=state_choices, max_length=225, db_index=True, default='active'
     )
 
     type_choices = Choices(
         ('bill:introduced', 'Bill Introduced'),
-        ('bill:updated', 'Bill Updated'),
+        ('wrapper:updated', 'Bill Updated'),
         ('organization:user-add', 'User Joined'),
         ('organization:user-invite', 'User Invited'),
         ('organization:mention', 'Mentioned')
@@ -188,7 +184,7 @@ class Action(AbstractBaseModel):
         verbose_name_plural = "actions"
 
     class JSONAPIMeta:
-        resource_name = "action"
+        resource_name = "actions"
 
     @staticmethod
     @allow_staff_or_superuser

@@ -266,7 +266,7 @@ class ActionFilter(BaseModelFilterSet):
 class ActionsViewSet(BasicViewSet):
 
     def get_queryset(self):
-        return Action.objects.all(user=self.request.user)
+        return Action.objects.filter(user=self.request.user)
 
     filter_class = ActionFilter
     serializer_class = ActionSerializer
