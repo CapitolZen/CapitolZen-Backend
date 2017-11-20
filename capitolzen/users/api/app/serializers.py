@@ -1,15 +1,23 @@
+from collections import OrderedDict
+
 from django.contrib.auth import get_user_model
 
 from rest_framework_json_api import serializers
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework.validators import UniqueValidator
+from rest_framework_json_api.utils import  get_resource_type_from_instance
+from rest_framework.serializers import Field
 
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
 
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
+from capitolzen.proposals.models import Committee
+from capitolzen.proposals.models import Bill, Legislator
+
 from capitolzen.users.utils import token_decode, token_encode
 from capitolzen.users.notifications import email_user_password_reset_request
 from capitolzen.organizations.models import Organization
+from capitolzen.users.models import Action
 
 User = get_user_model()
 
@@ -328,3 +336,40 @@ class ChangeUserOrganizationRoleSerializer(serializers.Serializer):
 
     class Meta:
         model = User
+
+
+class ActionObjectRelatedField(Field):
+    """
+    A custom field to use for the `tagged_object` generic relationship.
+    """
+
+    def to_representation(self, value):
+
+        resource_type = get_resource_type_from_instance(value)
+
+        return OrderedDict([('type', resource_type), ('id', str(value.id))])
+
+    def to_internal_value(self, data):
+        print(data)
+        return data['id']
+
+
+class ActionSerializer(BaseInternalModelSerializer):
+    user = ResourceRelatedField(
+        many=False,
+        queryset=User.objects,
+    )
+
+    action_object = ActionObjectRelatedField()
+
+    class Meta:
+        model = Action
+        fields = (
+            'id',
+            'user',
+            'state',
+            'title',
+            'priority',
+            'created',
+            'action_object'
+        )

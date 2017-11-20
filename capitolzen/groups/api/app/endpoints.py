@@ -50,8 +50,16 @@ class GroupFilter(OrganizationFilterSet):
         help_text="Filter Groups on a Bill They Do Not Have"
     )
 
+    user = filters.CharFilter(
+        name='saved for user id',
+        method='user_favorite_filter'
+    )
+
     def without_bill_filter(self, queryset, name, value):
         return queryset.exclude(wrapper__bill__id=value)
+
+    def user_favorite_filter(self, queryset, name, value):
+        return queryset.filter(user_list__contains=value)
 
     class Meta(OrganizationFilterSet.Meta):
         model = Group

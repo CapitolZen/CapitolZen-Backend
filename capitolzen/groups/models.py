@@ -36,10 +36,14 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     avatar = models.FileField(
         blank=True, null=True, max_length=255, upload_to=avatar_directory_path
     )
-    starred = models.BooleanField(default=False)
     attachments = JSONField(blank=True, null=True)
     saved_filters = JSONField(default=dict)
     active = models.BooleanField(default=True)
+    group_label = models.CharField(default="Client", max_length=255)
+    user_list = ArrayField(
+        models.TextField(blank=True, null=True),
+        default=list,
+    )
 
     organization = models.ForeignKey(
         'organizations.Organization',
