@@ -20,17 +20,12 @@ logger = getLogger('app_logger')
 
 
 class GroupFilter(OrganizationFilterSet):
-    title = filters.CharFilter(
-        name='title',
-        label='Title',
-        help_text='Title of a Group',
-        lookup_expr='exact')
 
-    starred = filters.CharFilter(
+
+    starred = filters.BooleanFilter(
         name='starred',
         label="Starred",
         help_text="Starred groups",
-        lookup_expr='exact'
     )
 
     organization = filters.CharFilter(
@@ -63,6 +58,9 @@ class GroupFilter(OrganizationFilterSet):
 
     class Meta(OrganizationFilterSet.Meta):
         model = Group
+        fields = {
+            'title': ['exact', 'icontains'],
+        }
 
 
 class GroupViewSet(OwnerBasedViewSet):
