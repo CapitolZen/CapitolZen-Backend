@@ -21,7 +21,6 @@ logger = getLogger('app_logger')
 
 class GroupFilter(OrganizationFilterSet):
 
-
     starred = filters.BooleanFilter(
         name='starred',
         label="Starred",
@@ -46,7 +45,7 @@ class GroupFilter(OrganizationFilterSet):
     )
 
     user = filters.CharFilter(
-        name='saved for user id',
+        name='user_list',
         method='user_favorite_filter'
     )
 
@@ -54,12 +53,12 @@ class GroupFilter(OrganizationFilterSet):
         return queryset.exclude(wrapper__bill__id=value)
 
     def user_favorite_filter(self, queryset, name, value):
-        return queryset.filter(user_list__contains=value)
+        return queryset.filter(user_list__contains=[value])
 
     class Meta(OrganizationFilterSet.Meta):
         model = Group
         fields = {
-            'title': ['exact', 'icontains'],
+            'title': ['exact', 'icontains']
         }
 
 
