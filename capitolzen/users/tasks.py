@@ -27,12 +27,20 @@ def intercom_manage_user(user_id, operation):
         user = None
 
     def _populate_intercom_user(intercom_user):
-        # provider_info = user.provider_info
+        if intercom_user.email != user.username:
+            intercom_user.email = user.username
+
+        properties = ["username", "name"]
+
+        for prop in properties:
+            value = getattr(user, prop, None)
+            setattr(intercom_user, prop, value)
+        
         return intercom_user
 
     def _create():
         intercom_user = intercom.users.create(user_id=str(user.id),
-                                              email=user.email
+                                              email=user.username
                                               )
         intercom_user = _populate_intercom_user(intercom_user)
         intercom.users.save(intercom_user)
