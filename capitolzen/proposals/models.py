@@ -9,6 +9,8 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 
 from config.models import AbstractBaseModel
 
+from model_utils import Choices
+
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
 from capitolzen.meta.notifications import admin_email
 from capitolzen.proposals.mixins import MixinExternalData
@@ -103,7 +105,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
                     self.sponsor = leg
                 else:
                     # Need to prevent duplicate entries
-                    if leg.id not in self.cosponsors:
+                    if str(leg.id) not in self.cosponsors:
                         self.cosponsors.append(str(leg.id))
 
             except (ObjectDoesNotExist, MultipleObjectsReturned):
@@ -209,6 +211,38 @@ class Committee(AbstractBaseModel, MixinExternalData):
 
     class JSONAPIMeta:
         resource_name = "committees"
+
+
+class Event(AbstractBaseModel, MixinExternalData):
+    state = models.CharField(max_length=255)
+    chamber = models.CharField(max_length=255)
+    time = models.DateTimeField()
+
+    event_choices = Choices(
+        ('committee:meeting', 'Committee - Meeting')
+    )
+    event_type = models.CharField(choices=event_choices, default='committee:meeting', max_length=255)
+    url = models.URLField(blank=True, null=True)
+    publish_date = models.DateTimeField(blank=True, null=True)
+
+    # TODO: Need to figure out how to actually turn this into legit locations
+    location_text = models.TextField()
+
+    description = models.TextField(blank=True, null=True)
+    attachments = JSONField(default=list)
+
+    # Possible external references
+    committee = models.ForeignKey('proposals.Committee', blank=True, null=True)
+    legislator = models.ForeignKey('proposals.Legislator', blank=True, null=True)
+    remote_id = models.TextField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        abstract = False
+        verbose_name_plural = "Events"
+        verbose_name = "event"
+
+    class JSONAPIMeta:
+        resource_name = "events"
 
 
 class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):

@@ -150,8 +150,8 @@ class Action(AbstractBaseModel):
         validators=[MaxValueValidator(10), MinValueValidator(-10)]
     )
 
-    object_id = models.UUIDField(null=True)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.UUIDField(null=True, blank=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
     action_object = GenericForeignKey('content_type', 'object_id')
     state_choices = Choices(
         ('active', 'Active'),

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from celery import shared_task
 
 from capitolzen.proposals.managers import (
-    BillManager, LegislatorManager, CommitteeManager
+    BillManager, LegislatorManager, CommitteeManager, EventManager
 )
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import User, Action
@@ -34,6 +34,11 @@ def committee_manager(state):
 
 
 @shared_task
+def event_manager(state):
+    return EventManager(state).run()
+
+
+@shared_task
 def spawn_bill_updates():
     return iterate_states(BillManager, bill_manager)
 
@@ -46,6 +51,11 @@ def spawn_legislator_updates():
 @shared_task
 def spawn_committee_updates():
     return iterate_states(CommitteeManager, committee_manager)
+
+
+@shared_task
+def spawn_committee_meeting_updates():
+    return iterate_states(EventManager, event_manager)
 
 
 @shared_task
@@ -105,7 +115,8 @@ def create_bill_introduction_actions():
                 action, created = Action.objects.get_or_create(
                     user=user,
                     title='bill:introduced',
-                    action_object=bill
+                    action_object=bill,
+                    priority=1
                 )
 
                 if not created:

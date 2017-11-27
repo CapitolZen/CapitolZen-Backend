@@ -8,7 +8,7 @@ AvailableStateChoices = (
 StateData = namedtuple(
     'StateData',
     'name title lower_bill_prefix upper_bill_prefix '
-    'lower_chamber upper_chamber is_active'
+    'lower_chamber upper_chamber timezone committee_rss is_active'
 )
 
 mi = StateData(
@@ -18,6 +18,8 @@ mi = StateData(
     upper_bill_prefix='SB',
     lower_chamber='House',
     upper_chamber='Senate',
+    committee_rss='http://www.legislature.mi.gov/documents/publications/RssFeeds/comschedule.xml',
+    timezone='America/Detroit',
     is_active=True
 )
 
