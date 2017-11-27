@@ -18,11 +18,11 @@ from common.utils.filters.filters import UUIDInFilter
 
 from config.viewsets import OwnerBasedViewSet, GenericBaseViewSet
 from capitolzen.groups.models import Group, prepare_report_filters
-from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
+from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee, Event
 from capitolzen.proposals.documents import BillDocument
 from capitolzen.proposals.api.app.serializers import (
     BillSerializer, WrapperSerializer, LegislatorSerializer,
-    CommitteeSerializer
+    CommitteeSerializer, EventSerializer
 )
 
 
@@ -153,6 +153,30 @@ class CommitteeViewSet(mixins.RetrieveModelMixin,
     serializer_class = CommitteeSerializer
     queryset = Committee.objects.all()
     ordering = ('state', 'name')
+
+
+class EventFilter(BaseModelFilterSet):
+    class Meta:
+        model = Event
+        fields = {
+            'state': ['exact'],
+            'chamber': ['exact'],
+            'event_type': ['exact'],
+            'time': ['lt', 'gt', 'exact']
+        }
+
+
+class EventViewSet(mixins.RetrieveModelMixin,
+                   mixins.ListModelMixin,
+                   GenericBaseViewSet):
+    serializer_class = EventSerializer
+    queryset = Event.objects.all()
+    ordering = ('time', )
+    search_fields = (
+        'description',
+        'committee__name',
+        'location_text'
+    )
 
 
 class WrapperFilter(OrganizationFilterSet):
