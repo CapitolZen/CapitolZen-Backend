@@ -3,6 +3,8 @@ from string import capwords
 from datetime import datetime, timedelta
 from celery import shared_task
 
+from capitolzen.meta.states import AVAILABLE_STATES
+
 from capitolzen.proposals.managers import (
     BillManager, LegislatorManager, CommitteeManager, EventManager
 )
@@ -32,12 +34,6 @@ def legislator_manager(state):
 def committee_manager(state):
     return CommitteeManager(state).run()
 
-
-@shared_task
-def event_manager(state):
-    return EventManager(state).run()
-
-
 @shared_task
 def spawn_bill_updates():
     return iterate_states(BillManager, bill_manager)
@@ -55,7 +51,8 @@ def spawn_committee_updates():
 
 @shared_task
 def spawn_committee_meeting_updates():
-    return iterate_states(EventManager, event_manager)
+    for state in AVAILABLE_STATES:
+        EventManager(state).run()
 
 
 @shared_task
@@ -92,7 +89,7 @@ def run_organization_bill_updates():
 def create_bill_introduction_actions():
     today = datetime.today()
     date_range = today - timedelta(days=1)
-    bills = Bill.objects.filter(action_dates_range=date_range)
+    bills = Bill.objects.filter(action_dates__range=date_range)
     count = len(bills)
     if count:
         p = inflect.engine()
