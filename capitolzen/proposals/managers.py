@@ -230,6 +230,10 @@ class EventManager(object):
         parts = date.split(',')
         date = parts[1].strip()
         time = rows[4].find_all('td')[1].string.strip().lower().replace('.', '')
+
+        if time.endswith('noon'):
+            time.replace('noon', 'pm')
+
         time_string = "%s %s" % (date, time)
         time_object = datetime.strptime(time_string, "%m/%d/%Y %I:%M %p",)
         args['time'] = time_object.replace(tzinfo=self.timezone)
