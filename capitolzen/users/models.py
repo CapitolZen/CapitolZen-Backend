@@ -1,7 +1,13 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
+from model_utils import Choices
+
 
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
@@ -133,30 +139,61 @@ class User(AbstractUser, AbstractNoIDModel):
         return False
 
 
-class Notification(AbstractBaseModel):
-    references = JSONField(default=list, blank=True, null=True)
-    is_read = models.BooleanField(default=False)
-    message = models.TextField()
-    notification_type = models.CharField(max_length=255, default="user")
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+class Action(AbstractBaseModel):
+
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE
+    )
+    priority = models.IntegerField(
+        default=0,
+        validators=[MaxValueValidator(10), MinValueValidator(-10)]
+    )
+
+    object_id = models.UUIDField(null=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    action_object = GenericForeignKey('content_type', 'object_id')
+    state_choices = Choices(
+        ('active', 'Active'),
+        ('dismissed', 'Dismissed'),
+        ('snoozed', 'Snoozed'),
+        ('flagged', 'Flagged')
+    )
+
+    state = models.CharField(
+        choices=state_choices, max_length=225, db_index=True, default='active'
+    )
+
+    type_choices = Choices(
+        ('bill:introduced', 'Bill Introduced'),
+        ('wrapper:updated', 'Bill Updated'),
+        ('organization:user-add', 'User Joined'),
+        ('organization:user-invite', 'User Invited'),
+        ('organization:mention', 'Mentioned')
+    )
+
+    title = models.CharField(
+        choices=type_choices,
+        max_length=225,
+        db_index=True
+    )
 
     class Meta:
         abstract = False
-        verbose_name = "notification"
-        verbose_name_plural = "notifications"
+        verbose_name = "action"
+        verbose_name_plural = "actions"
 
     class JSONAPIMeta:
-        resource_name = "notification"
-
-    @staticmethod
-    @allow_staff_or_superuser
-    def has_read_permission(request):
-        return True
+        resource_name = "actions"
 
     @staticmethod
     @allow_staff_or_superuser
     def has_write_permission(request):
         return False
+
+    @allow_staff_or_superuser
+    def has_object_write_permission(self, request):
+        return request.user == self.user
 
     @staticmethod
     @allow_staff_or_superuser
@@ -164,19 +201,9 @@ class Notification(AbstractBaseModel):
         return False
 
     @allow_staff_or_superuser
-    def has_object_read_permission(self, request):
-        if self == request.user:
-            return True
-
-        return False
-
-    @allow_staff_or_superuser
-    def has_object_write_permission(self, request):
-        if self.user == request.user:
-            return True
-
-        return False
-
-    @allow_staff_or_superuser
     def has_object_create_permission(self, request):
         return False
+
+    @allow_staff_or_superuser
+    def has_object_read_permission(self, request):
+        return request.user == self.user

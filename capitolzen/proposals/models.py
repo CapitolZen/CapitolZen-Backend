@@ -102,7 +102,10 @@ class Bill(AbstractBaseModel, MixinExternalData):
                 if sponsor['type'] == "primary":
                     self.sponsor = leg
                 else:
-                    self.cosponsors.append(str(leg.id))
+                    # Need to prevent duplicate entries
+                    if leg.id not in self.cosponsors:
+                        self.cosponsors.append(str(leg.id))
+
             except (ObjectDoesNotExist, MultipleObjectsReturned):
                 msg = "id: %s does not match sponsor" % self.id
                 admin_email.delay(msg)
@@ -120,9 +123,29 @@ class Bill(AbstractBaseModel, MixinExternalData):
             if 200 >= response.status_code < 300:
                 self.bill_raw_text = base64.b64encode(
                     response.content).decode('ascii')
+        self.history = source.get('history', [])
+        self.set_current_committee()
         self.save()
 
         return self
+
+    def set_current_committee(self):
+        committee = None
+        chamber = None
+        for action in self.history:
+            committee = None
+            chamber = None
+            if action['type'][0] == 'committee:referred':
+                action_parts = action['action'].lower().split('referred to committee on ')
+                if len(action_parts) > 1:
+                    committee = action_parts[1]
+                    chamber = action['actor']
+            if action['type'][0] == 'committee:passed':
+                committee = None
+                chamber = None
+
+        if committee and chamber:
+            self.current_committee = Committee.objects.filter(name__icontains=committee, chamber=chamber).first()
 
     class Meta:
         abstract = False

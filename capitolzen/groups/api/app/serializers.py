@@ -24,11 +24,11 @@ class GroupSerializer(BaseInternalModelSerializer):
             'active',
             'contacts',
             'description',
-            'starred',
+            'user_list',
             'created',
             'avatar',
         )
-        read_only_fields = ('id',)
+        read_only_fields = ('id', 'created')
 
 
 class ReportSerializer(BaseInternalModelSerializer):

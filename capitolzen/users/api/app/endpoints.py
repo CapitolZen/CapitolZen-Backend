@@ -4,6 +4,8 @@ from dry_rest_permissions.generics import DRYPermissionFiltersBase
 from dry_rest_permissions.generics import DRYPermissions
 from django_filters import rest_framework as filters
 
+from config.viewsets import BasicViewSet
+
 from rest_framework.exceptions import APIException
 from rest_framework import viewsets
 from rest_framework.decorators import list_route, detail_route
@@ -13,16 +15,19 @@ from rest_framework.permissions import AllowAny
 from rest_framework import mixins
 from rest_framework import status
 
+from common.utils.filters.sets import BaseModelFilterSet
+
 from capitolzen.organizations.models import OrganizationInvite
 
 from capitolzen.users.api.app.serializers import (
     ChangePasswordSerializer,
     RegistrationSerializer, ResetPasswordRequestSerializer,
     ResetPasswordSerializer,
-    ChangeUserOrganizationRoleSerializer, ChangeUserStatusSerializer
+    ChangeUserOrganizationRoleSerializer, ChangeUserStatusSerializer,
+    ActionSerializer, UserSerializer
 )
-from capitolzen.users.api.app.serializers import UserSerializer
-from capitolzen.users.models import User
+
+from capitolzen.users.models import User, Action
 
 
 class UserFilter(filters.FilterSet):
@@ -236,3 +241,32 @@ class UserViewSet(mixins.RetrieveModelMixin,
             return Response(
                 {"status": status.HTTP_400_BAD_REQUEST},
                 status=status.HTTP_400_BAD_REQUEST)
+
+
+class ActionFilter(BaseModelFilterSet):
+    class Meta:
+        model = Action
+        ordering = ['-created']
+        fields = {
+            'id': ['exact'],
+            'created': ['lt', 'gt'],
+            'modified': ['lt', 'gt'],
+        }
+
+    search_fields = (
+        'bill__title',
+        'bill__state_id',
+        'bill__sponsor__last_name'
+        'title',
+        'user__name',
+        'committee__name'
+    )
+
+
+class ActionsViewSet(BasicViewSet):
+
+    def get_queryset(self):
+        return Action.objects.filter(user=self.request.user)
+
+    filter_class = ActionFilter
+    serializer_class = ActionSerializer

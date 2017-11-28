@@ -10,6 +10,9 @@ from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 from model_utils import Choices
 
+from capitolzen.organizations.models import Organization
+from capitolzen.users.models import User
+
 from config.models import AbstractBaseModel
 
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
@@ -33,10 +36,14 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     avatar = models.FileField(
         blank=True, null=True, max_length=255, upload_to=avatar_directory_path
     )
-    starred = models.BooleanField(default=False)
     attachments = JSONField(blank=True, null=True)
     saved_filters = JSONField(default=dict)
     active = models.BooleanField(default=True)
+    group_label = models.CharField(default="Client", max_length=255)
+    user_list = ArrayField(
+        models.TextField(blank=True, null=True),
+        default=list,
+    )
 
     organization = models.ForeignKey(
         'organizations.Organization',

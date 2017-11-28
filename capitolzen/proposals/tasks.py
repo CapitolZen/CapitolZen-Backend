@@ -7,6 +7,8 @@ from capitolzen.proposals.managers import (
     BillManager, LegislatorManager, CommitteeManager
 )
 from capitolzen.organizations.models import Organization
+from capitolzen.users.models import User, Action
+
 from capitolzen.proposals.models import Wrapper, Bill
 from capitolzen.groups.models import Group
 from capitolzen.organizations.notifications import email_update_bills
@@ -60,11 +62,11 @@ def run_organization_bill_updates():
                 group=group
             )
             count = len(wrappers)
-            p = inflect.engine()
-            count = p.number_to_words(count)
-            output = normalize_data(wrappers)
             if count:
-                subject = '%s Bills Have Updates for %s' % (count, group.title)
+                p = inflect.engine()
+                count = p.number_to_words(count)
+                output = normalize_data(wrappers)
+                subject = '%s Bills Have Updates for %s' % (count.title(), group.title)
                 message = 'Bills for %s have new action or information.' % (
                     group.title)
                 message = capwords(message)
@@ -77,8 +79,7 @@ def run_organization_bill_updates():
 
 
 @shared_task
-def new_introduction_email():
-    organizations = Organization.objects.filter(is_active=True)
+def create_bill_introduction_actions():
     today = datetime.today()
     date_range = today - timedelta(days=1)
     bills = Bill.objects.filter(action_dates_range=date_range)
@@ -87,6 +88,7 @@ def new_introduction_email():
         p = inflect.engine()
         count = p.number_to_words(count)
         bill_list = []
+
         for bill in bills:
             data = {
                 "state_id": bill.state_id,
@@ -98,15 +100,26 @@ def new_introduction_email():
             }
             bill_list.append(data)
 
-        for org in organizations:
-            subject = '%s New Bills Have Been Introduced' % (count,)
+        for user in User.objects.filter(is_active=True):
+            for bill in bills:
+                action, created = Action.objects.get_or_create(
+                    user=user,
+                    title='bill:introduced',
+                    action_object=bill
+                )
+
+                if not created:
+                    continue
+
+                action.save()
+            subject = '%s New Bills Have Been Introduced' % (count.title(),)
             message = 'There were %s new bills introduced yesterday. ' \
                       'Login into your Capitol Zen account to view them all.'
             email_update_bills(
                 message=message,
                 subject=subject,
                 bills=bill_list,
-                organization=org
+                to=user
             )
 
 
