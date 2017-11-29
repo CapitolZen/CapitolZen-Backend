@@ -79,13 +79,13 @@ def intercom_manage_organization(organization_id, operation):
             pass
 
     if operation == "create":
-        _create()
+        return _create()
     elif operation == "update":
-        _update()
+        return _update()
     elif operation == "delete":
-        _delete()
+        return _delete()
 
-    return True
+    return False
 
 
 @shared_task()
