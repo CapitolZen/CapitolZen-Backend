@@ -169,6 +169,8 @@ class EventSerializer(BaseInternalModelSerializer):
             'attachments',
             'location_text',
             'time',
+            'url',
+            'description'
         )
 
 

@@ -223,7 +223,7 @@ class Event(AbstractBaseModel, MixinExternalData):
     )
     event_type = models.CharField(choices=event_choices, default='committee:meeting', max_length=255)
     url = models.URLField(blank=True, null=True)
-    publish_date = models.DateTimeField(blank=True, null=True)
+    publish_date = models.DateTimeField(blank=True, null=True, auto_now_add=True)
 
     # TODO: Need to figure out how to actually turn this into legit locations
     location_text = models.TextField()
