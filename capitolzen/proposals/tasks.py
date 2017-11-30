@@ -88,8 +88,8 @@ def run_organization_bill_updates():
 @shared_task
 def create_bill_introduction_actions():
     today = datetime.today()
-    date_range = today - timedelta(days=1)
-    bills = Bill.objects.filter(action_dates__range=date_range)
+    yesterday = today - timedelta(days=1)
+    bills = Bill.objects.filter(created_at__range=[yesterday, today])
     count = len(bills)
     if count:
         p = inflect.engine()
