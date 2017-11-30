@@ -438,7 +438,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     'create_intro_actions': {
         'task': 'capitolzen.proposals.tasks.create_bill_introduction_actions',
-        'schedule': crontab(minute=30, hour='6')
+        'schedule': crontab(minute=30, hour='5,8')
     }
 }
 

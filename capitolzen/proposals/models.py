@@ -113,6 +113,11 @@ class Bill(AbstractBaseModel, MixinExternalData):
                 admin_email.delay(msg)
                 continue
 
+        # So Open states lately isn't reporting primary sponsors...
+        if not self.sponsor:
+            only_id = self.cosponsors.pop(0)
+            self.sponsor = Legislator.objects.get(id=only_id)
+
         self.type = source.get('type', ['bill'])[0]
 
         for cat in source.get('categories', []):
