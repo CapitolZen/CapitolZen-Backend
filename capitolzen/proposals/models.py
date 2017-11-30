@@ -114,7 +114,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
                 continue
 
         # So Open states lately isn't reporting primary sponsors...
-        if not self.sponsor:
+        if not self.sponsor and len(self.cosponsors):
             only_id = self.cosponsors.pop(0)
             self.sponsor = Legislator.objects.get(id=only_id)
 
