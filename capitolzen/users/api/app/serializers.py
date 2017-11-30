@@ -12,7 +12,7 @@ from config.serializers import BaseInternalModelSerializer, RemoteFileField
 
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
 from capitolzen.proposals.models import Committee
-from capitolzen.proposals.models import Bill, Legislator
+from capitolzen.proposals.models import Bill, Legislator, Committee, Event
 
 from capitolzen.users.utils import token_decode, token_encode
 from capitolzen.users.notifications import email_user_password_reset_request
@@ -350,8 +350,11 @@ class ActionObjectRelatedField(Field):
         return OrderedDict([('type', resource_type), ('id', str(value.id))])
 
     def to_internal_value(self, data):
-        print(data)
-        return data['id']
+
+        if data['type'] == 'bills':
+            return Bill.objects.get(id=data['id'])
+        elif data['type'] == 'events':
+            return Event.objects.get(id=data['id'])
 
 
 class ActionSerializer(BaseInternalModelSerializer):

@@ -7,6 +7,8 @@ from django.db import models
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.postgres.fields import ArrayField, JSONField
 
+from django.contrib.contenttypes.fields import GenericRelation
+
 from config.models import AbstractBaseModel
 
 from model_utils import Choices
@@ -17,6 +19,8 @@ from capitolzen.proposals.mixins import MixinExternalData
 
 
 class Bill(AbstractBaseModel, MixinExternalData):
+    actions = GenericRelation('users.Action', related_query_name="legislator")
+
     # External Data
     state = models.TextField(max_length=255, null=True)
     state_id = models.CharField(max_length=255, null=True)
@@ -168,6 +172,8 @@ class Bill(AbstractBaseModel, MixinExternalData):
 
 
 class Legislator(AbstractBaseModel, MixinExternalData):
+    actions = GenericRelation('users.Action', related_query_name="legislator")
+
     # External Data
     remote_id = models.CharField(max_length=255)
     state = models.CharField(max_length=255)
@@ -203,6 +209,7 @@ class Legislator(AbstractBaseModel, MixinExternalData):
 
 
 class Committee(AbstractBaseModel, MixinExternalData):
+    actions = GenericRelation('users.Action', related_query_name="committee")
 
     name = models.CharField(max_length=255)
     state = models.CharField(max_length=255)
@@ -223,6 +230,8 @@ class Committee(AbstractBaseModel, MixinExternalData):
 
 
 class Event(AbstractBaseModel, MixinExternalData):
+    actions = GenericRelation('users.Action', related_query_name="event")
+
     state = models.CharField(max_length=255)
     chamber = models.CharField(max_length=255)
     time = models.DateTimeField()
@@ -255,7 +264,7 @@ class Event(AbstractBaseModel, MixinExternalData):
 
 
 class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
-
+    actions = GenericRelation('users.Action', related_query_name="wrapper")
     organization = models.ForeignKey(
         'organizations.Organization',
         on_delete=models.CASCADE,
