@@ -10,7 +10,7 @@ from config.serializers import (
 
 from capitolzen.organizations.models import Organization
 from capitolzen.groups.models import Group
-from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee
+from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee, Event
 
 
 class BillSerializer(BaseModelSerializer):
@@ -150,6 +150,28 @@ class CommitteeSerializer(BaseModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+
+
+class EventSerializer(BaseInternalModelSerializer):
+    committee = ResourceRelatedField(many=False, queryset=Committee.objects, required=False, allow_null=True)
+    legislator = ResourceRelatedField(many=False, queryset=Legislator.objects, required=False, allow_null=True)
+
+    class Meta:
+        model = Event
+        fields = (
+            'committee',
+            'legislator',
+            'event_type',
+            'chamber',
+            'state',
+            'created',
+            'modified',
+            'attachments',
+            'location_text',
+            'time',
+            'url',
+            'description'
+        )
 
 
 class WrapperSerializer(BaseInternalModelSerializer):

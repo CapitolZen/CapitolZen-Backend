@@ -27,12 +27,8 @@ def intercom_manage_user(user_id, operation):
         user = None
 
     def _populate_intercom_user(intercom_user):
-
-        properties = ["username", "name"]
-
-        for prop in properties:
-            value = getattr(user, prop, None)
-            setattr(intercom_user, prop, value)
+        intercom_user.email = getattr(user, 'username', None)
+        intercom_user.name = getattr(user, 'name', None)
 
         return intercom_user
 

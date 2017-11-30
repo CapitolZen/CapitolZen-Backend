@@ -1,12 +1,24 @@
-from requests import get
-
+from pytz import timezone
 from django.conf import settings
 from django.core.cache import cache
 
-from capitolzen.proposals.models import Bill, Legislator, Committee
+from requests import get
+import feedparser
+from bs4 import BeautifulSoup
+from datetime import datetime
+
+from capitolzen.meta.notifications import admin_email
+
+from capitolzen.proposals.models import Bill, Legislator, Committee, Event, Wrapper
 from capitolzen.proposals.api.app.serializers import (
     BillSerializer, LegislatorSerializer, CommitteeSerializer
 )
+
+from capitolzen.users.models import User, Action
+
+from logging import getLogger
+
+logger = getLogger('app')
 
 
 class CongressionalManager(object):
@@ -163,3 +175,109 @@ class LegislatorManager(CongressionalManager):
     def run(self):
         for human in self._get_remote_list():
             self.update(None, human['id'], human)
+
+
+class EventManager(object):
+    current_session = settings.CURRENT_SESSION
+    index = "committee_meetings"
+
+    def __init__(self, state):
+        self.url = state.committee_rss
+        self.state = state.name
+        self.timezone = timezone(state.timezone)
+
+    def _get_remote_list_response(self):
+        feed = feedparser.parse(self.url)
+        return feed['items']
+
+    def update(self, entry):
+        parts = entry['description'].split('-')
+        chamber = 'lower' if parts[0].lower() == 'house' else 'upper'
+
+        committee = Committee.objects.filter(
+            chamber=chamber,
+            name__icontains=parts[1].strip(),
+        ).first()
+
+        if not committee:
+            logger.error("No commitee matching string found")
+            msg = "no committee found for meeeting %s" % entry['link']
+            admin_email.delay(msg)
+            return None
+
+        args = {
+            "chamber": chamber,
+            "url": entry['link'],
+            "remote_id": entry['guid'],
+            "committee": committee,
+            "state": self.state,
+        }
+
+        events = Event.objects.filter(**args)
+
+        if not events:
+            self.populate_model(entry, args)
+
+    def populate_model(self, entry, args):
+        page = get(entry['link'])
+        soup = BeautifulSoup(page.content, 'html.parser')
+        table = soup.find('table',  id="frg_committeemeeting_MeetingTable")
+        rows = table.find_all('tr')
+        # Set location
+        args['location_text'] = rows[2].contents[2].string
+
+        # Set Date/Time
+        date = rows[3].contents[2].string
+        parts = date.split(',')
+        date = parts[1].strip()
+        time = rows[4].find_all('td')[1].string.strip().lower().replace('.', '')
+
+        if time.endswith('noon'):
+            time.replace('noon', 'pm')
+
+        time_string = "%s %s" % (date, time)
+        time_object = datetime.strptime(time_string, "%m/%d/%Y %I:%M %p",)
+        args['time'] = time_object.replace(tzinfo=self.timezone)
+
+        agenda = rows[5].find_all('td')[1]
+
+        args['description'] = agenda.encode_contents()
+
+        bill_list = []
+        for link in agenda.find_all('a'):
+            bill_list.append(link.string)
+
+        if len(bill_list):
+            args['attachments'] = [{"billlist": bill_list}]
+            self.generate_actions(bill_list)
+
+        event = Event.objects.create(**args)
+        event.save()
+
+    @staticmethod
+    def generate_actions(bill_list):
+        for bill in bill_list:
+            for wrapper in Wrapper.objects.filter(bill__state_id=bill):
+                if wrapper.group.active:
+                    for user_id in wrapper.group.user_list:
+                        try:
+                            user = User.objects.get(user_id)
+                            action = Action.objects.create(
+                                title='wrapper:updated',
+                                priority=-1,
+                                user=user,
+                                action_object=wrapper
+                            )
+                            action.save()
+                        except Exception:
+                            logger.error("user not found somehow")
+
+    def is_updating(self):
+        return False
+
+    def run(self):
+        items = self._get_remote_list_response()
+        for item in items:
+            self.update(item)
+
+

@@ -3,8 +3,10 @@ from string import capwords
 from datetime import datetime, timedelta
 from celery import shared_task
 
+from capitolzen.meta.states import AVAILABLE_STATES
+
 from capitolzen.proposals.managers import (
-    BillManager, LegislatorManager, CommitteeManager
+    BillManager, LegislatorManager, CommitteeManager, EventManager
 )
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import User, Action
@@ -32,7 +34,6 @@ def legislator_manager(state):
 def committee_manager(state):
     return CommitteeManager(state).run()
 
-
 @shared_task
 def spawn_bill_updates():
     return iterate_states(BillManager, bill_manager)
@@ -46,6 +47,12 @@ def spawn_legislator_updates():
 @shared_task
 def spawn_committee_updates():
     return iterate_states(CommitteeManager, committee_manager)
+
+
+@shared_task
+def spawn_committee_meeting_updates():
+    for state in AVAILABLE_STATES:
+        EventManager(state).run()
 
 
 @shared_task
@@ -81,8 +88,8 @@ def run_organization_bill_updates():
 @shared_task
 def create_bill_introduction_actions():
     today = datetime.today()
-    date_range = today - timedelta(days=1)
-    bills = Bill.objects.filter(action_dates_range=date_range)
+    yesterday = today - timedelta(days=1)
+    bills = Bill.objects.filter(created_at__range=[yesterday, today])
     count = len(bills)
     if count:
         p = inflect.engine()
@@ -100,12 +107,13 @@ def create_bill_introduction_actions():
             }
             bill_list.append(data)
 
-        for user in User.objects.filter(is_active=True):
+        for user in User.objects.all():
             for bill in bills:
                 action, created = Action.objects.get_or_create(
                     user=user,
                     title='bill:introduced',
-                    action_object=bill
+                    action_object=bill,
+                    priority=1
                 )
 
                 if not created:

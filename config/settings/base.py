@@ -429,9 +429,13 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'capitolzen.proposals.tasks.spawn_bill_updates',
         'schedule': crontab(minute=0, hour='3,5,8')
     },
+    'import_meetings': {
+        'task': 'capitolzen.proposals.tasks.spawn_committee_meeting_updates',
+        'schedule': crontab(minute=0, hour='4-21')
+    },
     'create_intro_actions': {
         'task': 'capitolzen.proposals.tasks.create_bill_introduction_actions',
-        'schedule': crontab(minute=30, hour='6')
+        'schedule': crontab(minute=30, hour='5,8')
     }
 }
 
@@ -492,6 +496,9 @@ AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
 AWS_TEMP_BUCKET_NAME = env("AWS_TEMP_BUCKET_NAME", default='')
 INDEX_LAMBDA = env(
     "capitolzen_search_bills", default="capitolzen_search_bills")
+
+
+CURRENT_SESSION = env("CURRENT_SESSION", default="2017-2018")
 
 # OPEN STATES
 OPEN_STATES_KEY = env("OPEN_STATES_KEY", default='')
