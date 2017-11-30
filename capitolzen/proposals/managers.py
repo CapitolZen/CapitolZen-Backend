@@ -209,7 +209,8 @@ class EventManager(object):
             "chamber": chamber,
             "url": entry['link'],
             "remote_id": entry['guid'],
-            "committee": committee
+            "committee": committee,
+            "state": self.state,
         }
 
         events = Event.objects.filter(**args)
@@ -240,7 +241,7 @@ class EventManager(object):
 
         agenda = rows[5].find_all('td')[1]
 
-        args['description'] = str(agenda.encode_contents())
+        args['description'] = agenda.encode_contents()
 
         bill_list = []
         for link in agenda.find_all('a'):

@@ -45,5 +45,5 @@ class BillDocument(DocType):
             'summary',
             'type',
             'content',
-            'bill_raw_text'
+            'bill_raw_text',
         ]

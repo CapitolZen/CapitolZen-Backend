@@ -113,6 +113,11 @@ class Bill(AbstractBaseModel, MixinExternalData):
                 admin_email.delay(msg)
                 continue
 
+        # So Open states lately isn't reporting primary sponsors...
+        if not self.sponsor and len(self.cosponsors):
+            only_id = self.cosponsors.pop(0)
+            self.sponsor = Legislator.objects.get(id=only_id)
+
         self.type = source.get('type', ['bill'])[0]
 
         for cat in source.get('categories', []):
@@ -223,7 +228,7 @@ class Event(AbstractBaseModel, MixinExternalData):
     )
     event_type = models.CharField(choices=event_choices, default='committee:meeting', max_length=255)
     url = models.URLField(blank=True, null=True)
-    publish_date = models.DateTimeField(blank=True, null=True)
+    publish_date = models.DateTimeField(blank=True, null=True, auto_now_add=True)
 
     # TODO: Need to figure out how to actually turn this into legit locations
     location_text = models.TextField()

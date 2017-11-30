@@ -161,14 +161,16 @@ class EventSerializer(BaseInternalModelSerializer):
         fields = (
             'committee',
             'legislator',
-            'name',
+            'event_type',
             'chamber',
             'state',
             'created',
             'modified',
             'attachments',
-            'location',
+            'location_text',
             'time',
+            'url',
+            'description'
         )
 
 
