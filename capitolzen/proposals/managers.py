@@ -66,6 +66,10 @@ class CongressionalManager(object):
         return cache.get(self.cache_key) == self.cache_value
 
     def run(self):
+        """
+        TODO: If error, delete cache key so we can re-run
+        :return:
+        """
         # Make sure this is thread / worker friendly and we're not trying
         # to update the same thing twice
         if cache.get(self.cache_key) is None:
@@ -120,7 +124,7 @@ class BillManager(CongressionalManager):
             )
             try:
                 full_list_of_bills += response.json()
-            except ValueError:
+            except ValueError as e:
                 continue
 
         return full_list_of_bills
