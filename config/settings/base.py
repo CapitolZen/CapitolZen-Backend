@@ -252,9 +252,6 @@ STATICFILES_FINDERS = [
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#media-root
 MEDIA_ROOT = str(APPS_DIR('media'))
 
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#media-url
-MEDIA_URL = '/media/'
-
 AWS_ACCESS_KEY_ID = env('AWS_ACCESSID', default="")
 AWS_SECRET_ACCESS_KEY = env('AWS_SECRETKEY', default="")
 AWS_STORAGE_BUCKET_NAME = env('AWS_BUCKET_NAME', default="")
