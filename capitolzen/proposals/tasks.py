@@ -11,7 +11,7 @@ from capitolzen.proposals.managers import (
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import User, Action
 
-from capitolzen.proposals.models import Wrapper, Bill
+from capitolzen.proposals.models import Wrapper, Bill, Event
 from capitolzen.groups.models import Group
 from capitolzen.organizations.notifications import email_update_bills
 from capitolzen.proposals.utils import (
@@ -59,13 +59,13 @@ def spawn_committee_meeting_updates():
 def run_organization_bill_updates():
     organizations = Organization.objects.filter(is_active=True)
     today = datetime.today()
-    date_range = today - timedelta(days=1)
+    yesterday = today - timedelta(days=1)
     for org in organizations:
         groups = Group.objects.filter(organization=org, active=True)
 
         for group in groups:
             wrappers = Wrapper.objects.filter(
-                bill__action_dates__range=[str(date_range), str(today)],
+                bill__modified_at__range=[yesterday, today],
                 group=group
             )
             count = len(wrappers)
@@ -113,7 +113,7 @@ def create_bill_introduction_actions():
                     user=user,
                     title='bill:introduced',
                     action_object=bill,
-                    priority=1
+                    priority=0
                 )
 
                 if not created:

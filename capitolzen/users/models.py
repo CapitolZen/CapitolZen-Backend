@@ -169,7 +169,8 @@ class Action(AbstractBaseModel):
         ('wrapper:updated', 'Bill Updated'),
         ('organization:user-add', 'User Joined'),
         ('organization:user-invite', 'User Invited'),
-        ('organization:mention', 'Mentioned')
+        ('user:mention', 'Mentioned'),
+        ('committee:meeting', 'Committee Meeting')
     )
 
     title = models.CharField(
