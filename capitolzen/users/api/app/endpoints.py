@@ -246,11 +246,13 @@ class UserViewSet(mixins.RetrieveModelMixin,
 class ActionFilter(BaseModelFilterSet):
     class Meta:
         model = Action
-        ordering = ['-created']
+        ordering = ['-priority', '-created']
         fields = {
             'id': ['exact'],
             'created': ['lt', 'gt'],
             'modified': ['lt', 'gt'],
+            'state': ['exact'],
+            'priority': ['lt', 'gt', 'exact']
         }
 
     search_fields = (

@@ -1,10 +1,15 @@
 from celery.utils.log import get_task_logger
 from celery import shared_task
 
+from datetime import datetime, timedelta
+
 from intercom.errors import ResourceNotFound
 
-from capitolzen.users.models import User
+from capitolzen.proposals.models import Event, Bill
+
+from capitolzen.users.models import User, Action
 from capitolzen.users.utils import get_intercom_client
+
 
 logger = get_task_logger(__name__)
 
@@ -91,3 +96,31 @@ def intercom_manage_user_companies(user_id):
 
     intercom_user.companies = companies
     intercom.users.save(intercom_user)
+
+
+def user_action_defaults(user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except Exception:
+        return False
+
+    today = datetime.today()
+    yesterday = today - timedelta(days=1)
+    for bill in Bill.objects.filter(created_at__range=[yesterday, today]):
+        pass
+        a = Action.objects.create(
+            user=user,
+            action_object=bill,
+            title='bill:introduced',
+            priority=0
+        )
+        a.save()
+
+    for event in Event.objects.filter(time__gte=datetime.now()):
+        a = Action.objects.create(
+            user=user,
+            action_object=event,
+            priority=-1,
+            title='committee:meeting'
+        )
+        a.save()

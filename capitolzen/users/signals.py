@@ -8,7 +8,8 @@ from organizations.signals import user_added, user_removed
 from capitolzen.users.models import User
 from capitolzen.users.tasks import (
     intercom_manage_user_companies,
-    intercom_manage_user
+    intercom_manage_user,
+    user_action_defaults
 )
 
 
@@ -22,16 +23,18 @@ def intercom_update_user(sender, **kwargs):
     :param kwargs:
     :return:
     """
-    if settings.INTERCOM_ENABLE_SYNC:
-        created = kwargs.get('created')
-        user = kwargs.get('instance')
-        operation = 'create' if created else 'update'
+    user = kwargs.get('instance')
+    created = kwargs.get('created')
+    operation = 'create' if created else 'update'
 
+    if settings.INTERCOM_ENABLE_SYNC:
         transaction.on_commit(
             lambda: intercom_manage_user.apply_async(kwargs={
                 'user_id': str(user.id),
                 'operation': operation
             }))
+
+    user_action_defaults(str(user.id))
 
 
 @receiver(post_delete, sender=User)
