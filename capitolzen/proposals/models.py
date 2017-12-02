@@ -128,7 +128,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
         else:
             msg = "id: %s does not match sponsor" % self.id
             admin_email.delay(msg)
-        
+
         self.type = source.get('type', ['bill'])[0]
 
         for cat in source.get('categories', []):
