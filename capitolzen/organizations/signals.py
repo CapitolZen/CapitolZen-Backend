@@ -113,5 +113,6 @@ def create_group_for_new_organization(sender, **kwargs):
         Group.objects.create(
             title=organization.name,
             organization=organization,
-            description="Your organization"
+            description="Your organization",
+            user_list=[str(organization.owner.organization_user.user.id)]
         )

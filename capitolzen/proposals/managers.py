@@ -81,6 +81,9 @@ class CongressionalManager(object):
 
         return True
 
+    def update_local_instance(self, instance_id):
+        raise NotImplementedError()
+
 
 class CommitteeManager(CongressionalManager):
     index = "committees"
@@ -104,6 +107,9 @@ class CommitteeManager(CongressionalManager):
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
         return instance
+
+    def update_local_instance(self, instance_id):
+        pass
 
 
 class BillManager(CongressionalManager):
@@ -129,9 +135,8 @@ class BillManager(CongressionalManager):
 
         return full_list_of_bills
 
-    def update(self, local_id, remote_id, resource_info):
-        source = self._get_remote_detail(remote_id)
-
+    @staticmethod
+    def _cleanup_source(source):
         if source.get('bill_id'):
             source['state_id'] = source.pop('bill_id')
         if source.get('actions'):
@@ -140,6 +145,13 @@ class BillManager(CongressionalManager):
             source['bill_versions'] = source.pop('versions')
         if isinstance(source.get('type'), list):
             source['type'] = ",".join(source.get('type'))
+        return source
+
+    def update(self, local_id, remote_id, resource_info):
+        source = self._get_remote_detail(remote_id)
+
+        source = self._cleanup_source(source)
+
         try:
             instance = Bill.objects.get(remote_id=remote_id)
         except Bill.DoesNotExist:
@@ -151,6 +163,22 @@ class BillManager(CongressionalManager):
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
         return instance
+
+    def update_local_instance(self, instance_id):
+        try:
+            bill = Bill.objects.get(id=instance_id)
+            source = self._get_remote_detail(bill.remote_id)
+            source = self._cleanup_source(source)
+            serializer = BillSerializer(bill, data={
+                'remote_id': bill.remote_id,
+                **source
+            })
+            serializer.is_valid(raise_exception=True)
+            instance = serializer.save()
+            return instance
+
+        except Bill.DoesNotExist:
+            return "Did not provide a valid ID"
 
 
 class LegislatorManager(CongressionalManager):
@@ -179,6 +207,9 @@ class LegislatorManager(CongressionalManager):
     def run(self):
         for human in self._get_remote_list():
             self.update(None, human['id'], human)
+
+    def update_local_instance(self, instance_id):
+        pass
 
 
 class EventManager(object):
