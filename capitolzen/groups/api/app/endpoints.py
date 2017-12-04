@@ -7,6 +7,8 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
 from common.utils.filters.sets import OrganizationFilterSet
+from common.utils.filters.filters import UUIDInFilter
+
 from config.viewsets import OwnerBasedViewSet
 from capitolzen.proposals.models import Bill, Wrapper
 from capitolzen.proposals.api.app.serializers import BillSerializer
@@ -39,8 +41,10 @@ class GroupFilter(OrganizationFilterSet):
         help_text="Filter Groups based on whether or not they are active"
     )
 
-    without_bill = filters.CharFilter(
-        method='without_bill_filter',
+    without_bills = UUIDInFilter(
+        name="wrapper__bill__id",
+        label="without bill",
+        exclude=True,
         help_text="Filter Groups on a Bill They Do Not Have"
     )
 
@@ -48,9 +52,6 @@ class GroupFilter(OrganizationFilterSet):
         name='user_list',
         method='user_favorite_filter'
     )
-
-    def without_bill_filter(self, queryset, name, value):
-        return queryset.exclude(wrapper__bill__id=value)
 
     def user_favorite_filter(self, queryset, name, value):
         return queryset.filter(user_list__contains=[value])
