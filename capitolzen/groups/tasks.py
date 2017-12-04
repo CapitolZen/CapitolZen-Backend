@@ -54,10 +54,12 @@ def generate_report(report):
                       )
 
     status = res.get('StatusCode', False)
+
     if status != 200:
         return False
     response = res['Payload'].read()
     response = loads(response)
+
     url = response.get('url', False)
     if url:
         update_report_docs(report, url)

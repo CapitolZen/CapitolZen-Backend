@@ -251,7 +251,10 @@ class EventManager(object):
         events = Event.objects.filter(**args)
 
         if not events:
-            self.populate_model(entry, args)
+            try:
+                self.populate_model(entry, args)
+            except Exception:
+                logger.error('problem creating `event` model')
 
     def populate_model(self, entry, args):
         page = get(entry['link'])
@@ -267,8 +270,7 @@ class EventManager(object):
         date = parts[1].strip()
         time = rows[4].find_all('td')[1].string.strip().lower().replace('.', '')
 
-        if time.endswith('noon'):
-            time.replace('noon', 'pm')
+        time.replace('noon', 'pm')
 
         time_string = "%s %s" % (date, time)
         time_object = datetime.strptime(time_string, "%m/%d/%Y %I:%M %p",)
