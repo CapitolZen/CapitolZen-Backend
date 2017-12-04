@@ -59,7 +59,7 @@ def generate_report(report):
         return False
     response = res['Payload'].read()
     response = loads(response)
-    print(response)
+
     url = response.get('url', False)
     if url:
         update_report_docs(report, url)
