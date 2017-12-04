@@ -251,7 +251,10 @@ class EventManager(object):
         events = Event.objects.filter(**args)
 
         if not events:
-            self.populate_model(entry, args)
+            try:
+                self.populate_model(entry, args)
+            except Exception:
+                logger.error('problem creating `event` model')
 
     def populate_model(self, entry, args):
         page = get(entry['link'])
