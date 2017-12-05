@@ -15,7 +15,7 @@ from capitolzen.proposals.models import Wrapper, Bill, Event
 from capitolzen.groups.models import Group
 from capitolzen.organizations.notifications import email_update_bills
 from capitolzen.proposals.utils import (
-    iterate_states, summarize, normalize_data
+    iterate_states, summarize, normalize_bill_data
 )
 from capitolzen.proposals.documents import BillDocument
 
@@ -72,7 +72,7 @@ def run_organization_bill_updates():
             if count:
                 p = inflect.engine()
                 count = p.number_to_words(count)
-                output = normalize_data(wrappers)
+                output = normalize_bill_data(wrappers)
                 subject = '%s Bills Have Updates for %s' % (count.title(), group.title)
                 message = 'Bills for %s have new action or information.' % (
                     group.title)

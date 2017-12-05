@@ -6,7 +6,7 @@ from django.conf import settings
 from capitolzen.meta.clients import aws_client
 from capitolzen.meta.notifications import email_user_report_link
 from capitolzen.proposals.models import Wrapper
-from capitolzen.proposals.utils import normalize_data
+from capitolzen.proposals.utils import normalize_bill_data
 from capitolzen.users.models import User
 from capitolzen.groups.models import Report
 
@@ -20,7 +20,7 @@ def generate_report(report):
     if filters:
         wrappers = wrappers.filter(**filters)
 
-    bill_list = normalize_data(wrappers)
+    bill_list = normalize_bill_data(wrappers)
     data = {
         "title": report.title,
         "id": str(report.id),
