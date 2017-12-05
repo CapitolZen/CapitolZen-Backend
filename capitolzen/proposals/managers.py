@@ -7,6 +7,8 @@ import feedparser
 from bs4 import BeautifulSoup
 from datetime import datetime
 
+import dateutil.parser
+
 from capitolzen.meta.notifications import admin_email
 
 from capitolzen.proposals.models import Bill, Legislator, Committee, Event, Wrapper
@@ -273,7 +275,7 @@ class EventManager(object):
         time.replace('noon', 'pm')
 
         time_string = "%s %s" % (date, time)
-        time_object = datetime.strptime(time_string, "%m/%d/%Y %I:%M %p",)
+        time_object = dateutil.parser.parse(time_string)
         args['time'] = time_object.replace(tzinfo=self.timezone)
 
         agenda = rows[5].find_all('td')[1]
