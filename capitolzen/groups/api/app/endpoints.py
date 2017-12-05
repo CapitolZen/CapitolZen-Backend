@@ -161,6 +161,7 @@ class ReportViewSet(OwnerBasedViewSet):
     @detail_route(methods=['GET'])
     def url(self, request, pk):
         report = Report.objects.get(pk=pk)
+        self.check_object_permissions(request, report)
         url = generate_report(report)
         if url:
             return Response({
