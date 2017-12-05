@@ -278,11 +278,14 @@ class EventManager(object):
 
         agenda = rows[5].find_all('td')[1]
 
-        args['description'] = agenda.encode_contents()
-
         bill_list = []
         for link in agenda.find_all('a'):
             bill_list.append(link.string)
+
+        for a in agenda.find_all('a'):
+            a.unwrap()
+
+        args['description'] = str(agenda)
 
         if len(bill_list):
             args['attachments'] = [{"billlist": bill_list}]
