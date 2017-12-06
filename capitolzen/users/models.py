@@ -35,6 +35,7 @@ class User(AbstractUser, AbstractNoIDModel):
         blank=True, null=True, max_length=255,
         upload_to=avatar_directory_path
     )
+    preferences = JSONField(default=list)
 
     def __str__(self):
         return self.name or self.username

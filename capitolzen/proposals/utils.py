@@ -29,7 +29,7 @@ def summarize(content):
     return summarize_text(content)
 
 
-def normalize_data(wrapper_list, time_format='%m/%d/%Y'):
+def normalize_bill_data(wrapper_list, time_format='%m/%d/%Y'):
     """
     Take a list of wrappers and standardize data for output purposes
     returns a flattened dict of data for wrappers
@@ -39,7 +39,10 @@ def normalize_data(wrapper_list, time_format='%m/%d/%Y'):
     """
     output = []
     for w in wrapper_list:
-        action_time = datetime.strptime(w.bill.last_action_date, '%Y-%m-%d %H:%M:%S')
+        if getattr(w.bill, 'last_action_date', False):
+            action_time = datetime.strptime(w.bill.last_action_date, '%Y-%m-%d %H:%M:%S')
+        else:
+            action_time = None
         data = {
             "state_id": w.bill.state_id,
             "state": w.bill.state,
