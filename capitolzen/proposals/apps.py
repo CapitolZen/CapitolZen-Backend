@@ -7,3 +7,6 @@ class ProposalsConfig(AppConfig):
     name = 'capitolzen.proposals'
     label = 'proposals'
     verbose_name = 'Proposals'
+
+    def ready(self):
+        import capitolzen.users.signals  # noqa

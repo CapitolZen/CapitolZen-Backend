@@ -108,18 +108,7 @@ def create_bill_introduction_actions():
             bill_list.append(data)
 
         for user in User.objects.all():
-            for bill in bills:
-                action, created = Action.objects.get_or_create(
-                    user=user,
-                    title='bill:introduced',
-                    action_object=bill,
-                    priority=0
-                )
 
-                if not created:
-                    continue
-
-                action.save()
             subject = '%s New Bills Have Been Introduced' % (count.title(),)
             message = 'There were %s new bills introduced yesterday. ' \
                       'Login into your Capitol Zen account to view them all.'
