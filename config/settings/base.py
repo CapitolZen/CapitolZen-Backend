@@ -435,7 +435,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     'create_intro_actions': {
         'task': 'capitolzen.proposals.tasks.create_bill_introduction_actions',
-        'schedule': crontab(minute=0, hour='9, 15')
+        'schedule': crontab(minute=0, hour=9)
     },
     'cleanup_bills': {
         'task': 'capitolzen.proposals.tasks.clean_missing_sponsors',

@@ -2,6 +2,7 @@ from datetime import datetime
 from pytz import UTC
 
 from django.conf import settings
+from django.apps import apps
 
 from capitolzen.document_analysis.summarize import summarize_text
 

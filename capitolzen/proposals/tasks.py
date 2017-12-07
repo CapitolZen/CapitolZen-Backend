@@ -14,7 +14,7 @@ from capitolzen.proposals.managers import (
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import User, Action
 
-from capitolzen.proposals.models import Wrapper, Bill, Event, Legislator
+from capitolzen.proposals.models import Wrapper, Bill, Legislator
 from capitolzen.groups.models import Group
 from capitolzen.organizations.notifications import email_update_bills
 from capitolzen.proposals.utils import (
@@ -83,11 +83,19 @@ def run_organization_bill_updates():
                 emails = []
                 for user in group.organization.users.all():
                     emails.append(user.username)
-                email_update_bills(
-                    message=message,
-                    subject=subject,
-                    bills=output
-                )
+                    email_update_bills(
+                        message=message,
+                        subject=subject,
+                        bills=output
+                    )
+                    for wrapper in wrappers:
+                        a = Action.objects.create(
+                            user=user,
+                            action_object=wrapper,
+                            priority=4,
+                            title='wrapper:updated'
+                        )
+                        a.save()
 
 
 @shared_task
@@ -156,15 +164,18 @@ def clean_missing_sponsors():
         if bill.history:
             intro = list(bill.history)[0]
             if intro['type'] == ['bill:introduced']:
+                if intro['action'].lower() == 'entire membership':
+                    continue
                 pieces = intro['action'].split(' ')
                 fname = pieces[-2].lower().strip()
                 lname = pieces[-1].lower().strip()
-                try:
-                    leg = Legislator.objects.get(first_name__icontains=fname, last_name__icontains=lname)
-                    bill.sponsor = leg
-                    bill.save()
-                except Exception:
+
+                legislator = Legislator.objects.get_by_name_pieces(lname, **{'first_name': fname})
+                if not legislator:
                     data = "Bill ID: %s | fname: %s | lname %s" % (bill.id, fname, lname)
                     create_asana_task("History legislator mismatch", data)
+                else:
+                    bill.sponsor = legislator
+                    bill.save()
         else:
             create_asana_task("Bill Missing History", bill.id)

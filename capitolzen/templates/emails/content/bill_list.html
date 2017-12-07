@@ -101,14 +101,13 @@
                     <tr>
                       <td style="padding: 0 15px 0 0;">{{bill.state_id}}</td>
                       <td style="padding: 0 15px;">{{bill.state}}</td>
-                      <td style="padding: 0 0 0 15px;">{{bill.sponsor.full_name}}</td>
+                      <td style="padding: 0 0 0 15px;">{{bill.sponsor}}</td>
                       <td style="padding: 0 0 0 15px;">{{bill.status}}</td>
                       <td style="padding: 0 0 0 15px;">
-                        <mj-button background-color="%23F45E43" href="%7B%7Bbill.link%7D%7D"><!--[CDATA[View
-                      
-                    
-                {% endfor %}
-            ]]--></mj-button></td></tr></table></td></tr></tbody></table></div><!--[if mso | IE]>
+                          <a href="{{bill.link}}">View</a>
+                      </td>
+                    </tr>
+                {% endfor %}</table></td></tr></tbody></table></div><!--[if mso | IE]>
       </td></tr></table>
       <![endif]--></td></tr></tbody></table></div><!--[if mso | IE]>
       </td></tr></table>
