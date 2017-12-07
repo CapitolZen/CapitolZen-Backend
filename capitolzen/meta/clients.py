@@ -1,5 +1,6 @@
 from boto3 import client
 from django.conf import settings
+from asana import Client
 
 
 def aws_client(service='lambda'):
@@ -12,6 +13,10 @@ def aws_client(service='lambda'):
 
     return bclient
 
+
+def asana_client():
+    a_client = Client.access_token(settings.ASANA_PAT)
+    return a_client
 
 class DocManager:
     def __init__(self, org_instance):
