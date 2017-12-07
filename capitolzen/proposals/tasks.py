@@ -3,7 +3,10 @@ from string import capwords
 from datetime import datetime, timedelta
 from celery import shared_task
 
+from django.conf import settings
+
 from capitolzen.meta.states import AVAILABLE_STATES
+from capitolzen.meta.notifications import create_asana_task
 
 from capitolzen.proposals.managers import (
     BillManager, LegislatorManager, CommitteeManager, EventManager
@@ -11,7 +14,7 @@ from capitolzen.proposals.managers import (
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import User, Action
 
-from capitolzen.proposals.models import Wrapper, Bill, Event
+from capitolzen.proposals.models import Wrapper, Bill, Event, Legislator
 from capitolzen.groups.models import Group
 from capitolzen.organizations.notifications import email_update_bills
 from capitolzen.proposals.utils import (
@@ -77,9 +80,10 @@ def run_organization_bill_updates():
                 message = 'Bills for %s have new action or information.' % (
                     group.title)
                 message = capwords(message)
+
+
                 email_update_bills(
                     message=message,
-                    organization=org,
                     subject=subject,
                     bills=output
                 )
@@ -101,9 +105,10 @@ def create_bill_introduction_actions():
                 "state_id": bill.state_id,
                 "state": bill.state,
                 "id": str(bill.id),
-                "sponsor": bill.sponsor.full_name,
+                "sponsor":  bill.sponsor.full_name if bill.sponsor else None,
                 "summary": bill.title,
                 "status": bill.remote_status,
+                "link": "%s/bills/%s" % (settings.APP_FRONTEND, str(bill.id))
             }
             bill_list.append(data)
 
@@ -116,7 +121,7 @@ def create_bill_introduction_actions():
                 message=message,
                 subject=subject,
                 bills=bill_list,
-                to=user
+                to=user.username
             )
 
 
@@ -142,3 +147,23 @@ def ingest_attachment(identifier):
     instance.summary = summarize(instance.content)
     instance.save()
     return True
+
+
+@shared_task
+def clean_missing_sponsors():
+    for bill in Bill.objects.filter(sponsor=None):
+        if bill.history:
+            intro = list(bill.history)[0]
+            if intro['type'] == ['bill:introduced']:
+                pieces = intro['action'].split(' ')
+                fname = pieces[-2].lower().strip()
+                lname = pieces[-1].lower().strip()
+                try:
+                    leg = Legislator.objects.get(first_name__icontains=fname, last_name__icontains=lname)
+                    bill.sponsor = leg
+                    bill.save()
+                except Exception:
+                    data = "Bill ID: %s | fname: %s | lname %s" % (bill.id, fname, lname)
+                    create_asana_task("History legislator mismatch", data)
+        else:
+            create_asana_task("Bill Missing History", bill.id)

@@ -112,13 +112,14 @@ def client():
 
 
 def create_asana_task(title, description):
-    aclient = asana_client()
+    if settings.ASANA_ENABLE_SYNC:
+        aclient = asana_client()
 
-    try:
-        result = aclient.tasks.create_in_workspace(
-            settings.ASANA_WORKSPACE,
-            {'name': title, 'notes': description, 'projects': [settings.ASANA_PROJECT]}
-        )
-        return result
-    except Exception as e:
-        return e.__dict__
+        try:
+            result = aclient.tasks.create_in_workspace(
+                settings.ASANA_WORKSPACE,
+                {'name': title, 'notes': description, 'projects': [settings.ASANA_PROJECT]}
+            )
+            return result
+        except Exception as e:
+            return e.__dict__
