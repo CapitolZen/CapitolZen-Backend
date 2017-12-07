@@ -4,7 +4,6 @@ import requests
 
 from django.db import models
 
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.postgres.fields import ArrayField, JSONField
 
 from django.contrib.contenttypes.fields import GenericRelation
@@ -14,9 +13,8 @@ from config.models import AbstractBaseModel
 from model_utils import Choices
 
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
-from capitolzen.meta.notifications import admin_email, create_asana_task
+from capitolzen.meta.notifications import create_asana_task
 from capitolzen.proposals.mixins import MixinExternalData
-
 
 
 class Bill(AbstractBaseModel, MixinExternalData):
