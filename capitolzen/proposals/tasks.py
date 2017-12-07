@@ -88,14 +88,14 @@ def run_organization_bill_updates():
                         subject=subject,
                         bills=output
                     )
-                    for wrapper in wrappers:
-                        a = Action.objects.create(
-                            user=user,
-                            action_object=wrapper,
-                            priority=4,
-                            title='wrapper:updated'
-                        )
-                        a.save()
+                    # for wrapper in wrappers:
+                    #     a = Action.objects.create(
+                    #         user=user,
+                    #         action_object=wrapper,
+                    #         priority=4,
+                    #         title='wrapper:updated'
+                    #     )
+                    #     a.save()
 
 
 @shared_task
