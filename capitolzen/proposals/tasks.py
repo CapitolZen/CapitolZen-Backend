@@ -80,8 +80,9 @@ def run_organization_bill_updates():
                 message = 'Bills for %s have new action or information.' % (
                     group.title)
                 message = capwords(message)
-
-
+                emails = []
+                for user in group.organization.users.all():
+                    emails.append(user.username)
                 email_update_bills(
                     message=message,
                     subject=subject,

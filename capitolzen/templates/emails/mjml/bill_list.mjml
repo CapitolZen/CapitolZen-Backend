@@ -29,7 +29,9 @@
                       <td style="padding: 0 15px;">{{bill.state}}</td>
                       <td style="padding: 0 0 0 15px;">{{bill.sponsor.full_name}}</td>
                       <td style="padding: 0 0 0 15px;">{{bill.status}}</td>
-                      <td style="padding: 0 0 0 15px;">{{bill.link}}</td>
+                      <td style="padding: 0 0 0 15px;">
+                        <mj-button background-color="#F45E43" href="{{bill.link}}">View</mj-button>
+                      </td>
                     </tr>
                 {% endfor %}
             </mj-table>
