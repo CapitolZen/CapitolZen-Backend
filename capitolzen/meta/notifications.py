@@ -2,6 +2,7 @@ from logging import getLogger
 from sparkpost import SparkPost
 from celery import shared_task
 from requests import post
+from .clients import asana_client
 
 from django.conf import settings
 
@@ -69,7 +70,7 @@ def admin_email(message, subject=False):
     :return:
     """
 
-    recipients = ['dwasserman@capitolzen.com']
+    recipients = ['djwasserman@gmail.com']
     html = "<p>%s<p>" % message
     sp = client()
     if not subject:
@@ -108,3 +109,17 @@ def client():
         return SparkPost(api_key=settings.SPARKPOST_KEY)
     else:
         return False
+
+
+def create_asana_task(title, description):
+    if settings.ASANA_ENABLE_SYNC:
+        aclient = asana_client()
+
+        try:
+            result = aclient.tasks.create_in_workspace(
+                settings.ASANA_WORKSPACE,
+                {'name': title, 'notes': description, 'projects': [settings.ASANA_PROJECT]}
+            )
+            return result
+        except Exception as e:
+            return e.__dict__

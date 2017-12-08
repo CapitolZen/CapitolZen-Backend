@@ -5,11 +5,10 @@ from django.core.cache import cache
 from requests import get
 import feedparser
 from bs4 import BeautifulSoup
-from datetime import datetime
 
 import dateutil.parser
 
-from capitolzen.meta.notifications import admin_email
+from capitolzen.meta.notifications import admin_email, create_asana_task
 
 from capitolzen.proposals.models import Bill, Legislator, Committee, Event, Wrapper
 from capitolzen.proposals.api.app.serializers import (
@@ -238,8 +237,10 @@ class EventManager(object):
 
         if not committee:
             logger.error("No commitee matching string found")
-            msg = "no committee found for meeeting %s" % entry['link']
-            admin_email.delay(msg)
+            msg = 'Committee Remote name: `%s`' % parts[1].strip()
+            msg += "no committee found for meeeting %s" % entry['link']
+            create_asana_task('missing committee import', msg)
+            admin_email(msg)
             return None
 
         args = {
@@ -257,6 +258,10 @@ class EventManager(object):
                 self.populate_model(entry, args)
             except Exception:
                 logger.error('problem creating `event` model')
+        else:
+            if parts[-1] == 'canceled' and len(events) == 1:
+                events[0].objects.delete()
+
 
     def populate_model(self, entry, args):
         page = get(entry['link'])

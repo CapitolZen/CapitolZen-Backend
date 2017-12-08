@@ -3,7 +3,10 @@ from string import capwords
 from datetime import datetime, timedelta
 from celery import shared_task
 
+from django.conf import settings
+
 from capitolzen.meta.states import AVAILABLE_STATES
+from capitolzen.meta.notifications import create_asana_task
 
 from capitolzen.proposals.managers import (
     BillManager, LegislatorManager, CommitteeManager, EventManager
@@ -11,7 +14,7 @@ from capitolzen.proposals.managers import (
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import User, Action
 
-from capitolzen.proposals.models import Wrapper, Bill, Event
+from capitolzen.proposals.models import Wrapper, Bill, Legislator
 from capitolzen.groups.models import Group
 from capitolzen.organizations.notifications import email_update_bills
 from capitolzen.proposals.utils import (
@@ -65,10 +68,10 @@ def run_organization_bill_updates():
 
         for group in groups:
             wrappers = Wrapper.objects.filter(
-                bill__modified_at__range=[yesterday, today],
+                bill__updated_at__range=[yesterday, today],
                 group=group
             )
-            count = len(wrappers)
+            count = wrappers.count()
             if count:
                 p = inflect.engine()
                 count = p.number_to_words(count)
@@ -77,12 +80,22 @@ def run_organization_bill_updates():
                 message = 'Bills for %s have new action or information.' % (
                     group.title)
                 message = capwords(message)
-                email_update_bills(
-                    message=message,
-                    organization=org,
-                    subject=subject,
-                    bills=output
-                )
+                emails = []
+                for user in group.organization.users.all():
+                    emails.append(user.username)
+                    email_update_bills(
+                        message=message,
+                        subject=subject,
+                        bills=output
+                    )
+                    # for wrapper in wrappers:
+                    #     a = Action.objects.create(
+                    #         user=user,
+                    #         action_object=wrapper,
+                    #         priority=4,
+                    #         title='wrapper:updated'
+                    #     )
+                    #     a.save()
 
 
 @shared_task
@@ -101,9 +114,10 @@ def create_bill_introduction_actions():
                 "state_id": bill.state_id,
                 "state": bill.state,
                 "id": str(bill.id),
-                "sponsor": bill.sponsor.full_name,
+                "sponsor":  bill.sponsor.full_name if bill.sponsor else None,
                 "summary": bill.title,
                 "status": bill.remote_status,
+                "link": "%s/bills/%s" % (settings.APP_FRONTEND, str(bill.id))
             }
             bill_list.append(data)
 
@@ -116,7 +130,7 @@ def create_bill_introduction_actions():
                 message=message,
                 subject=subject,
                 bills=bill_list,
-                to=user
+                to=user.username
             )
 
 
@@ -142,3 +156,26 @@ def ingest_attachment(identifier):
     instance.summary = summarize(instance.content)
     instance.save()
     return True
+
+
+@shared_task
+def clean_missing_sponsors():
+    for bill in Bill.objects.filter(sponsor=None):
+        if bill.history:
+            intro = list(bill.history)[0]
+            if intro['type'] == ['bill:introduced']:
+                if intro['action'].lower() == 'entire membership':
+                    continue
+                pieces = intro['action'].split(' ')
+                fname = pieces[-2].lower().strip()
+                lname = pieces[-1].lower().strip()
+
+                legislator = Legislator.objects.get_by_name_pieces(lname, **{'first_name': fname})
+                if not legislator:
+                    data = "Bill ID: %s | fname: %s | lname %s" % (bill.id, fname, lname)
+                    create_asana_task("History legislator mismatch", data)
+                else:
+                    bill.sponsor = legislator
+                    bill.save()
+        else:
+            create_asana_task("Bill Missing History", bill.id)

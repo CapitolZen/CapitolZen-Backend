@@ -4,7 +4,6 @@ import requests
 
 from django.db import models
 
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.postgres.fields import ArrayField, JSONField
 
 from django.contrib.contenttypes.fields import GenericRelation
@@ -14,7 +13,7 @@ from config.models import AbstractBaseModel
 from model_utils import Choices
 
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
-from capitolzen.meta.notifications import admin_email
+from capitolzen.meta.notifications import create_asana_task
 from capitolzen.proposals.mixins import MixinExternalData
 
 
@@ -94,28 +93,31 @@ class Bill(AbstractBaseModel, MixinExternalData):
 
     def update(self, source):
         for sponsor in source.get('sponsors', []):
-            if sponsor.get('leg_id', False):
-                q = {"remote_id": sponsor['leg_id']}
-            else:
-                parts = sponsor['name'].split(' ', 1)
-                if len(parts) > 1:
-                    q = {"first_name": parts[0], "last_name": parts[1]}
-                else:
-                    q = {"last_name": parts[0]}
-
             try:
-                leg = Legislator.objects.get(**q)
+                legislator = None
+                if sponsor.get('leg_id', False):
+                    q = {"remote_id": sponsor['leg_id']}
+                    legislator = Legislator.objects.get(**q)
+                else:
+                    parts = sponsor['name'].split(' ', 1)
+                    lname = parts[-1].lower().strip()
+                    extras = {}
+                    if len(parts) > 1:
+                        extras['first_name'] = parts[0].lower().strip()
+
+                    legislator = Legislator.objects.get_by_name_pieces(lname, **extras)
+                if not legislator:
+                    raise Exception
+
                 if sponsor['type'] == "primary":
-                    self.sponsor = leg
+                    self.sponsor = legislator
                 else:
                     # Need to prevent duplicate entries
-                    if str(leg.id) not in self.cosponsors:
-                        self.cosponsors.append(str(leg.id))
-
-            except (ObjectDoesNotExist, MultipleObjectsReturned):
-                msg = "id: %s does not match sponsor" % self.id
-                admin_email.delay(msg)
-                continue
+                    if str(legislator.id) not in self.cosponsors:
+                        self.cosponsors.append(str(legislator.id))
+            except Exception:
+                msg = "id: %s does not match sponsor | %s" % (self.id, self.state_id)
+                create_asana_task('Bill Sponsor Not Found', msg)
 
         # So Open states lately isn't reporting primary sponsors...
         if not self.sponsor:
@@ -124,11 +126,11 @@ class Bill(AbstractBaseModel, MixinExternalData):
                 try:
                     self.sponsor = Legislator.objects.get(only_id['leg_id'])
                 except Exception:
-                    msg = "id: %s does not match sponsor" % self.id
-                    admin_email.delay(msg)
+                    msg = "id: %s does not match sponsor | %s" % (self.id, self.state_id)
+                    create_asana_task('Bill Sponsor Not Found', msg)
         else:
-            msg = "id: %s does not match sponsor" % self.id
-            admin_email.delay(msg)
+            msg = "id: %s does not match sponsor | %s" % (self.id, self.state_id)
+            create_asana_task('Bill Sponsor Not Found', msg)
 
         self.type = source.get('type', ['bill'])[0]
 
@@ -175,7 +177,32 @@ class Bill(AbstractBaseModel, MixinExternalData):
         resource_name = "bills"
 
 
+class LegislatorManager(models.Manager):
+    def get_by_name_pieces(self, last_name, **kwargs):
+        queryset = self.get_queryset().filter(last_name__icontains=last_name.lower().strip())
+        if queryset.count() > 1:
+            for key in kwargs:
+                arg = '%s__icontains' % key
+                queryset.filter(**{arg: kwargs[key]})
+                if queryset.count() > 1:
+                    continue
+                elif queryset.count() == 1:
+                    return queryset.first()
+                else:
+                    return False
+            # fuck it -- if we end up here, all hope is lost.
+            if queryset.count() > 1:
+                return queryset.first()
+
+        elif queryset.count() == 1:
+            return queryset.first()
+
+        else:
+            return None
+
+
 class Legislator(AbstractBaseModel, MixinExternalData):
+    objects = LegislatorManager()
     actions = GenericRelation('users.Action', related_query_name="legislator")
 
     # External Data

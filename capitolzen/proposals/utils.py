@@ -1,6 +1,8 @@
 from datetime import datetime
 from pytz import UTC
 
+from django.conf import settings
+
 from capitolzen.document_analysis.summarize import summarize_text
 
 from capitolzen.meta.states import AVAILABLE_STATES
@@ -53,7 +55,8 @@ def normalize_bill_data(wrapper_list, time_format='%m/%d/%Y'):
             "position": w.position,
             "position_detail": w.position_detail,
             "last_action_date": action_time.strftime(time_format),
-            "remote_url": w.bill.remote_url
+            "remote_url": w.bill.remote_url,
+            "link": "%s/bills/%s" % (settings.APP_FRONTEND, str(w.bill.id))
         }
 
         output.append(data)

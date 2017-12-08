@@ -25,11 +25,13 @@
                 </tr>
                 {% for bill in bills %}
                     <tr>
-                      <td style="padding: 0 15px 0 0;">bill.state_id</td>
-                      <td style="padding: 0 15px;">bill.state</td>
-                      <td style="padding: 0 0 0 15px;">bill.sponsor.full_name</td>
-                      <td style="padding: 0 0 0 15px;">bill.status</td>
-                      <td style="padding: 0 0 0 15px;">bill.link</td>
+                      <td style="padding: 0 15px 0 0;">{{bill.state_id}}</td>
+                      <td style="padding: 0 15px;">{{bill.state}}</td>
+                      <td style="padding: 0 0 0 15px;">{{bill.sponsor}}</td>
+                      <td style="padding: 0 0 0 15px;">{{bill.status}}</td>
+                      <td style="padding: 0 0 0 15px;">
+                          <a href="{{bill.link}}">View</a>
+                      </td>
                     </tr>
                 {% endfor %}
             </mj-table>

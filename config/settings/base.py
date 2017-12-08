@@ -435,7 +435,11 @@ CELERY_BEAT_SCHEDULE = {
     },
     'create_intro_actions': {
         'task': 'capitolzen.proposals.tasks.create_bill_introduction_actions',
-        'schedule': crontab(minute=30, hour='5,8')
+        'schedule': crontab(minute=0, hour=9)
+    },
+    'cleanup_bills': {
+        'task': 'capitolzen.proposals.tasks.clean_missing_sponsors',
+        'schedule': crontab(minute=0, hour=23)
     }
 }
 
@@ -528,6 +532,12 @@ STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
 STREAM_API_KEY = env("STREAM_API_KEY", default="")
 STREAM_API_SECRET = env("STREAM_API_SECRET", default="")
 STREAM_FEED_MANAGER_CLASS = 'capitolzen.meta.stream.FeedManager'
+
+# ASANA
+ASANA_PAT = env("ASANA_PAT", default='')
+ASANA_PROJECT = env("ASANA_PROJECT", default="497390564241002")
+ASANA_ENABLE_SYNC = env("ASANA_ENABLE_SYNC", default=True)
+ASANA_WORKSPACE = env("ASANA_WORKSPACE", default="313428278436952")
 
 # Summarizing & URL Blocking
 # -----------------------------------------------------------------------------

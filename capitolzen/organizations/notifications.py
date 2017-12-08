@@ -67,7 +67,7 @@ def email_update_bills(to, subject, message, bills, **extra_context):
 
     send_templated_mail(
         template_name='bill_list',
-        from_email='hello@capitolzen.com',
+        from_email='donald@capitolzen.com',
         recipient_list=to,
         context=context
     )
