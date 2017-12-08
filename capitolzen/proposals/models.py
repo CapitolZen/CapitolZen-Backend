@@ -93,27 +93,31 @@ class Bill(AbstractBaseModel, MixinExternalData):
 
     def update(self, source):
         for sponsor in source.get('sponsors', []):
-            if sponsor.get('leg_id', False):
-                q = {"remote_id": sponsor['leg_id']}
-            else:
-                parts = sponsor['name'].split(' ', 1)
-                lname = parts[-1].lower().strip()
-                extras = {}
-                if len(parts) > 1:
-                    extras['first_name'] = parts[0].lower().strip()
+            try:
+                legislator = None
+                if sponsor.get('leg_id', False):
+                    q = {"remote_id": sponsor['leg_id']}
+                    legislator = Legislator.objects.get(**q)
+                else:
+                    parts = sponsor['name'].split(' ', 1)
+                    lname = parts[-1].lower().strip()
+                    extras = {}
+                    if len(parts) > 1:
+                        extras['first_name'] = parts[0].lower().strip()
 
-                leg = Legislator.objects.get_by_name_pieces(lname, **extras)
-                if not leg:
-                    msg = "id: %s does not match sponsor | %s" % (self.id, self.state_id)
-                    create_asana_task('Bill Sponsor Not Found', msg)
-                    continue
+                    legislator = Legislator.objects.get_by_name_pieces(lname, **extras)
+                if not legislator:
+                    raise Exception
 
                 if sponsor['type'] == "primary":
-                    self.sponsor = leg
+                    self.sponsor = legislator
                 else:
                     # Need to prevent duplicate entries
-                    if str(leg.id) not in self.cosponsors:
-                        self.cosponsors.append(str(leg.id))
+                    if str(legislator.id) not in self.cosponsors:
+                        self.cosponsors.append(str(legislator.id))
+            except Exception:
+                msg = "id: %s does not match sponsor | %s" % (self.id, self.state_id)
+                create_asana_task('Bill Sponsor Not Found', msg)
 
         # So Open states lately isn't reporting primary sponsors...
         if not self.sponsor:
