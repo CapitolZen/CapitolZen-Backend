@@ -68,10 +68,10 @@ def run_organization_bill_updates():
 
         for group in groups:
             wrappers = Wrapper.objects.filter(
-                bill__modified_at__range=[yesterday, today],
+                bill__updated_at__range=[yesterday, today],
                 group=group
             )
-            count = len(wrappers)
+            count = wrappers.count()
             if count:
                 p = inflect.engine()
                 count = p.number_to_words(count)
