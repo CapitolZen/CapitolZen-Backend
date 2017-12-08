@@ -106,6 +106,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
                 if not leg:
                     msg = "id: %s does not match sponsor | %s" % (self.id, self.state_id)
                     create_asana_task('Bill Sponsor Not Found', msg)
+                    continue
 
                 if sponsor['type'] == "primary":
                     self.sponsor = leg
