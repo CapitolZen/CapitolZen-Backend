@@ -115,8 +115,8 @@ def create_bill_introduction_actions():
                 "state": bill.state,
                 "id": str(bill.id),
                 "sponsor":  bill.sponsor.full_name if bill.sponsor else None,
-                "summary": bill.title,
-                "status": bill.remote_status,
+                # In order to not munge more email templates, pass different data
+                "status": bill.title,
                 "link": "%s/bills/%s" % (settings.APP_FRONTEND, str(bill.id))
             }
             bill_list.append(data)
@@ -125,7 +125,7 @@ def create_bill_introduction_actions():
 
             subject = '%s New Bills Have Been Introduced' % (count.title(),)
             message = 'There were %s new bills introduced yesterday. ' \
-                      'Login into your Capitol Zen account to view them all.' % (count.title(),)
+                      '<a href="%s">Login into</a> your Capitol Zen account to view them all.' % (count.title(), settings.APP_FRONTEND)
             email_update_bills(
                 message=message,
                 subject=subject,
