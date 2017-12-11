@@ -18,7 +18,7 @@ from capitolzen.proposals.mixins import MixinExternalData
 
 
 class Bill(AbstractBaseModel, MixinExternalData):
-    actions = GenericRelation('users.Action', related_query_name="legislator")
+    actions = GenericRelation('users.Action', related_query_name="bills")
 
     # External Data
     state = models.TextField(max_length=255, null=True)

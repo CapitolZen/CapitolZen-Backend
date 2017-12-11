@@ -105,23 +105,22 @@ def user_action_defaults(user_id):
         return False
 
     today = datetime.today()
-    yesterday = today - timedelta(days=1)
-    for bill in Bill.objects.filter(created_at__range=[yesterday, today]):
-        a, created = Action.objects.get_or_create(
+    next_week = today + timedelta(days=7)
+    for bill in Bill.objects.filter(created_at__gt=today):
+        a = Action.objects.create(
             user=user,
             action_object=bill,
             title='bill:introduced',
             priority=0
         )
-        if created:
-            a.save()
+        a.save()
 
-    for event in Event.objects.filter(time__gte=datetime.now()):
-        a, created = Action.objects.get_or_create(
+    for event in Event.objects.filter(time__gte=today, time__lt=next_week):
+        print(event.__dict__)
+        a = Action.objects.create(
             user=user,
             action_object=event,
             priority=-1,
             title='committee:meeting'
         )
-        if created:
-            a.save()
+        a.save()
