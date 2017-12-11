@@ -7,6 +7,7 @@ import feedparser
 from bs4 import BeautifulSoup
 
 import dateutil.parser
+from datetime import timedelta
 
 from capitolzen.meta.notifications import admin_email, create_asana_task
 
@@ -264,6 +265,7 @@ class EventManager(object):
 
     def populate_model(self, entry, args):
         page = get(entry['link'])
+
         soup = BeautifulSoup(page.content, 'html.parser')
         table = soup.find('table',  id="frg_committeemeeting_MeetingTable")
         rows = table.find_all('tr')
@@ -274,13 +276,19 @@ class EventManager(object):
         date = rows[3].contents[2].string
         parts = date.split(',')
         date = parts[1].strip()
-        time = rows[4].find_all('td')[1].string.strip().lower().replace('.', '')
+        time = rows[4].find_all('td')[1].string.lower().replace('.', '').strip()
 
-        time.replace('noon', 'pm')
-
+        # Need to add this here to split for these random type of times
+        time_pieces = time.split('or immed')
+        time = time_pieces[0]
+        time = time.replace('noon', 'pm')
         time_string = "%s %s" % (date, time)
         time_object = dateutil.parser.parse(time_string)
-        args['time'] = time_object.replace(tzinfo=self.timezone)
+        aware = time_object.replace(tzinfo=self.timezone)
+
+        # Munge the data for some reason because of the timezone changing
+        time_object = aware - timedelta(minutes=2)
+        args['time'] = time_object
 
         agenda = rows[5].find_all('td')[1]
 
@@ -296,7 +304,6 @@ class EventManager(object):
         if len(bill_list):
             args['attachments'] = [{"billlist": bill_list}]
             self.generate_actions(bill_list)
-
         event = Event.objects.create(**args)
         event.save()
 
