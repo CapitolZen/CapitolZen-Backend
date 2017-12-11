@@ -125,7 +125,7 @@ def create_bill_introduction_actions():
 
             subject = '%s New Bills Have Been Introduced' % (count.title(),)
             message = 'There were %s new bills introduced yesterday. ' \
-                      'Login into your Capitol Zen account to view them all.'
+                      'Login into your Capitol Zen account to view them all.' % (count.title(),)
             email_update_bills(
                 message=message,
                 subject=subject,

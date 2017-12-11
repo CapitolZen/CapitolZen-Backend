@@ -1,8 +1,9 @@
 from django.db.models.signals import post_save
+from django.db import transaction
 
 from django.dispatch import receiver
 
-from capitolzen.proposals.models import Bill
+from capitolzen.proposals.models import Bill, Event
 from capitolzen.users.models import User, Action
 
 
@@ -16,12 +17,16 @@ def create_introduction_actions(sender, **kwargs):
     bill = kwargs.get('instance')
     created = kwargs.get('created')
     if created:
-        for user in User.objects.all():
-            a, created = Action.objects.get_or_create(
-                user=user,
-                action_object=bill,
-                title='bill:introduced',
-                priority=0
-            )
-            if created:
-                a.save()
+        transaction.on_commit(lambda: create_actions(bill))
+
+
+def create_actions(bill):
+    for user in User.objects.all():
+        a = Action.objects.create(
+            user=user,
+            action_object=bill,
+            title='bill:introduced',
+            priority=0
+        )
+
+        a.save()

@@ -262,7 +262,6 @@ class EventManager(object):
             if parts[-1] == 'canceled' and len(events) == 1:
                 events[0].objects.delete()
 
-
     def populate_model(self, entry, args):
         page = get(entry['link'])
         soup = BeautifulSoup(page.content, 'html.parser')

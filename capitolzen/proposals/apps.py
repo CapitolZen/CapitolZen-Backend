@@ -9,4 +9,4 @@ class ProposalsConfig(AppConfig):
     verbose_name = 'Proposals'
 
     def ready(self):
-        import capitolzen.users.signals  # noqa
+        import capitolzen.proposals.signals  # noqa

@@ -4,10 +4,11 @@ from elasticsearch import Elasticsearch, RequestsHttpConnection
 
 from django.db.models import Q
 from django.conf import settings
+from django.http import HttpResponse
 
 from django_filters import rest_framework as filters
 
-from rest_framework.decorators import list_route
+from rest_framework.decorators import list_route, detail_route
 from rest_framework import mixins, status
 from rest_framework.response import Response
 
