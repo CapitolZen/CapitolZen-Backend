@@ -282,12 +282,8 @@ class EventManager(object):
         time_pieces = time.split('or immed')
         time = time_pieces[0]
         time = time.replace('noon', 'pm')
-        time_string = "%s %s" % (date, time)
+        time_string = "%s %s %s" % (date, time, self.timezone)
         time_object = dateutil.parser.parse(time_string)
-        aware = time_object.replace(tzinfo=self.timezone)
-
-        # Munge the data for some reason because of the timezone changing
-        time_object = aware - timedelta(minutes=2)
         args['time'] = time_object
 
         agenda = rows[5].find_all('td')[1]

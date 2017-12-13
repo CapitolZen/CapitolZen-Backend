@@ -19,7 +19,7 @@ mi = StateData(
     lower_chamber='House',
     upper_chamber='Senate',
     committee_rss='http://www.legislature.mi.gov/documents/publications/RssFeeds/comschedule.xml',
-    timezone='America/Detroit',
+    timezone='EST',
     is_active=True
 )
 
