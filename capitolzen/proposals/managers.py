@@ -7,9 +7,8 @@ import feedparser
 from bs4 import BeautifulSoup
 
 import dateutil.parser
-from datetime import timedelta
 
-from capitolzen.meta.notifications import admin_email, create_asana_task
+from capitolzen.meta.notifications import create_asana_task
 
 from capitolzen.proposals.models import Bill, Legislator, Committee, Event, Wrapper
 from capitolzen.proposals.api.app.serializers import (
@@ -240,8 +239,7 @@ class EventManager(object):
             logger.error("No commitee matching string found")
             msg = 'Committee Remote name: `%s`' % parts[1].strip()
             msg += "no committee found for meeeting %s" % entry['link']
-            create_asana_task('missing committee import', msg)
-            admin_email(msg)
+            create_asana_task('Committee:Missing %s' % parts[1].strip(), msg)
             return None
 
         args = {
