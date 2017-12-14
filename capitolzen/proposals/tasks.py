@@ -62,13 +62,13 @@ def spawn_committee_meeting_updates():
 def run_organization_bill_updates():
     organizations = Organization.objects.filter(is_active=True)
     today = datetime.today()
-    yesterday = today - timedelta(days=1)
+
     for org in organizations:
         groups = Group.objects.filter(organization=org, active=True)
 
         for group in groups:
             wrappers = Wrapper.objects.filter(
-                bill__updated_at__range=[yesterday, today],
+                bill__updated_at__gt=today,
                 group=group
             )
             count = wrappers.count()
@@ -101,8 +101,8 @@ def run_organization_bill_updates():
 @shared_task
 def create_bill_introduction_actions():
     today = datetime.today()
-    yesterday = today - timedelta(days=1)
-    bills = Bill.objects.filter(created_at__range=[yesterday, today])
+
+    bills = Bill.objects.filter(created_at__gt=today)
     count = len(bills)
     if count:
         p = inflect.engine()
