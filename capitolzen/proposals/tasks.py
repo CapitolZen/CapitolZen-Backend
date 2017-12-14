@@ -62,7 +62,7 @@ def spawn_committee_meeting_updates():
 def run_organization_bill_updates():
     organizations = Organization.objects.filter(is_active=True)
     today = datetime.today()
- 
+
     for org in organizations:
         groups = Group.objects.filter(organization=org, active=True)
 
@@ -100,7 +100,6 @@ def run_organization_bill_updates():
 
 @shared_task
 def create_bill_introduction_actions():
-    print('sup2')
     today = datetime.today()
 
     bills = Bill.objects.filter(created_at__gt=today)
