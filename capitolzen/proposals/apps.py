@@ -10,4 +10,4 @@ class ProposalsConfig(AppConfig):
 
     def ready(self):
         import capitolzen.proposals.signals  # noqa
-        
+
