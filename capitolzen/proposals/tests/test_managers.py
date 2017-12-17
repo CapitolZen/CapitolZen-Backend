@@ -42,6 +42,9 @@ class TestBillManager(TestCase):
             [bill.delete() for bill in s.execute()]
         except NotFoundError:
             pass
+        Graph(**settings.GRAPH_DATABASE).data(
+            "MATCH (n) DETACH DELETE n"
+        )
 
     @mock.patch('capitolzen.proposals.managers.BillManager._get_remote_list')
     def test_get_remote_list(self, m):
@@ -99,8 +102,18 @@ class TestBillManager(TestCase):
             'MATCH (bill:Bill {remote_id: $remote_id}) RETURN bill',
             parameters={"remote_id": bill_id}
         )
-        self.assertEqual(response[0]['title'], bill.title)
-        self.assertEqual(response[0]['uuid'], bill.id)
+        self.assertEqual(response[0]['bill']['title'], bill.title)
+        self.assertEqual(response[0]['bill']['uuid'], str(bill.id))
+
+        response = Graph(**settings.GRAPH_DATABASE).data(
+            'MATCH (bill:Bill {remote_id: $remote_id})<-[r]-(leg)'
+            ' RETURN bill, leg',
+            parameters={"remote_id": bill_id}
+        )
+        self.assertEqual(response[0]['leg']['remote_id'], "MIL000275")
+        self.assertEqual(response[0]['leg']['last_name'], "Greig")
+        self.assertEqual(response[1]['leg']['remote_id'], "MIL000236")
+        self.assertEqual(response[1]['leg']['last_name'], "Lauwers")
 
     @requests_mock.mock(real_http=True)
     def test_get_remote_detail_updates(self, m):
@@ -162,8 +175,16 @@ class TestBillManager(TestCase):
             'MATCH (bill:Bill {remote_id: $remote_id}) RETURN bill',
             parameters={"remote_id": bill_id}
         )
-        self.assertEqual(response[0]['title'], bill.title)
-        self.assertEqual(response[0]['uuid'], bill.id)
+        self.assertEqual(response[0]['bill']['title'], bill.title)
+        self.assertEqual(response[0]['bill']['uuid'], str(bill.id))
+
+        response = Graph(**settings.GRAPH_DATABASE).data(
+            'MATCH (bill:Bill {remote_id: $remote_id})<-[r]-(leg)'
+            ' RETURN bill, leg',
+            parameters={"remote_id": bill_id}
+        )
+        self.assertEqual(response[0]['leg']['remote_id'], "ALL000010")
+        self.assertEqual(response[0]['leg']['last_name'], "Dial")
 
     @requests_mock.mock()
     def test_get_remote_detail_no_data(self, m):

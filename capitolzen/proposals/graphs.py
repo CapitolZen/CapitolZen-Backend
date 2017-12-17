@@ -25,23 +25,20 @@ class BillGraph(BasicGraph):
     def merge(self):
         query = """
             MERGE (bill:Bill {uuid: $uuid})
-            ON CREATE SET bill.summary = $summary, bill.created = $created, 
+            ON CREATE SET bill.created = $created, 
                 bill.modified = $modified, bill.state_id = $state_id, 
                 bill.remote_id = $remote_id, bill.title = $title
-                bill.raw_text = $raw_text
-            ON MATCH SET bill.modified = $modified, bill.summary = $summary,
-                bill.title = $title, $bill.raw_text = $raw_text 
+            ON MATCH SET bill.modified = $modified,
+                bill.title = $title
             RETURN bill
             """
         self.graph.data(query, parameters={
-            "uuid": self.instance.id,
-            "summary": self.instance.summary,
-            "created": self.instance.created,
-            "modified": self.instance.modified,
+            "uuid": str(self.instance.id),
+            "created": self.instance.created.isoformat(),
+            "modified": self.instance.modified.isoformat(),
             "state_id": self.instance.state_id,
             "remote_id": self.instance.remote_id,
             "title": self.instance.title,
-            "raw_text": self.instance.bill_raw_text
         })
 
     def link_to_sponsors(self):
@@ -62,7 +59,7 @@ class BillGraph(BasicGraph):
                 # Now that we know that they exist link them to the bill
                 self.graph.data(query, parameters={
                     "remote_id": sponsor.get('leg_id'),
-                    "bill_uuid": self.instance.id,
+                    "bill_uuid": str(self.instance.id),
                     "type": sponsor.get('type')
                 })
 
@@ -100,9 +97,9 @@ class LegislatorGraph(BasicGraph):
         RETURN legislator
         """
         self.graph.data(query, parameters={
-            "uuid": self.instance.id,  # index
-            "created": self.instance.created,
-            "modified": self.instance.modified,
+            "uuid": str(self.instance.id),  # index
+            "created": self.instance.created.isoformat(),
+            "modified": self.instance.modified.isoformat(),
             "remote_id": self.instance.remote_id,  # index
             "state": self.instance.state,
             "active": self.instance.active,
@@ -112,6 +109,6 @@ class LegislatorGraph(BasicGraph):
             "email": self.instance.email,
             "first_name": self.instance.first_name,
             "last_name": self.instance.last_name,
-            "updated_at": self.instance.updated_at,
-            "created_at": self.instance.created_at
+            "updated_at": self.instance.updated_at.isoformat(),
+            "created_at": self.instance.created_at.isoformat()
         })
