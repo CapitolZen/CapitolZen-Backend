@@ -494,7 +494,7 @@ LOGGING = {
 
 # Neo4j GRAPH DATABASE
 GRAPH_DATABASE = {
-    "username": env('GRAPH_USERNAME', default="neo4j"),
+    "user": env('GRAPH_USERNAME', default="neo4j"),
     "password": env('GRAPH_PASSWORD', default="neo4jpw"),
     "host": env('GRAPH_HOST', default='neo4j'),
     "secure": env.bool("GRAPH_SECURE", default=False),
