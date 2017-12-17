@@ -10,7 +10,9 @@ import dateutil.parser
 
 from capitolzen.meta.notifications import create_asana_task
 
-from capitolzen.proposals.models import Bill, Legislator, Committee, Event, Wrapper
+from capitolzen.proposals.models import (
+    Bill, Legislator, Committee, Event, Wrapper
+)
 from capitolzen.proposals.api.app.serializers import (
     BillSerializer, LegislatorSerializer, CommitteeSerializer
 )
@@ -192,6 +194,7 @@ class LegislatorManager(CongressionalManager):
         )
 
     def update(self, local_id, remote_id, resource_info):
+        from capitolzen.proposals.graphs import LegislatorGraph
         source = self._get_remote_detail(remote_id)
         try:
             instance = Legislator.objects.get(remote_id=remote_id)
@@ -203,6 +206,7 @@ class LegislatorManager(CongressionalManager):
         })
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
+        LegislatorGraph(identifier=instance.id).run()
         return instance
 
     def run(self):

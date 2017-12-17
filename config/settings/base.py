@@ -492,6 +492,14 @@ LOGGING = {
 # CONNECTIONS
 # ------------------------------------------------------------------------------
 
+# Neo4j GRAPH DATABASE
+GRAPH_DATABASE = {
+    "username": env('GRAPH_USERNAME', default="neo4j"),
+    "password": env('GRAPH_PASSWORD', default="neo4jpw"),
+    "host": env('GRAPH_HOST', default='localhost'),
+    "secure": env.bool("GRAPH_SECURE", default=False)
+}
+
 # AWS
 AWS_ACCESS_ID = env("AWS_ACCESSID", default='')
 AWS_SECRET_KEY = env("AWS_SECRETKEY", default='')
