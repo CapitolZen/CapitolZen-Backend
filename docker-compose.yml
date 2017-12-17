@@ -47,6 +47,7 @@ services:
       - postgres
       - mailhog
       - elasticsearch
+      - neo4j
     environment:
       - POSTGRES_USER=capitolzen
       - POSTGRES_PASSWORD=capitolzen
@@ -59,6 +60,7 @@ services:
       - postgres
       - redis
       - elasticsearch
+      - neo4j
 
   #
   # Local Development utility for running commands.
@@ -71,6 +73,7 @@ services:
     depends_on:
       - postgres
       - elasticsearch
+      - neo4j
     environment:
       - POSTGRES_USER=capitolzen
       - POSTGRES_PASSWORD=capitolzen
@@ -80,6 +83,7 @@ services:
       - postgres
       - redis
       - elasticsearch
+      - neo4j
 
   #
   # Workers
@@ -95,10 +99,12 @@ services:
      - postgres
      - redis
      - elasticsearch
+     - neo4j
     links:
       - postgres
       - redis
       - elasticsearch
+      - neo4j
     command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch:9200", "--", celery, -A, capitolzen.tasks, worker, --workdir=/app, --concurrency=4,  -l, INFO]
     volumes:
       - .:/app
@@ -117,10 +123,12 @@ services:
       - postgres
       - redis
       - elasticsearch
+      - neo4j
     links:
       - postgres
       - redis
       - elasticsearch
+      - neo4j
     command: ["./utilities/wait-for-it.sh -t 90", "elasticsearch:9200", "--", celery, -A, capitolzen.tasks, beat, --workdir=/app, -l, INFO]
     volumes:
       - .:/app
