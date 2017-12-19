@@ -2,11 +2,20 @@ from django_filters import rest_framework as filters
 from psycopg2.extras import DateTimeTZRange
 
 __all__ = ['UUIDInFilter',
+           'IntInFilter',
            'DateTimeRangeContainsFilter',
            'DateTimeRangeOverlapFilter']
 
 
 class UUIDInFilter(filters.BaseInFilter, filters.UUIDFilter):
+    """
+    Mixing an In Filter + uuid filter will validate uuid formats
+    and allow for multiple values to be filtered on.
+    """
+    pass
+
+
+class IntInFilter(filters.BaseInFilter, filters.NumberFilter):
     """
     Mixing an In Filter + uuid filter will validate uuid formats
     and allow for multiple values to be filtered on.
