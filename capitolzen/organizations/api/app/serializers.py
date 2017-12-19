@@ -32,6 +32,7 @@ class OrganizationSerializer(BaseInternalModelSerializer):
             'stripe_payment_tokens',
             'plan_name',
             'avatar',
+            'available_states',
             'user_is_member'
         )
 
@@ -84,5 +85,6 @@ class OrganizationInviteSerializer(BaseInternalModelSerializer):
             'organization',
             'organization_name',
             'email',
-            'status'
+            'status',
+
         )
