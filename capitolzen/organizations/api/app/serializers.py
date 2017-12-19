@@ -46,7 +46,7 @@ class OrganizationInviteSerializer(BaseInternalModelSerializer):
 
     organization = ResourceRelatedField(
         many=False,
-        queryset=Organization.objects
+        read_only=True,
     )
 
     def validate_username(self, value):
@@ -61,6 +61,18 @@ class OrganizationInviteSerializer(BaseInternalModelSerializer):
             pass
 
         return value
+
+    def validate(self, attrs):
+        """
+        We don't allow the frontend to dictate the invite's organization.
+        :param attrs:
+        :return:
+        """
+        if not self.context.get('request').organization:
+            raise serializers.ValidationError(detail="Cannot create invites without an organization")
+
+        attrs['organization'] = self.context.get('request').organization
+        return attrs
 
     class Meta:
         model = OrganizationInvite
