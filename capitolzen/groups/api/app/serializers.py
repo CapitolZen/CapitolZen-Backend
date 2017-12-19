@@ -3,6 +3,7 @@ from rest_framework_json_api import serializers
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import User
+from django.contrib.auth import get_user_model
 from capitolzen.groups.models import Group, Report, Comment, File
 
 
@@ -13,6 +14,11 @@ class GroupSerializer(BaseInternalModelSerializer):
         required=False
     )
     avatar = RemoteFileField(required=False)
+
+    assigned_to = ResourceRelatedField(
+        queryset=get_user_model().objects,
+        many=True
+    )
 
     class Meta:
         model = Group
@@ -27,6 +33,7 @@ class GroupSerializer(BaseInternalModelSerializer):
             'user_list',
             'created',
             'avatar',
+            'assigned_to',
         )
         read_only_fields = ('id', 'created')
 

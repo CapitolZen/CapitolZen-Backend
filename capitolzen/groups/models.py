@@ -12,6 +12,7 @@ from model_utils import Choices
 
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import User
+from django.contrib.auth import get_user_model
 
 from config.models import AbstractBaseModel
 
@@ -32,23 +33,26 @@ def avatar_directory_path(instance, filename):
 class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     title = models.CharField(blank=False, max_length=225)
     description = models.TextField(blank=True, null=True)
-    contacts = JSONField(blank=True, null=True)
-    avatar = models.FileField(
-        blank=True, null=True, max_length=255, upload_to=avatar_directory_path
-    )
-    attachments = JSONField(blank=True, null=True)
-    saved_filters = JSONField(default=dict)
     active = models.BooleanField(default=True)
-    group_label = models.CharField(default="Client", max_length=255)
-    user_list = ArrayField(
-        models.TextField(blank=True, null=True),
-        default=list,
-    )
-
     organization = models.ForeignKey(
         'organizations.Organization',
         on_delete=models.CASCADE,
     )
+    avatar = models.FileField(
+        blank=True, null=True, max_length=255, upload_to=avatar_directory_path
+    )
+
+    contacts = JSONField(blank=True, null=True)
+    attachments = JSONField(blank=True, null=True)
+    saved_filters = JSONField(default=dict)
+    group_label = models.CharField(default="Client", max_length=255)
+
+    # "Assigned To"
+    user_list = ArrayField(
+        models.TextField(blank=True, null=True),
+        default=list,
+    )
+    assigned_to = models.ManyToManyField(get_user_model())
 
     class JSONAPIMeta:
         resource_name = "groups"
@@ -62,7 +66,7 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         return self.title
 
 
-def report_diretory_path(instance, filename):
+def report_directory_path(instance, filename):
     """
     :param instance:
     :param filename:
