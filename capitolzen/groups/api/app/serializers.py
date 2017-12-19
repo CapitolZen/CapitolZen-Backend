@@ -17,7 +17,8 @@ class GroupSerializer(BaseInternalModelSerializer):
 
     assigned_to = ResourceRelatedField(
         queryset=get_user_model().objects,
-        many=True
+        many=True,
+        required=False,
     )
 
     class Meta:

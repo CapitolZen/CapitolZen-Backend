@@ -32,7 +32,7 @@ class GroupFilter(OrganizationFilterSet):
     organization = filters.CharFilter(
         name="organization",
         label="Organization",
-        help_text="Filter Groups based on Organziation"
+        help_text="Filter Groups based on Organization"
     )
 
     active = filters.BooleanFilter(
