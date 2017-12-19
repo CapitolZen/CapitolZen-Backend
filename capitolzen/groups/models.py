@@ -47,11 +47,6 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     saved_filters = JSONField(default=dict)
     group_label = models.CharField(default="Client", max_length=255)
 
-    # "Assigned To"
-    user_list = ArrayField(
-        models.TextField(blank=True, null=True),
-        default=list,
-    )
     assigned_to = models.ManyToManyField(get_user_model())
 
     class JSONAPIMeta:
