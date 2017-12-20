@@ -140,13 +140,6 @@ class ReportViewSet(OwnerBasedViewSet):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
     filter_class = ReportFilter
-    filter_fields = (
-        'organization',
-        'group',
-        'status',
-        'title',
-        'user'
-    )
 
     # prefetch_for_includes = {
     #     '__all__': [],

@@ -182,6 +182,12 @@ class EventSerializer(BaseInternalModelSerializer):
 
 
 class WrapperSerializer(BaseInternalModelSerializer):
+    included_serializers = {
+        'bill': BillSerializer,
+        'bill.sponsor': LegislatorSerializer,
+    }
+
+
     bill = ResourceRelatedField(many=False, queryset=Bill.objects, required=False, allow_null=True)
     organization = ResourceRelatedField(
         many=False, queryset=Organization.objects
@@ -201,6 +207,9 @@ class WrapperSerializer(BaseInternalModelSerializer):
             'files',
             'metadata'
         )
+
+    class JSONAPIMeta:
+        included_resources = ['bill', 'bill.sponsor']
 
     def create(self, validated_data):
         bill = validated_data.get('bill')
