@@ -2,7 +2,9 @@ from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework_json_api import serializers
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
 from capitolzen.organizations.models import Organization
+from capitolzen.organizations.api.app.serializers import OrganizationSerializer
 from capitolzen.users.models import User
+from capitolzen.users.api.app.serializers import UserSerializer
 from django.contrib.auth import get_user_model
 from capitolzen.groups.models import Group, Report, Comment, File
 
@@ -39,6 +41,12 @@ class GroupSerializer(BaseInternalModelSerializer):
 
 
 class ReportSerializer(BaseInternalModelSerializer):
+    included_serializers = {
+        'user': UserSerializer,
+        'organization': OrganizationSerializer,
+        'group': GroupSerializer,
+    }
+
     user = ResourceRelatedField(
         many=False,
         queryset=User.objects
@@ -70,6 +78,9 @@ class ReportSerializer(BaseInternalModelSerializer):
             'user',
             'preferences'
         )
+
+    # class JSONAPIMeta:
+    #    included_resources = ['user', 'organization', 'group']
 
 
 class CommentSerializer(BaseInternalModelSerializer):
