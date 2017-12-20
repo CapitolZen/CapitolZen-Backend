@@ -13,73 +13,6 @@ from capitolzen.groups.models import Group
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee, Event
 
 
-class BillSerializer(BaseModelSerializer):
-
-    current_committee = ResourceRelatedField(
-        many=False,
-        queryset=Legislator.objects,
-        required=False
-    )
-
-    class Meta:
-        model = Bill
-        fields = (
-            'state',
-            'state_id',
-            'type',
-            'session',
-            'chamber',
-            'remote_id',
-            'remote_status',
-            'history',
-            'current_committee',
-            'sponsor',
-            'sponsors',
-            'title',
-            'categories',
-            'remote_url',
-            'affected_section',
-            'sources',
-            'action_dates',
-            'documents',
-            'cosponsors',
-            'votes',
-            'last_action_date',
-            'companions',
-            'bill_versions',
-            'introduced_date',
-            'created_at',
-            'updated_at'
-        )
-
-    def create(self, validated_data):
-        from capitolzen.proposals.tasks import ingest_attachment
-        remote_id = validated_data.pop('remote_id')
-        if validated_data.get('state'):
-            validated_data['state'] = validated_data.get('state').upper()
-        instance, _ = Bill.objects.get_or_create(
-            remote_id=remote_id,
-            defaults={
-                **validated_data
-            }
-        )
-        instance = instance.update(validated_data)
-        transaction.on_commit(
-            lambda: ingest_attachment.apply_async(kwargs={
-                "identifier": str(instance.pk)
-            }))
-        return instance
-
-    def update(self, instance, validated_data):
-        from capitolzen.proposals.tasks import ingest_attachment
-        instance = instance.update(validated_data)
-        transaction.on_commit(
-            lambda: ingest_attachment.apply_async(kwargs={
-                "identifier": str(instance.pk)
-            }))
-        return instance
-
-
 class LegislatorSerializer(BaseModelSerializer):
     class Meta:
         model = Legislator
@@ -118,6 +51,80 @@ class LegislatorSerializer(BaseModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+
+
+class BillSerializer(BaseModelSerializer):
+    included_serializers = {
+        'sponsor': LegislatorSerializer,
+    }
+
+    current_committee = ResourceRelatedField(
+        many=False,
+        queryset=Legislator.objects,
+        required=False
+    )
+
+    class Meta:
+        model = Bill
+        fields = (
+            'state',
+            'state_id',
+            'type',
+            'session',
+            'chamber',
+            'remote_id',
+            'remote_status',
+            'history',
+            'current_committee',
+            'sponsor',
+            'sponsors',
+            'title',
+            'categories',
+            'remote_url',
+            'affected_section',
+            'sources',
+            'action_dates',
+            'documents',
+            'cosponsors',
+            'votes',
+            'last_action_date',
+            'companions',
+            'bill_versions',
+            'introduced_date',
+            'created_at',
+            'updated_at'
+        )
+
+    class JSONAPIMeta:
+        included_resources = ['sponsor']
+
+    def create(self, validated_data):
+        from capitolzen.proposals.tasks import ingest_attachment
+        remote_id = validated_data.pop('remote_id')
+        if validated_data.get('state'):
+            validated_data['state'] = validated_data.get('state').upper()
+        instance, _ = Bill.objects.get_or_create(
+            remote_id=remote_id,
+            defaults={
+                **validated_data
+            }
+        )
+        instance = instance.update(validated_data)
+        transaction.on_commit(
+            lambda: ingest_attachment.apply_async(kwargs={
+                "identifier": str(instance.pk)
+            }))
+        return instance
+
+    def update(self, instance, validated_data):
+        from capitolzen.proposals.tasks import ingest_attachment
+        instance = instance.update(validated_data)
+        transaction.on_commit(
+            lambda: ingest_attachment.apply_async(kwargs={
+                "identifier": str(instance.pk)
+            }))
+        return instance
+
 
 
 class CommitteeSerializer(BaseModelSerializer):

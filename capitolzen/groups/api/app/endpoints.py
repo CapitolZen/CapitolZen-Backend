@@ -148,6 +148,10 @@ class ReportViewSet(OwnerBasedViewSet):
         'user'
     )
 
+    # prefetch_for_includes = {
+    #     '__all__': [],
+    # }
+
     def perform_create(self, serializer):
         serializer.save()
         report = serializer.instance
