@@ -13,7 +13,50 @@ from capitolzen.groups.models import Group
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee, Event
 
 
+class LegislatorSerializer(BaseModelSerializer):
+    class Meta:
+        model = Legislator
+        fields = (
+            'remote_id',
+            'state',
+            'active',
+            'chamber',
+            'party',
+            'district',
+            'email',
+            'url',
+            'photo_url',
+            'first_name',
+            'middle_name',
+            'last_name',
+            'suffixes',
+            'full_name',
+            'created_at',
+            'updated_at'
+        )
+
+    def create(self, validated_data):
+        remote_id = validated_data.pop('remote_id')
+        instance, _ = Legislator.objects.get_or_create(
+            remote_id=remote_id,
+            defaults={
+                **validated_data
+            }
+        )
+
+        return instance
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
 class BillSerializer(BaseModelSerializer):
+    included_serializers = {
+        'sponsor': LegislatorSerializer,
+    }
 
     current_committee = ResourceRelatedField(
         many=False,
@@ -53,6 +96,9 @@ class BillSerializer(BaseModelSerializer):
             'bill_text_analysis'
         )
 
+    class JSONAPIMeta:
+        included_resources = ['sponsor']
+
     def create(self, validated_data):
         from capitolzen.proposals.tasks import ingest_attachment
         remote_id = validated_data.pop('remote_id')
@@ -80,45 +126,6 @@ class BillSerializer(BaseModelSerializer):
             }))
         return instance
 
-
-class LegislatorSerializer(BaseModelSerializer):
-    class Meta:
-        model = Legislator
-        fields = (
-            'remote_id',
-            'state',
-            'active',
-            'chamber',
-            'party',
-            'district',
-            'email',
-            'url',
-            'photo_url',
-            'first_name',
-            'middle_name',
-            'last_name',
-            'suffixes',
-            'full_name',
-            'created_at',
-            'updated_at'
-        )
-
-    def create(self, validated_data):
-        remote_id = validated_data.pop('remote_id')
-        instance, _ = Legislator.objects.get_or_create(
-            remote_id=remote_id,
-            defaults={
-                **validated_data
-            }
-        )
-
-        return instance
-
-    def update(self, instance, validated_data):
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        return instance
 
 
 class CommitteeSerializer(BaseModelSerializer):
@@ -176,6 +183,12 @@ class EventSerializer(BaseInternalModelSerializer):
 
 
 class WrapperSerializer(BaseInternalModelSerializer):
+    included_serializers = {
+        'bill': BillSerializer,
+        'bill.sponsor': LegislatorSerializer,
+    }
+
+
     bill = ResourceRelatedField(many=False, queryset=Bill.objects, required=False, allow_null=True)
     organization = ResourceRelatedField(
         many=False, queryset=Organization.objects
@@ -195,6 +208,9 @@ class WrapperSerializer(BaseInternalModelSerializer):
             'files',
             'metadata'
         )
+
+    class JSONAPIMeta:
+        included_resources = ['bill', 'bill.sponsor']
 
     def create(self, validated_data):
         bill = validated_data.get('bill')
