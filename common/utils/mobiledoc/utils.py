@@ -1,23 +1,24 @@
-from json import dump, load
+
 
 class MobileDoc(object):
-    version: "0.3.1"
-    markups: []
-    atoms: []
-    cards: []
-    sections: []
+
+    def __init__(self):
+        self.version = "0.3.1"
+        self.markups = []
+        self.atoms = []
+        self.cards = []
+        self.sections = []
 
     @property
-    def json(self):
+    def data(self):
         data = {
             'version': self.version,
-            'atoms': self.atom,
+            'atoms': self.atoms,
             'markups': self.markups,
             'cards': self.cards,
             'sections': self.sections
         }
-
-        return dump(data)
+        return data
 
     def add_p(self, text):
         wrapper = [
@@ -25,5 +26,4 @@ class MobileDoc(object):
                 [0, [], 0, text]
             ]
         ]
-
         self.sections.append(wrapper)
