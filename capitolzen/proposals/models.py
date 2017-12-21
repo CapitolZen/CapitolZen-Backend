@@ -317,7 +317,7 @@ class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         null=True
     )
 
-    position = models.CharField(blank=True, max_length=255)
+    position = models.CharField(blank=True, max_length=255, default='neutral')
     position_detail = models.TextField(blank=True, null=True)
     notes = JSONField(blank=True, default=list)
     starred = models.BooleanField(default=False)

@@ -498,6 +498,7 @@ AWS_SECRET_KEY = env("AWS_SECRETKEY", default='')
 AWS_REGION = env("AWS_REGION", default='us-east-1')
 AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
 AWS_TEMP_BUCKET_NAME = env("AWS_TEMP_BUCKET_NAME", default='')
+AWS_CUSTOMER_IMPORT_BUCKET_NAME = env("AWS_CUSTOMER_IMPORT_BUCKET", default='cz-customer-import')
 INDEX_LAMBDA = env(
     "capitolzen_search_bills", default="capitolzen_search_bills")
 
