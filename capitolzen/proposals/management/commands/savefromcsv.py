@@ -75,7 +75,6 @@ class Command(BaseCommand):
                             wrapper.notes.append(mobiledoc)
 
                         wrapper.save()
-                        print(wrapper.__dict__)
                 except Exception:
                     self.stdout.write(self.style.ERROR('error finding %s' % row[0]))
                     continue
