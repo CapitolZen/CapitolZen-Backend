@@ -75,8 +75,10 @@ class Command(BaseCommand):
                             wrapper.notes.append(mobiledoc)
 
                         wrapper.save()
+                    else:
+                        self.stdout.write(self.style.NOTICE('wrapper created for %s') % state_id)
                 except Exception:
-                    self.stdout.write(self.style.ERROR('error finding %s' % row[0]))
+                    self.stdout.write(self.style.WARNING('error finding %s' % row[0]))
                     continue
 
         except Exception:
