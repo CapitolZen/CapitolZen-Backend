@@ -92,7 +92,8 @@ class BillSerializer(BaseModelSerializer):
             'bill_versions',
             'introduced_date',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'bill_text_analysis'
         )
 
     class JSONAPIMeta:
