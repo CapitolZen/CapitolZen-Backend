@@ -67,11 +67,6 @@ class UserSerializer(BaseInternalModelSerializer):
 
         return None
 
-    def validate(self, attrs):
-        from pprint import pprint
-        pprint(attrs)
-        return attrs
-
     class Meta:
         model = User
         fields = (
