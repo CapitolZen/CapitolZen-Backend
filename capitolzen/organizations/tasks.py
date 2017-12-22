@@ -7,9 +7,9 @@ from stripe.error import StripeError
 from capitolzen.users.utils import get_intercom_client
 from capitolzen.organizations.models import Organization
 from capitolzen.organizations.utils import get_stripe_client
-from logging import getLogger
 
-logger = getLogger('app')
+from celery.utils.log import get_task_logger
+logger = get_task_logger(__name__)
 
 
 @shared_task()
@@ -62,7 +62,7 @@ def intercom_manage_organization(organization_id, operation):
         intercom.companies.save(intercom_company)
         logger.debug(" -- INTERCOM ORG SYNC - %s - %s" % (operation, intercom_company.id))
 
-        return intercom_company.id
+        return {'op': 'create', 'id': intercom_company.id}
 
     def _update():
         try:
@@ -71,7 +71,7 @@ def intercom_manage_organization(organization_id, operation):
             intercom_company = _populate_intercom_company(intercom_company)
             intercom.companies.save(intercom_company)
             logger.debug(" -- INTERCOM ORG SYNC - %s - %s" % (operation, intercom_company.id))
-            return intercom_company.id
+            return {'op': 'update', 'id': intercom_company.id}
         except ResourceNotFound:
             _create()
 
@@ -81,7 +81,7 @@ def intercom_manage_organization(organization_id, operation):
                 company_id=str(organization_id))
             intercom.companies.delete(intercom_company)
             logger.debug(" -- INTERCOM ORG SYNC - %s - %s" % (operation, intercom_company.id))
-            return intercom_company.id
+            return {'op': 'delete', 'id': intercom_company.id}
         except ResourceNotFound:
             pass
 
