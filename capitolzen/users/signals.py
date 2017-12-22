@@ -11,7 +11,9 @@ from capitolzen.users.tasks import (
     intercom_manage_user,
     user_action_defaults
 )
+from logging import getLogger
 
+logger = getLogger('app')
 
 ################################################################################
 # INTERCOM
@@ -28,6 +30,9 @@ def intercom_update_user(sender, **kwargs):
     operation = 'create' if created else 'update'
 
     if settings.INTERCOM_ENABLE_SYNC:
+
+        logger.debug("INTERCOM USER SYNC - %s - %s" % (operation, user.username))
+
         transaction.on_commit(
             lambda: intercom_manage_user.apply_async(kwargs={
                 'user_id': str(user.id),
@@ -47,6 +52,9 @@ def intercom_delete_user(sender, **kwargs):
     """
     if settings.INTERCOM_ENABLE_SYNC:
         user = kwargs.get('instance')
+
+        logger.debug("INTERCOM USER SYNC - %s - %s" % ('delete', user.username))
+
         transaction.on_commit(lambda: intercom_manage_user.apply_async(kwargs={
             'user_id': str(user.id),
             'operation': 'delete'
@@ -68,6 +76,9 @@ def user_removed_from_organization(sender, **kwargs):
     """
     if settings.INTERCOM_ENABLE_SYNC:
         user = kwargs.get('user')
+
+        logger.debug("INTERCOM USER SYNC - %s - %s" % ('organizations', user.username))
+
         transaction.on_commit(
             lambda: intercom_manage_user_companies.apply_async(kwargs={
                 "user_id": str(user.id),

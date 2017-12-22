@@ -7,6 +7,9 @@ from stripe.error import StripeError
 from capitolzen.users.utils import get_intercom_client
 from capitolzen.organizations.models import Organization
 from capitolzen.organizations.utils import get_stripe_client
+from logging import getLogger
+
+logger = getLogger('app')
 
 
 @shared_task()
@@ -57,6 +60,8 @@ def intercom_manage_organization(organization_id, operation):
             remote_created_at=organization.created.timestamp())
         intercom_company = _populate_intercom_company(intercom_company)
         intercom.companies.save(intercom_company)
+        logger.debug(" -- INTERCOM ORG SYNC - %s - %s" % (operation, intercom_company.id))
+
         return intercom_company.id
 
     def _update():
@@ -65,6 +70,7 @@ def intercom_manage_organization(organization_id, operation):
                 company_id=str(organization.id))
             intercom_company = _populate_intercom_company(intercom_company)
             intercom.companies.save(intercom_company)
+            logger.debug(" -- INTERCOM ORG SYNC - %s - %s" % (operation, intercom_company.id))
             return intercom_company.id
         except ResourceNotFound:
             _create()
@@ -74,6 +80,7 @@ def intercom_manage_organization(organization_id, operation):
             intercom_company = intercom.companies.find(
                 company_id=str(organization_id))
             intercom.companies.delete(intercom_company)
+            logger.debug(" -- INTERCOM ORG SYNC - %s - %s" % (operation, intercom_company.id))
             return intercom_company.id
         except ResourceNotFound:
             pass

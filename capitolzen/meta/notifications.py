@@ -9,7 +9,7 @@ from django.conf import settings
 from templated_email import send_templated_mail
 
 
-logger = getLogger('app_logger')
+logger = getLogger('app')
 
 
 @shared_task
