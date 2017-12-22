@@ -94,4 +94,4 @@ def set_user_action_defaults(sender, **kwargs):
     :return:
     """
     user = kwargs.get('instance')
-    user_action_defaults.str(user.id)
+    user_action_defaults(str(user.id))
