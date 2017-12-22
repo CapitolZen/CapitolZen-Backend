@@ -484,6 +484,10 @@ LOGGING = {
             'handlers': ['console'],
             'level': env("REQUEST_LOG_LEVEL", default='ERROR'),
         },
+        'intercom.request': {
+            'handlers': ['console'],
+            'level': env("REQUEST_LOG_LEVEL", default='ERROR'),
+        },
         'django.db': {
             'handlers': ['console'],
             'level': env("DB_LOG_LEVEL", default='ERROR'),
