@@ -1,35 +1,63 @@
 <mjml>
+
+  <mj-head>
+    <mj-title>Welcome to Capitol Zen</mj-title>
+    <mj-font name="Montserrat" href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500" />
+    <mj-attributes>
+      <mj-all font-family="Montserrat, Helvetica, Arial, sans-serif" />
+      <mj-text font-weight="400" font-size="16" color="#000000" line-height="24px" />
+      <mj-section padding="0" />
+    </mj-attributes>
+  </mj-head>
+
   <mj-body>
-    <mj-container>
-      <mj-include path="./partials/header" /> <!-- or 'header.mjml' -->
+    <mj-container background-color="#F5F5F5">
 
+      <mj-include path="./partials/header" />
+      <!-- or 'header.mjml' -->
 
-      <!-- Image Header -->
-      <mj-section background-url="https://unsplash.it/200/600" background-size="cover" background-repeat="no-repeat">
-
-        <mj-column width="600">
-          <mj-text align="center" color="#fff" font-size="40" font-family="Helvetica Neue">Welcome to Capitol Zen</mj-text>
-        </mj-column>
-
-      </mj-section>
-
-      <!-- Intro text -->
-      <mj-section background-color="#fafafa">
-        <mj-column width="400">
-
-          <mj-text font-style="italic" font-size="20" font-family="Helvetica Neue" color="#626262">My Awesome Text</mj-text>
-
-          <mj-text color="#525252">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin rutrum enim eget magna efficitur, eu semper augue semper. Aliquam erat volutpat. Cras id dui lectus. Vestibulum sed finibus lectus, sit amet suscipit nibh. Proin nec commodo purus. Sed eget
-            nulla elit. Nulla aliquet mollis faucibus.
+      <mj-section padding="0px 20px 0 20px" background-color="#FFFFFF">
+        <mj-column>
+          <mj-text align="center" font-weight="300" padding="20px 0px 10px 0px" font-size="26px" line-height="40x" color="#33cc99">
+            Welcome, {{first.name}}!
           </mj-text>
-
-          <mj-button background-color="#F45E43" href="{{url}}">Learn more</mj-button>
-
         </mj-column>
       </mj-section>
 
-      <mj-include path="./partials/footer" /> <!-- or 'footer.mjml' -->
+      <mj-section background-color="#FFFFFF">
+        <mj-column>
+          <mj-divider width="100px" border-width="1px" border-color="#9B9B9B" />
+        </mj-column>
+      </mj-section>
+
+      <mj-section padding="0 20px 20px 20px" background-color="#FFFFFF">
+        <mj-column width="80%">
+          <mj-text font-size="16px" align="center" padding-top="10px" font-weight="100" padding="0">
+            Get ready to say goodbye to spreadsheets and manage your clients and legislative portfolios on the go!
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-url="http://f6b.502.mwp.accessdomain.com/wp-content/uploads/2017/12/email_capitol.png" vertical-align="bottom" background-size="cover" background-repeat="no-repeat">
+        <mj-column width="100%">
+          <mj-image src="http://f6b.502.mwp.accessdomain.com/wp-content/uploads/2017/12/lineshadow.png" alt="" align="bottom" border="none" padding="0"></mj-image>
+          <mj-text align="center" padding="50px 40px 0 40px" font-weight="300" padding="0">
+            To get started please confirm your email address:
+          </mj-text>
+          <mj-button border-radius="5px" align="center" background-color="#33cc99" color="#FFFFFF" border-radius="2px" href="{{action_url}}" inner-padding="15px 30px" padding-bottom="100" padding-top="20">
+            Confirm Email Address
+          </mj-button>
+        </mj-column>
+      </mj-section>
+
+      <mj-section padding="50px 0 0 0" background-color="#FFFFFF">
+        <mj-column>
+          <mj-image src="http://f6b.502.mwp.accessdomain.com/wp-content/uploads/2017/12/bottom.png" alt="bottom border" align="center" border="none" padding="0"></mj-image>
+        </mj-column>
+      </mj-section>
+
+      <mj-include path="./partials/footer" />
+      <!-- or 'footer.mjml' -->
 
     </mj-container>
   </mj-body>
