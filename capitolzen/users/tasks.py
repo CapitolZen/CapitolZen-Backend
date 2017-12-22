@@ -12,6 +12,7 @@ from capitolzen.users.utils import get_intercom_client
 from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
+
 @shared_task()
 def intercom_manage_user(user_id, operation):
     """
@@ -99,7 +100,7 @@ def intercom_manage_user_companies(user_id):
     logger.debug(" -- INTERCOM USER SYNC - %s - %s" % ('organizations', str(companies)))
     intercom_user.companies = companies
     intercom.users.save(intercom_user)
-    return {'op': 'companies', 'id': intercom_user.id}
+    return {'op': 'companies', 'id': intercom_user.id,  'companies': companies}
 
 
 def user_action_defaults(user_id):
