@@ -86,5 +86,4 @@ class OrganizationInviteSerializer(BaseInternalModelSerializer):
             'organization_name',
             'email',
             'status',
-
         )

@@ -154,7 +154,11 @@ class OrganizationInviteViewSet(viewsets.ModelViewSet):
         Send email and create user for the invite.
         """
         instance = serializer.save(status="unclaimed")
-        user = User.objects.create(username=instance.email)
+        name = None
+        if instance.metadata:
+            name = instance.metadata.get('name')
+
+        user = User.objects.create(username=instance.email, name=name)
         instance.user = user
 
         # Double save is a little rough here...
