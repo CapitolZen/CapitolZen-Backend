@@ -38,9 +38,9 @@
         </mj-column>
       </mj-section>
 
-      <mj-section background-url="http://f6b.502.mwp.accessdomain.com/wp-content/uploads/2017/12/email_capitol.png" vertical-align="bottom" background-size="cover" background-repeat="no-repeat">
+      <mj-section background-url="https://s3.amazonaws.com/czstatic/email_capitol.png" vertical-align="bottom" background-size="cover" background-repeat="no-repeat">
         <mj-column width="100%">
-          <mj-image src="http://f6b.502.mwp.accessdomain.com/wp-content/uploads/2017/12/lineshadow.png" alt="" align="bottom" border="none" padding="0"></mj-image>
+          <mj-image src="https://s3.amazonaws.com/czstatic/lineshadow.png" alt="" align="bottom" border="none" padding="0"></mj-image>
           <mj-text align="center" padding="50px 40px 0 40px" font-weight="300" padding="0">
             To get started please confirm your email address:
           </mj-text>
@@ -52,7 +52,7 @@
 
       <mj-section padding="50px 0 0 0" background-color="#FFFFFF">
         <mj-column>
-          <mj-image src="http://f6b.502.mwp.accessdomain.com/wp-content/uploads/2017/12/bottom.png" alt="bottom border" align="center" border="none" padding="0"></mj-image>
+          <mj-image src="https://s3.amazonaws.com/czstatic/bottom.png" alt="bottom border" align="center" border="none" padding="0"></mj-image>
         </mj-column>
       </mj-section>
 

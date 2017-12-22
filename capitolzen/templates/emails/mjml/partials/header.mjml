@@ -5,7 +5,7 @@
         </mj-column>
       </mj-section>      <mj-section border-radius="5px 5px 0px 0px" padding="0px 20px 0 20px" background-color="#FFFFFF">
         <mj-column width="30%">
-          <mj-image src="http://f6b.502.mwp.accessdomain.com/wp-content/uploads/2017/12/CapitolZen_Logo.png" alt="Capitol Zen">
+          <mj-image src="https://s3.amazonaws.com/czstatic/CapitolZen_Logo.png" alt="Capitol Zen">
           </mj-image>
         </mj-column>
       </mj-section>
