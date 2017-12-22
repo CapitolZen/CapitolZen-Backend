@@ -310,18 +310,15 @@ class EventManager(object):
         for bill in bill_list:
             for wrapper in Wrapper.objects.filter(bill__state_id=bill):
                 if wrapper.group.active:
-                    for user_id in wrapper.group.user_list:
-                        try:
-                            user = User.objects.get(user_id)
-                            action = Action.objects.create(
-                                title='wrapper:updated',
-                                priority=-1,
-                                user=user,
-                                action_object=wrapper
-                            )
-                            action.save()
-                        except Exception:
-                            logger.error("user not found somehow")
+                    for user in wrapper.group.assigned_to.all():
+                        action = Action.objects.create(
+                            title='wrapper:updated',
+                            priority=-1,
+                            user=user,
+                            action_object=wrapper
+                        )
+                        action.save()
+
 
     def is_updating(self):
         return False

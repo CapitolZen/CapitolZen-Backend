@@ -7,7 +7,7 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
 from common.utils.filters.sets import OrganizationFilterSet
-from common.utils.filters.filters import UUIDInFilter
+from common.utils.filters.filters import UUIDInFilter, IntInFilter
 
 from config.viewsets import OwnerBasedViewSet
 from capitolzen.proposals.models import Bill, Wrapper
@@ -18,7 +18,7 @@ from capitolzen.groups.api.app.serializers import (
     GroupSerializer, ReportSerializer, FileSerializer
 )
 
-logger = getLogger('app_logger')
+logger = getLogger('app')
 
 
 class GroupFilter(OrganizationFilterSet):
@@ -32,7 +32,7 @@ class GroupFilter(OrganizationFilterSet):
     organization = filters.CharFilter(
         name="organization",
         label="Organization",
-        help_text="Filter Groups based on Organziation"
+        help_text="Filter Groups based on Organization"
     )
 
     active = filters.BooleanFilter(
@@ -48,13 +48,11 @@ class GroupFilter(OrganizationFilterSet):
         help_text="Filter Groups on a Bill They Do Not Have"
     )
 
-    user = filters.CharFilter(
-        name='user_list',
-        method='user_favorite_filter'
+    assigned_to = IntInFilter(
+        name="assigned_to",
+        label="Assigned To",
+        help_text="Assigned to user by id."
     )
-
-    def user_favorite_filter(self, queryset, name, value):
-        return queryset.filter(user_list__contains=[value])
 
     class Meta(OrganizationFilterSet.Meta):
         model = Group
@@ -142,13 +140,10 @@ class ReportViewSet(OwnerBasedViewSet):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
     filter_class = ReportFilter
-    filter_fields = (
-        'organization',
-        'group',
-        'status',
-        'title',
-        'user'
-    )
+
+    # prefetch_for_includes = {
+    #     '__all__': [],
+    # }
 
     def perform_create(self, serializer):
         serializer.save()

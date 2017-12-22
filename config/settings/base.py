@@ -50,7 +50,6 @@ THIRD_PARTY_APPS = [
     'health_check.cache',
     'rest_auth',
     'stream_django',
-    'thorn.django',
     'django_elasticsearch_dsl'
 ]
 
@@ -287,7 +286,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # REST FRAMEWORK
 # ------------------------------------------------------------------------------
 REST_FRAMEWORK = {
-    'PAGE_SIZE': 100,
+    'PAGE_SIZE': 20,
     'ORDERING_PARAM': 'sort',
     'EXCEPTION_HANDLER': 'rest_framework_json_api.exceptions.exception_handler',
     'DEFAULT_PAGINATION_CLASS':
@@ -456,38 +455,49 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d '
-                      '%(thread)d %(message)s'
+            'format': ('%(asctime)s [%(process)d] [%(levelname)s] ' +
+                       'pathname=%(pathname)s lineno=%(lineno)s ' +
+                       'funcname=%(funcName)s %(message)s'),
+            'datefmt': '%Y-%m-%d %H:%M:%S'
         },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        }
     },
     'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
         },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        }
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'WARNING',
+            'level': env("DJANGO_LOG_LEVEL", default='WARNING'),
         },
         'django.request': {
             'handlers': ['console'],
-            'level': 'ERROR',
-            'propagate': False,
+            'level': env("REQUEST_LOG_LEVEL", default='ERROR'),
+        },
+        'intercom.request': {
+            'handlers': ['console'],
+            'level': env("REQUEST_LOG_LEVEL", default='ERROR'),
         },
         'django.db': {
             'handlers': ['console'],
-            'level': 'ERROR',
-            'propagate': False,
+            'level': env("DB_LOG_LEVEL", default='ERROR'),
         },
-        'app_logger': {
+        'app': {
             'handlers': ['console'],
-            'level': 'ERROR',
-            'propogate': False
+            'level': env("APP_LOG_LEVEL", default='ERROR'),
         }
     },
 }
-
 
 # CONNECTIONS
 # ------------------------------------------------------------------------------
@@ -507,6 +517,7 @@ AWS_SECRET_KEY = env("AWS_SECRETKEY", default='')
 AWS_REGION = env("AWS_REGION", default='us-east-1')
 AWS_BUCKET_NAME = env("AWS_BUCKET_NAME", default='')
 AWS_TEMP_BUCKET_NAME = env("AWS_TEMP_BUCKET_NAME", default='')
+AWS_CUSTOMER_IMPORT_BUCKET_NAME = env("AWS_CUSTOMER_IMPORT_BUCKET", default='cz-customer-import')
 INDEX_LAMBDA = env(
     "capitolzen_search_bills", default="capitolzen_search_bills")
 

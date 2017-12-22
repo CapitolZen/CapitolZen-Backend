@@ -25,6 +25,7 @@ from capitolzen.proposals.api.app.serializers import (
     BillSerializer, WrapperSerializer, LegislatorSerializer,
     CommitteeSerializer, EventSerializer
 )
+from capitolzen.groups.models import Report
 
 
 class BillFilter(BaseModelFilterSet):
@@ -222,6 +223,12 @@ class WrapperFilter(OrganizationFilterSet):
         help_text='title of group'
     )
 
+    report = filters.UUIDFilter(
+        name='report', label='Report', method='filter_report')
+
+    introduced_range = filters.CharFilter(name='first', method='action_date_range_filter')
+    active_range = filters.CharFilter(name='last', method='action_date_range_filter')
+
     def filter_bill_by_state(self, queryset, name, value):
         return queryset.filter(bill__state=value)
 
@@ -238,8 +245,19 @@ class WrapperFilter(OrganizationFilterSet):
         params[key] = [parts[0], parts[1]]
         return queryset.filter(**params)
 
-    introduced_range = filters.CharFilter(name='first', method='action_date_range_filter')
-    active_range = filters.CharFilter(name='last', method='action_date_range_filter')
+    def filter_report(self, queryset, name, value):
+        try:
+            report = Report.objects.get(id=value)
+        except Report.DoesNotExist:
+            return queryset
+
+        queryset = queryset.filter(group=report.group)
+
+        if report.filter:
+            prepared_filters = prepare_report_filters(report.filter, True)
+            return queryset.filter(**prepared_filters)
+
+        return queryset
 
     class Meta(OrganizationFilterSet.Meta):
         model = Wrapper

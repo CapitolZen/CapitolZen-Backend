@@ -1,4 +1,3 @@
-from celery.utils.log import get_task_logger
 from celery import shared_task
 
 from datetime import datetime, timedelta
@@ -10,6 +9,7 @@ from capitolzen.proposals.models import Event, Bill
 from capitolzen.users.models import User, Action
 from capitolzen.users.utils import get_intercom_client
 
+from celery.utils.log import get_task_logger
 
 logger = get_task_logger(__name__)
 
@@ -34,38 +34,42 @@ def intercom_manage_user(user_id, operation):
     def _populate_intercom_user(intercom_user):
         intercom_user.email = getattr(user, 'username', None)
         intercom_user.name = getattr(user, 'name', None)
+        intercom_user.custom_attributes['Status'] = getattr(user, 'is_active', False)
+        companies = []
+        for organization in user.organizations_organization.all():
+            companies.append({
+                'company_id': str(organization.id)
+            })
+        intercom_user.companies = companies
 
         return intercom_user
 
-    def _create():
-        intercom_user = intercom.users.create(user_id=str(user.id),
-                                              email=user.username
-                                              )
-        intercom_user = _populate_intercom_user(intercom_user)
-        intercom.users.save(intercom_user)
-        return intercom_user.id
+    def _create_or_update():
 
-    def _update():
         try:
             intercom_user = intercom.users.find(user_id=str(user.id))
-            intercom_user = _populate_intercom_user(intercom_user)
-            intercom.users.save(intercom_user)
-            return intercom_user.id
         except ResourceNotFound:
-            _create()
+            intercom_user = intercom.users.create(
+                user_id=str(user.id),
+                email=user.username
+            )
+
+        intercom_user = _populate_intercom_user(intercom_user)
+        intercom.users.save(intercom_user)
+        logger.debug(" -- INTERCOM USER SYNC - %s - %s" % (operation, intercom_user.id))
+        return {'op': 'create_or_update', 'id': intercom_user.id}
 
     def _delete():
         try:
             intercom_user = intercom.users.find(user_id=str(user_id))
             intercom.users.delete(intercom_user)
-            return intercom_user.id
+            logger.debug(" -- INTERCOM USER SYNC - %s - %s" % (operation, intercom_user.id))
+            return {'op': 'delete', 'id': intercom_user.id}
         except ResourceNotFound:
             pass
 
-    if operation == "create":
-        _create()
-    elif operation == "update":
-        _update()
+    if operation == "create_or_update":
+        _create_or_update()
     elif operation == "delete":
         _delete()
 
@@ -73,31 +77,6 @@ def intercom_manage_user(user_id, operation):
 
 
 @shared_task()
-def intercom_manage_user_companies(user_id):
-    """
-    Called when a user is either added or removed from any organization
-    :param user_id:
-    :return:
-    """
-    user = User.objects.get(id=user_id)
-    intercom = get_intercom_client()
-
-    try:
-        intercom_user = intercom.users.find(user_id=str(user.id))
-    except ResourceNotFound:
-        return False
-
-    companies = []
-
-    for organization in user.organizations_organization.all():
-        companies.append({
-            'company_id': str(organization.id)
-        })
-
-    intercom_user.companies = companies
-    intercom.users.save(intercom_user)
-
-
 def user_action_defaults(user_id):
     try:
         user = User.objects.get(id=user_id)
@@ -116,7 +95,6 @@ def user_action_defaults(user_id):
         a.save()
 
     for event in Event.objects.filter(time__gte=today, time__lt=next_week):
-        print(event.__dict__)
         a = Action.objects.create(
             user=user,
             action_object=event,

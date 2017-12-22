@@ -8,6 +8,9 @@ from capitolzen.users.utils import get_intercom_client
 from capitolzen.organizations.models import Organization
 from capitolzen.organizations.utils import get_stripe_client
 
+from celery.utils.log import get_task_logger
+logger = get_task_logger(__name__)
+
 
 @shared_task()
 def intercom_manage_organization(organization_id, operation):
@@ -49,39 +52,32 @@ def intercom_manage_organization(organization_id, operation):
 
         return intercom_company
 
-    def _create():
-        intercom_company = intercom.companies.create(
-            company_id=str(
-                organization.id),
-            name=organization.name,
-            remote_created_at=organization.created.timestamp())
-        intercom_company = _populate_intercom_company(intercom_company)
-        intercom.companies.save(intercom_company)
-        return intercom_company.id
-
-    def _update():
+    def _create_or_update():
         try:
             intercom_company = intercom.companies.find(
                 company_id=str(organization.id))
-            intercom_company = _populate_intercom_company(intercom_company)
-            intercom.companies.save(intercom_company)
-            return intercom_company.id
         except ResourceNotFound:
-            _create()
+            intercom_company = intercom.companies.create(
+                company_id=str(organization.id),
+                remote_created_at=organization.created.timestamp()
+            )
+
+        intercom_company = _populate_intercom_company(intercom_company)
+        intercom.companies.save(intercom_company)
+        logger.debug(" -- INTERCOM ORG SYNC - %s - %s" % (operation, intercom_company.id))
+        return {'op': 'update', 'id': intercom_company.id}
 
     def _delete():
         try:
-            intercom_company = intercom.companies.find(
-                company_id=str(organization_id))
+            intercom_company = intercom.companies.find(company_id=str(organization_id))
             intercom.companies.delete(intercom_company)
-            return intercom_company.id
+            logger.debug(" -- INTERCOM ORG SYNC - %s - %s" % (operation, intercom_company.id))
+            return {'op': 'delete', 'id': intercom_company.id}
         except ResourceNotFound:
             pass
 
-    if operation == "create":
-        return _create()
-    elif operation == "update":
-        return _update()
+    if operation == "create_or_update":
+        return _create_or_update()
     elif operation == "delete":
         return _delete()
 

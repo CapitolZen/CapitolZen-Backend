@@ -7,6 +7,9 @@ from cacheops import invalidate_obj
 from capitolzen.groups.models import Group
 from django.db import transaction
 from django.conf import settings
+from logging import getLogger
+
+logger = getLogger('app')
 
 
 ################################################################################################
@@ -20,14 +23,14 @@ def intercom_update_organization(sender, **kwargs):
     :return:
     """
     if settings.INTERCOM_ENABLE_SYNC:
-        created = kwargs.get('created')
         organization = kwargs.get('instance')
-        operation = 'create' if created else 'update'
+
+        logger.debug("INTERCOM ORG SYNC - %s - %s" % ('create_or_update', organization.name))
 
         transaction.on_commit(
             lambda: intercom_manage_organization.apply_async(kwargs={
                 "organization_id": str(organization.id),
-                "operation": operation
+                "operation": 'create_or_update'
             }))
 
 
@@ -35,6 +38,9 @@ def intercom_update_organization(sender, **kwargs):
 def intercom_delete_organization(sender, **kwargs):
     if settings.INTERCOM_ENABLE_SYNC:
         organization = kwargs.get('instance')
+
+        logger.debug("INTERCOM ORG SYNC - %s - %s" % ('delete', organization.name))
+
         transaction.on_commit(
             lambda: intercom_manage_organization.apply_async(kwargs={
                 "organization_id": str(organization.id),
@@ -52,26 +58,25 @@ def stripe_update_organization(sender, **kwargs):
     :param kwargs:
     :return:
     """
+    created = kwargs.get('created')
     organization = kwargs.get('instance')
+    operation = 'create' if created else 'update'
 
-    if not organization.stripe_customer_id:
-        transaction.on_commit(
-            lambda: stripe_manage_customer.apply_async(kwargs={
-                "organization_id": str(organization.id),
-                "operation": 'create'
-            }))
+    logger.debug("STRIPE ORG SYNC - %s - %s" % (operation, organization.name))
 
-    else:
-        transaction.on_commit(
-            lambda: stripe_manage_customer.apply_async(kwargs={
-                "organization_id": str(organization.id),
-                "operation": 'update'
-            }))
+    transaction.on_commit(
+        lambda: stripe_manage_customer.apply_async(kwargs={
+            "organization_id": str(organization.id),
+            "operation": operation,
+        }))
 
 
 @receiver(post_delete, sender=Organization)
 def stripe_delete_organization(sender, **kwargs):
     organization = kwargs.get('instance')
+
+    logger.debug("STRIPE ORG SYNC - %s - %s" % ('delete', organization.name))
+
     transaction.on_commit(
         lambda: stripe_manage_customer.apply_async(kwargs={
             "organization_id": str(organization.id),
