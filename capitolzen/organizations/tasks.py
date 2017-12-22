@@ -59,7 +59,8 @@ def intercom_manage_organization(organization_id, operation):
         except ResourceNotFound:
             intercom_company = intercom.companies.create(
                 company_id=str(organization.id),
-                remote_created_at=organization.created.timestamp())
+                remote_created_at=organization.created.timestamp()
+            )
 
         intercom_company = _populate_intercom_company(intercom_company)
         intercom.companies.save(intercom_company)
@@ -68,8 +69,7 @@ def intercom_manage_organization(organization_id, operation):
 
     def _delete():
         try:
-            intercom_company = intercom.companies.find(
-                company_id=str(organization_id))
+            intercom_company = intercom.companies.find(company_id=str(organization_id))
             intercom.companies.delete(intercom_company)
             logger.debug(" -- INTERCOM ORG SYNC - %s - %s" % (operation, intercom_company.id))
             return {'op': 'delete', 'id': intercom_company.id}
