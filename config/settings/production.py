@@ -1,6 +1,3 @@
-from boto.s3.connection import OrdinaryCallingFormat
-
-
 from .base import *  # noqa
 
 # SECRET CONFIGURATION
@@ -19,6 +16,11 @@ MIDDLEWARE = ['opbeat.contrib.django.middleware.OpbeatAPMMiddleware', ] + \
 INSTALLED_APPS += ['gunicorn', 'opbeat.contrib.django', ]
 
 # Ensure any opbeat logs get pumped to logging agent
+LOGGING['handlers']['opbeat'] = {
+    'level': 'WARNING',
+    'class': 'opbeat.contrib.django.handlers.OpbeatHandler',
+}
+
 LOGGING['loggers']['opbeat.errors'] = {
     'handlers': ['console'],
     'propagate': True,
@@ -30,7 +32,6 @@ LOGGING['loggers']['opbeat.errors'] = {
 # See: https://whitenoise.readthedocs.io/
 WHITENOISE_MIDDLEWARE = ['whitenoise.middleware.WhiteNoiseMiddleware', ]
 MIDDLEWARE = WHITENOISE_MIDDLEWARE + MIDDLEWARE
-
 
 # SECURITY CONFIGURATION
 # ------------------------------------------------------------------------------
@@ -77,7 +78,6 @@ CELERY_BROKER_URL = '{0}/{1}'.format(
 # ------------------------
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
 # EMAIL
 # ------------------------------------------------------------------------------
 INSTALLED_APPS += ['anymail', ]
@@ -87,7 +87,6 @@ ANYMAIL = {
 }
 DEFAULT_FROM_EMAIL = "hello@capitolzen.com"
 
-
 # TEMPLATE CONFIGURATION
 # ------------------------------------------------------------------------------
 # See:
@@ -96,63 +95,6 @@ TEMPLATES[0]['OPTIONS']['loaders'] = [
     ('django.template.loaders.cached.Loader', [
         'django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader', ]),
 ]
-
-# LOGGING CONFIGURATION
-# ------------------------------------------------------------------------------
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#logging
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See https://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
-    },
-    'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s '
-                      '%(process)d %(thread)d %(message)s'
-        },
-    },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false', ],
-            'class': 'django.utils.log.AdminEmailHandler'
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-        'opbeat': {
-            'level': 'WARNING',
-            'class': 'opbeat.contrib.django.handlers.OpbeatHandler',
-        },
-    },
-    'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins', ],
-            'level': 'ERROR',
-            'propagate': True
-        },
-        'django.security.DisallowedHost': {
-            'level': 'ERROR',
-            'handlers': ['console', 'mail_admins', ],
-            'propagate': True
-        },
-        'opbeat.errors': {
-            'level': 'ERROR',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-    }
-}
 
 # Custom Admin URL, use {% url 'admin.py:index' %}
 ADMIN_URL = env('DJANGO_ADMIN_URL')

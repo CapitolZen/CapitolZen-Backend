@@ -23,16 +23,14 @@ def intercom_update_organization(sender, **kwargs):
     :return:
     """
     if settings.INTERCOM_ENABLE_SYNC:
-        created = kwargs.get('created')
         organization = kwargs.get('instance')
-        operation = 'create' if created else 'update'
 
-        logger.debug("INTERCOM ORG SYNC - %s - %s" % (operation, organization.name))
+        logger.debug("INTERCOM ORG SYNC - %s - %s" % ('create_or_update', organization.name))
 
         transaction.on_commit(
             lambda: intercom_manage_organization.apply_async(kwargs={
                 "organization_id": str(organization.id),
-                "operation": operation
+                "operation": 'create_or_update'
             }))
 
 
@@ -69,7 +67,7 @@ def stripe_update_organization(sender, **kwargs):
     transaction.on_commit(
         lambda: stripe_manage_customer.apply_async(kwargs={
             "organization_id": str(organization.id),
-            "operation": operation
+            "operation": operation,
         }))
 
 

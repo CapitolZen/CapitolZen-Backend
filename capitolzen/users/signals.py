@@ -7,7 +7,6 @@ from django.db import transaction
 from organizations.signals import user_added, user_removed
 from capitolzen.users.models import User
 from capitolzen.users.tasks import (
-    intercom_manage_user_companies,
     intercom_manage_user,
     user_action_defaults
 )
@@ -21,25 +20,22 @@ logger = getLogger('app')
 @receiver(post_save, sender=User)
 def intercom_update_user(sender, **kwargs):
     """
+    Sync user with intercom
+
     :param sender:
     :param kwargs:
     :return:
     """
     user = kwargs.get('instance')
-    created = kwargs.get('created')
-    operation = 'create' if created else 'update'
 
     if settings.INTERCOM_ENABLE_SYNC:
-
-        logger.debug("INTERCOM USER SYNC - %s - %s" % (operation, user.username))
+        logger.debug("INTERCOM USER SYNC - %s - %s" % ( 'create_or_update', user.username))
 
         transaction.on_commit(
             lambda: intercom_manage_user.apply_async(kwargs={
                 'user_id': str(user.id),
-                'operation': operation
+                'operation': 'create_or_update'
             }))
-
-    user_action_defaults(str(user.id))
 
 
 @receiver(post_delete, sender=User)
@@ -63,7 +59,7 @@ def intercom_delete_user(sender, **kwargs):
 
 @receiver(user_added)
 @receiver(user_removed)
-def user_removed_from_organization(sender, **kwargs):
+def user_manage_organizations(sender, **kwargs):
     """
     Note: This is only called when we use the add_user / etc
     methods directly (which we do via the api) however it doesn't
@@ -80,6 +76,22 @@ def user_removed_from_organization(sender, **kwargs):
         logger.debug("INTERCOM USER SYNC - %s - %s" % ('organizations', user.username))
 
         transaction.on_commit(
-            lambda: intercom_manage_user_companies.apply_async(kwargs={
-                "user_id": str(user.id),
+            lambda: intercom_manage_user.apply_async(kwargs={
+                'user_id': str(user.id),
+                'operation': 'create_or_update'
             }))
+
+################################################################################
+# MISC
+################################################################################
+@receiver(post_save, sender=User)
+def set_user_action_defaults(sender, **kwargs):
+    """
+    Creates default user actions.
+
+    :param sender:
+    :param kwargs:
+    :return:
+    """
+    user = kwargs.get('instance')
+    user_action_defaults(str(user.id))
