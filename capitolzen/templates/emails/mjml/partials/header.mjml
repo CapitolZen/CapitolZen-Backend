@@ -1,8 +1,11 @@
 <!-- Company Header -->
-<mj-section background-color="#e3e1e3">
-    <mj-column>
-        <mj-text font-size="20">
-            Capitol <span color="#009e83">Zen</span>
-        </mj-text>
-    </mj-column>
-</mj-section>
+ <mj-section padding="10px 0 10px 0">
+        <mj-column>
+          <mj-text align="center" color="#9B9B9B" font-size="11px">Effortlessly manage clients and legislative portfolios anywhere, anytime.</mj-text>
+        </mj-column>
+      </mj-section>      <mj-section border-radius="5px 5px 0px 0px" padding="0px 20px 0 20px" background-color="#FFFFFF">
+        <mj-column width="30%">
+          <mj-image src="https://s3.amazonaws.com/czstatic/CapitolZen_Logo.png" alt="Capitol Zen">
+          </mj-image>
+        </mj-column>
+      </mj-section>
