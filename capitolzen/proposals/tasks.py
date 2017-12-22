@@ -1,7 +1,8 @@
 import inflect
 from string import capwords
-from datetime import datetime, timedelta
+from datetime import datetime
 from celery import shared_task
+
 
 from django.conf import settings
 
@@ -12,7 +13,7 @@ from capitolzen.proposals.managers import (
     BillManager, LegislatorManager, CommitteeManager, EventManager
 )
 from capitolzen.organizations.models import Organization
-from capitolzen.users.models import User, Action
+from capitolzen.users.models import User
 
 from capitolzen.proposals.models import Wrapper, Bill, Legislator
 from capitolzen.groups.models import Group
@@ -76,7 +77,9 @@ def run_organization_bill_updates():
                 p = inflect.engine()
                 count = p.number_to_words(count)
                 output = normalize_bill_data(wrappers)
-                subject = '%s Bills Have Updates for %s' % (count.title(), group.title)
+                subject = '%s Bills Have Updates for %s' % (
+                    count.title(), group.title
+                )
                 message = 'Bills for %s have new action or information.' % (
                     group.title)
                 message = capwords(message)
@@ -115,7 +118,8 @@ def create_bill_introduction_actions():
                 "state": bill.state,
                 "id": str(bill.id),
                 "sponsor":  bill.sponsor.full_name if bill.sponsor else None,
-                # In order to not munge more email templates, pass different data
+                # In order to not munge more email templates,
+                # pass different data
                 "status": bill.title,
                 "link": "%s/bills/%s" % (settings.APP_FRONTEND, str(bill.id))
             }
@@ -125,7 +129,10 @@ def create_bill_introduction_actions():
 
             subject = '%s New Bills Have Been Introduced' % (count.title(),)
             message = 'There were %s new bills introduced yesterday. ' \
-                      '<a href="%s">Login into</a> your Capitol Zen account to view them all.' % (count.title(), settings.APP_FRONTEND)
+                      '<a href="%s">Login into</a> your Capitol Zen account ' \
+                      'to view them all.' % (
+                count.title(), settings.APP_FRONTEND
+            )
             email_update_bills(
                 message=message,
                 subject=subject,
@@ -136,6 +143,8 @@ def create_bill_introduction_actions():
 
 @shared_task(retry_kwargs={'max_retries': 20})
 def ingest_attachment(identifier):
+    from capitolzen.proposals.graphs import BillGraph
+
     instance = Bill.objects.get(id=identifier)
     document = BillDocument.get(id=str(instance.id))
     if not document:
@@ -155,6 +164,7 @@ def ingest_attachment(identifier):
         '\xa0', ' ').strip()
     instance.summary = summarize(instance.content)
     instance.save()
+    BillGraph(instance.id).run()
     return True
 
 
@@ -170,9 +180,13 @@ def clean_missing_sponsors():
                 fname = pieces[-2].lower().strip()
                 lname = pieces[-1].lower().strip()
 
-                legislator = Legislator.objects.get_by_name_pieces(lname, **{'first_name': fname})
+                legislator = Legislator.objects.get_by_name_pieces(lname, **{
+                    'first_name': fname
+                })
                 if not legislator:
-                    data = "Bill ID: %s | fname: %s | lname %s" % (bill.id, fname, lname)
+                    data = "Bill ID: %s | fname: %s | lname %s" % (
+                        bill.id, fname, lname
+                    )
                     create_asana_task("History legislator mismatch", data)
                 else:
                     bill.sponsor = legislator
