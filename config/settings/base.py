@@ -50,7 +50,6 @@ THIRD_PARTY_APPS = [
     'health_check.cache',
     'rest_auth',
     'stream_django',
-    'thorn.django',
     'django_elasticsearch_dsl'
 ]
 
