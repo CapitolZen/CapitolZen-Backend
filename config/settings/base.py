@@ -456,14 +456,25 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d '
-                      '%(thread)d %(message)s'
+            'format': ('%(asctime)s [%(process)d] [%(levelname)s] ' +
+                       'pathname=%(pathname)s lineno=%(lineno)s ' +
+                       'funcname=%(funcName)s %(message)s'),
+            'datefmt': '%Y-%m-%d %H:%M:%S'
         },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        }
     },
     'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
         },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        }
     },
     'loggers': {
         'django': {
@@ -473,17 +484,14 @@ LOGGING = {
         'django.request': {
             'handlers': ['console'],
             'level': env("REQUEST_LOG_LEVEL", default='ERROR'),
-            'propagate': False,
         },
         'django.db': {
             'handlers': ['console'],
             'level': env("DB_LOG_LEVEL", default='ERROR'),
-            'propagate': False,
         },
         'app': {
             'handlers': ['console'],
             'level': env("APP_LOG_LEVEL", default='ERROR'),
-            'propogate': False
         }
     },
 }
