@@ -34,7 +34,7 @@ def intercom_manage_user(user_id, operation):
     def _populate_intercom_user(intercom_user):
         intercom_user.email = getattr(user, 'username', None)
         intercom_user.name = getattr(user, 'name', None)
-
+        intercom_user.custom_attributes['Status'] = getattr(user, 'is_active', False)
         companies = []
         for organization in user.organizations_organization.all():
             companies.append({
