@@ -60,25 +60,17 @@ def stripe_update_organization(sender, **kwargs):
     :param kwargs:
     :return:
     """
+    created = kwargs.get('created')
     organization = kwargs.get('instance')
+    operation = 'create' if created else 'update'
 
-    if not organization.stripe_customer_id:
-        logger.debug("STRIPE ORG SYNC - %s - %s" % ('create', organization.name))
+    logger.debug("STRIPE ORG SYNC - %s - %s" % (operation, organization.name))
 
-        transaction.on_commit(
-            lambda: stripe_manage_customer.apply_async(kwargs={
-                "organization_id": str(organization.id),
-                "operation": 'create'
-            }))
-
-    else:
-        logger.debug("STRIPE ORG SYNC - %s - %s" % ('update', organization.name))
-
-        transaction.on_commit(
-            lambda: stripe_manage_customer.apply_async(kwargs={
-                "organization_id": str(organization.id),
-                "operation": 'update'
-            }))
+    transaction.on_commit(
+        lambda: stripe_manage_customer.apply_async(kwargs={
+            "organization_id": str(organization.id),
+            "operation": operation
+        }))
 
 
 @receiver(post_delete, sender=Organization)

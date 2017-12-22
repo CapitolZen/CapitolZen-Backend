@@ -58,7 +58,6 @@ dry-rest-permissions==0.1.9
 django-rest-elasticsearch==0.3.2
 django-elasticsearch-dsl==0.4.1
 django-rest-swagger==2.1.2
-thorn==1.5.0
 
 #
 # Other
