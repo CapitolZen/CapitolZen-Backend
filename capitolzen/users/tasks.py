@@ -1,4 +1,3 @@
-from celery.utils.log import get_task_logger
 from celery import shared_task
 
 from datetime import datetime, timedelta
@@ -10,8 +9,8 @@ from capitolzen.proposals.models import Event, Bill
 from capitolzen.users.models import User, Action
 from capitolzen.users.utils import get_intercom_client
 
-
-logger = get_task_logger(__name__)
+from logging import getLogger
+logger = getLogger('app')
 
 
 @shared_task()
@@ -43,6 +42,8 @@ def intercom_manage_user(user_id, operation):
                                               )
         intercom_user = _populate_intercom_user(intercom_user)
         intercom.users.save(intercom_user)
+        logger.debug(" -- INTERCOM USER SYNC - %s - %s" % (operation, intercom_user.id))
+
         return intercom_user.id
 
     def _update():
@@ -50,6 +51,7 @@ def intercom_manage_user(user_id, operation):
             intercom_user = intercom.users.find(user_id=str(user.id))
             intercom_user = _populate_intercom_user(intercom_user)
             intercom.users.save(intercom_user)
+            logger.debug(" -- INTERCOM USER SYNC - %s - %s" % (operation, intercom_user.id))
             return intercom_user.id
         except ResourceNotFound:
             _create()
@@ -58,6 +60,7 @@ def intercom_manage_user(user_id, operation):
         try:
             intercom_user = intercom.users.find(user_id=str(user_id))
             intercom.users.delete(intercom_user)
+            logger.debug(" -- INTERCOM USER SYNC - %s - %s" % (operation, intercom_user.id))
             return intercom_user.id
         except ResourceNotFound:
             pass
@@ -93,7 +96,8 @@ def intercom_manage_user_companies(user_id):
         companies.append({
             'company_id': str(organization.id)
         })
-
+    logger.debug(" -- INTERCOM USER SYNC - %s - %s" % ('organizations', intercom_user.id))
+    logger.debug(" -- INTERCOM USER SYNC - %s - %s" % ('organizations', str(companies)))
     intercom_user.companies = companies
     intercom.users.save(intercom_user)
 

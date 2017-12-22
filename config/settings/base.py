@@ -468,26 +468,25 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'WARNING',
+            'level': env("DJANGO_LOG_LEVEL", default='WARNING'),
         },
         'django.request': {
             'handlers': ['console'],
-            'level': 'ERROR',
+            'level': env("REQUEST_LOG_LEVEL", default='ERROR'),
             'propagate': False,
         },
         'django.db': {
             'handlers': ['console'],
-            'level': 'ERROR',
+            'level': env("DB_LOG_LEVEL", default='ERROR'),
             'propagate': False,
         },
-        'app_logger': {
+        'app': {
             'handlers': ['console'],
-            'level': 'ERROR',
+            'level': env("APP_LOG_LEVEL", default='ERROR'),
             'propogate': False
         }
     },
 }
-
 
 # CONNECTIONS
 # ------------------------------------------------------------------------------

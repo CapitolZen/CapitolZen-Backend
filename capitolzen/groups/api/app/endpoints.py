@@ -18,7 +18,7 @@ from capitolzen.groups.api.app.serializers import (
     GroupSerializer, ReportSerializer, FileSerializer
 )
 
-logger = getLogger('app_logger')
+logger = getLogger('app')
 
 
 class GroupFilter(OrganizationFilterSet):
