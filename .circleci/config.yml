@@ -13,10 +13,19 @@ jobs:
             docker --version
             docker-compose --version
 
+      ##
+      # NPM
+      ##
+      - restore_cache:
+          key: dependency-cache-nltk
       - run:
           name: Pull NLTK Data
           command: |
             pip install nltk && python -m nltk.downloader -d ~/app/nltk_data all
+      - save_cache:
+          key: dependency-cache-nltk
+          paths:
+              - ~/app/nltk_data
 
       - run:
           name: Setup Environment
