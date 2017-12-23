@@ -1,7 +1,7 @@
-      <mj-section padding="10px 0 20px 0">
-        <mj-column>
-          <mj-text align="center" color="#9B9B9B" font-size="11px"><a href="#" style="color: #9B9B9B;">Unsubscribe</a> from this email<br>3924 Hollow Wood Dr, Portage MI 48439<br>
-            <a href="{{unsubscribe}}" style="color: #9B9B9B; text-decoration:none;">© 2018 Capitol Zen</a>
-          </mj-text>
-        </mj-column>
-      </mj-section>
+<mj-section padding="10px 0 20px 0">
+    <mj-column>
+        <mj-text align="center" color="#9B9B9B" font-size="11px">3924 Hollow Wood Dr, Portage MI 48439<br>
+            <a href="https://www.capitolzen.com" style="color: #9B9B9B; text-decoration:none;">© 2018 Capitol Zen</a>
+        </mj-text>
+    </mj-column>
+</mj-section>
