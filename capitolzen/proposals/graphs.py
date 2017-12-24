@@ -1,7 +1,6 @@
 from py2neo import Graph
-from textblob import TextBlob
 from rake_nltk import Rake
-import operator
+from nltk.tokenize import word_tokenize
 from gensim import corpora, models, similarities
 
 from elasticsearch import Elasticsearch, RequestsHttpConnection
@@ -10,8 +9,8 @@ from elasticsearch_dsl import Search
 from django.conf import settings
 
 from capitolzen.proposals.models import Bill, Legislator
-from capitolzen.proposals.utils import tf, tfidf, idf
 from capitolzen.proposals.documents import BillDocument
+
 
 class BasicGraph(object):
     graph = Graph(**settings.GRAPH_DATABASE)
@@ -30,6 +29,19 @@ class BasicGraph(object):
 
 class BillGraph(BasicGraph):
     instance_class = Bill
+    es_client = Elasticsearch(
+        hosts=settings.ELASTICSEARCH_DSL['default']['hosts'],
+        connection_class=RequestsHttpConnection
+    )
+
+    # Keyword score requirement
+    # http://textminingonline.com/getting-started-with-keyword-extraction
+    min_rank_score = 10.0
+
+    # If no keywords are ranked above 10, how many keywords should we grab
+    # from the generated list as a default
+    default_list_length = 5
+    related_docs = None
 
     def merge(self):
         query = """
@@ -80,43 +92,90 @@ class BillGraph(BasicGraph):
                     "human_weight": human_weight
                 })
 
-    def generate_similarity_score(self):
+    def _get_keyphrases(self):
+        # Extract keywords and phrases from the current document so we know
+        # what to search for in ES.
+        r = Rake()
+        r.extract_keywords_from_text(self.instance.content)
+        key_phrases = [
+            keyphrase[1] for keyphrase in r.get_ranked_phrases_with_scores()
+            if keyphrase[0] >= self.min_rank_score
+        ]
+        if not key_phrases:
+            key_phrases = [
+                keyphrase[1]
+                for keyphrase in
+                r.get_ranked_phrases_with_scores()[:self.default_list_length]
+            ]
+
+        return key_phrases
+
+    def _build_related_lists(self):
+        # Build the list of related documents from ES based on the keywords /
+        # phrases extracted from the current document we're analyzing
+        if self.related_docs:
+            return self.related_docs
+        self.related_docs = {
+            "ids": [],
+            "content": []
+        }
+        for phrase in self._get_keyphrases():
+            s = Search().using(
+                self.es_client).query('match_phrase', content=phrase)
+            s.doc_type(BillDocument)
+            response = s.execute()
+            self.related_docs['ids'] += list(
+                set([hit.remote_id for hit in response]) -
+                set(self.related_docs['ids'])
+            )
+            self.related_docs['content'] += list(
+                set([hit.content for hit in response]) -
+                set(self.related_docs['content'])
+            )
+        # Don't include the document itself in the analysis
+        self.related_docs['ids'].remove(self.instance.remote_id)
+        self.related_docs['content'].remove(self.instance.content)
+
+        return self.related_docs
+
+    def _generate_similarity_scores(self):
+        gen_docs = [[w.lower() for w in word_tokenize(text)]
+                    for text in self._build_related_lists()['content']]
+        dictionary = corpora.Dictionary(gen_docs)
+        corpus = [dictionary.doc2bow(gen_doc) for gen_doc in gen_docs]
+        tf_idf = models.TfidfModel(corpus)
+        sims = similarities.Similarity(
+            '/tmp/tst', tf_idf[corpus], num_features=len(dictionary)
+        )
+        query_doc = [w.lower() for w in word_tokenize(self.instance.content)]
+        query_doc_bow = dictionary.doc2bow(query_doc)
+        query_doc_tf_idf = tf_idf[query_doc_bow]
+        return sims[query_doc_tf_idf]
+
+    def create_similarity_relation(self):
         # Find words of most interest / value in bill
         # TODO: Might be able to simplify / improve results by using ES's
         # aggregation & significant_terms capabilities.
-        es_client = Elasticsearch(
-            hosts=settings.ELASTICSEARCH_DSL['default']['hosts'],
-            connection_class=RequestsHttpConnection
-        )
-        r = Rake()
-        r.extract_keywords_from_text(self.instance.content)
-        key_phrases = [keyphrase[1] for keyphrase in r.get_ranked_phrases()[:3]]
-        for phrase in key_phrases:
-            s = Search().using(es_client).query('match', content=phrase)
-            s.doc_type(BillDocument)
-            response = s.execute()
-            for hit in response:
-                print(hit.id)
-        doc_list = []
-        scores = {word: tfidf(
-            word, self.instance.content, doc_list
-        ) for word in self.instance.content.words}
-        sorted_words = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-        for word, score in sorted_words[:3]:
-            print("\tWord: {}, TF-IDF: {}".format(word, round(score, 5)))
 
-        # Search for other bills with similar keywords
-
-        # Determine the similarity of the given documents
-
-        # Plot scores on relationships between bills
-        query = """
-        MATCH (bill:Bill) 
-        """
+        for idx, score in enumerate(self._generate_similarity_scores()):
+            query = """
+            MATCH (bill:Bill {remote_id: $remote_id}),  
+                (related_bill:Bill {remote_id: $related_id})
+            CREATE (bill)-[r:SIMILAR_TO {
+                content_similarity: $similarity_score
+                }]->(related_bill)
+            RETURN r
+            """
+            self.graph.data(query, parameters={
+                "remote_id": self.instance.remote_id,
+                "related_id": self._build_related_lists()['ids'][idx - 1],
+                "similarity_score": score
+            })
 
     def run(self):
         self.merge()
         self.link_to_sponsors()
+        self.create_similarity_relation()
 
 
 class LegislatorGraph(BasicGraph):
