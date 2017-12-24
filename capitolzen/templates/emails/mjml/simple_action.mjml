@@ -1,22 +1,30 @@
 <mjml>
+  <mj-head>
+    <mj-font name="Montserrat" href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500" />
+    <mj-attributes>
+      <mj-all font-family="Montserrat, Helvetica, Arial, sans-serif" />
+    </mj-attributes>
+  </mj-head>
   <mj-body>
-    <mj-container>
-      <mj-include path="./partials/header" /> <!-- or 'header.mjml' -->
+    <mj-container background-color="#F5F5F5">
+      <mj-include path="./partials/header" />
+      <!-- or 'header.mjml' -->
 
       <!-- Intro text -->
-      <mj-section background-color="#f5f5f5">
+      <mj-section border-radius="0 0 5px 5px" background-color="#FFFFFF">
         <mj-column>
 
-          <mj-text color="#525252">
+          <mj-text align="center" font-size="14px" color="#525252">
             {{ message |safe }}
           </mj-text>
 
-          <mj-button background-color="#009e83" href="{{action_url}}">{{action_cta}}</mj-button>
+          <mj-button background-color="#33cc99" href="{{action_url}}">{{action_cta}}</mj-button>
 
         </mj-column>
       </mj-section>
 
-      <mj-include path="./partials/footer" /> <!-- or 'footer.mjml' -->
+      <mj-include path="./partials/footer" />
+      <!-- or 'footer.mjml' -->
 
     </mj-container>
   </mj-body>

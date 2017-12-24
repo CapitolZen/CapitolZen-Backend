@@ -1,21 +1,29 @@
 <mjml>
+  <mj-head>
+    <mj-font name="Montserrat" href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500" />
+    <mj-attributes>
+      <mj-all font-family="Montserrat, Helvetica, Arial, sans-serif" />
+      <mj-section>
+    </mj-attributes>
+  </mj-head>
   <mj-body>
-    <mj-container>
-      <mj-include path="./partials/header" /> <!-- or 'header.mjml' -->
+    <mj-container background-color="#F5F5F5">
+      <mj-include path="./partials/header" />
+      <!-- or 'header.mjml' -->
 
       <!-- Intro text -->
-      <mj-section background-color="#f5f5f5">
+      <mj-section background-color="#ffffff">
         <mj-column>
 
-          <mj-text color="#525252">
+          <mj-text font-size="13px" color="#525252">
             {{ message |safe }}
           </mj-text>
 
         </mj-column>
       </mj-section>
-      <mj-section background-color="#f5f5f5">
+      <mj-section border-radius="0px 0px 5px 5px" padding="0 0 20px 0" background-color="#ffffff">
         <mj-column>
-            <mj-table>
+          <!--<mj-table>
                 <tr style="border-bottom:1px solid #ecedee;text-align:left;padding:15px 0;">
                   <th style="padding: 0 15px 0 0;">ID</th>
                   <th style="padding: 0 15px;">State</th>
@@ -34,12 +42,31 @@
                       </td>
                     </tr>
                 {% endfor %}
-            </mj-table>
+            </mj-table>!-->
+          <mj-table>
+            <tr style="font-size:13px;border-bottom:1px solid #ecedee;text-align:left;">
+              <th style="padding: 0 15px 0 0;">ID</th>
+              <th style="padding: 0 15px;">State</th>
+              <th style="padding: 0 15px;">Sponsor</th>
+              <th style="padding: 0 15px;">Info</th>
+              <th style="padding: 0 15px;">View</th>
+            </tr>
+            {% for bill in bills %}
+            <tr style="font-size:12px;font-weight:100;">
+              <td style="padding: 0 15px 0 0;">{{bill.state_id}}</td>
+              <td style="padding: 0 15px;">{{bill.state}}</td>
+              <td style="padding: 0 0 0 15px;">{{bill.sponsor}}</td>
+              <td style="padding: 0 0 0 15px;">{{bill.status}}</td>
+              <td style="padding: 0 0 0 15px;"><a href="{{bill.link}}">View</a></td>
+            </tr>
+            {% endfor %}
+          </mj-table>
         </mj-column>
 
       </mj-section>
 
-      <mj-include path="./partials/footer" /> <!-- or 'footer.mjml' -->
+      <mj-include path="./partials/footer" />
+      <!-- or 'footer.mjml' -->
 
     </mj-container>
   </mj-body>

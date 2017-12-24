@@ -1,9 +1,7 @@
-<mj-section background-color="#e7e7e7">
+<mj-section padding="10px 0 20px 0">
     <mj-column>
-
-        <mj-text color="#525252" align="center">
-            Copyright 2017 - Capitol Zen | 3924 Hollow Wood Dr, Portage MI 48439 | 989-859-6392
+        <mj-text align="center" color="#9B9B9B" font-size="11px">3924 Hollow Wood Dr, Portage MI 48439<br>
+            <a href="https://www.capitolzen.com" style="color: #9B9B9B; text-decoration:none;">© 2018 Capitol Zen</a>
         </mj-text>
-
     </mj-column>
 </mj-section>
