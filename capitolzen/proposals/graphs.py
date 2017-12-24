@@ -1,5 +1,4 @@
 from uuid import uuid1
-import numpy as np
 from py2neo import Graph
 from rake_nltk import Rake
 from nltk.tokenize import word_tokenize

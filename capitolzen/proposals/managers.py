@@ -84,9 +84,6 @@ class CongressionalManager(object):
 
         return True
 
-    def update_local_instance(self, instance_id):
-        raise NotImplementedError()
-
 
 class CommitteeManager(CongressionalManager):
     index = "committees"
@@ -113,9 +110,6 @@ class CommitteeManager(CongressionalManager):
             return None
         instance = serializer.save()
         return instance
-
-    def update_local_instance(self, instance_id):
-        pass
 
 
 class BillManager(CongressionalManager):
@@ -173,25 +167,6 @@ class BillManager(CongressionalManager):
         instance = serializer.save()
         return instance
 
-    def update_local_instance(self, instance_id):
-        try:
-            bill = Bill.objects.get(id=instance_id)
-            source = self._get_remote_detail(bill.remote_id)
-            source = self._cleanup_source(source)
-            serializer = BillSerializer(bill, data={
-                'remote_id': bill.remote_id,
-                **source
-            })
-            if not serializer.is_valid():
-                logger.error(serializer.errors)
-                logger.error(serializer.initial_data)
-                return None
-            instance = serializer.save()
-            return instance
-
-        except Bill.DoesNotExist:
-            return "Did not provide a valid ID"
-
 
 class LegislatorManager(CongressionalManager):
     index = "legislators"
@@ -224,9 +199,6 @@ class LegislatorManager(CongressionalManager):
     def run(self):
         for human in self._get_remote_list():
             self.update(None, human['id'], human)
-
-    def update_local_instance(self, instance_id):
-        pass
 
 
 class EventManager(object):

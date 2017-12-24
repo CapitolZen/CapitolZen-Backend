@@ -131,8 +131,8 @@ def create_bill_introduction_actions():
             message = 'There were %s new bills introduced yesterday. ' \
                       '<a href="%s">Login into</a> your Capitol Zen account ' \
                       'to view them all.' % (
-                count.title(), settings.APP_FRONTEND
-            )
+                        count.title(), settings.APP_FRONTEND
+                      )
             email_update_bills(
                 message=message,
                 subject=subject,

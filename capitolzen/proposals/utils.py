@@ -42,7 +42,9 @@ def normalize_bill_data(wrapper_list, time_format='%m/%d/%Y'):
     output = []
     for w in wrapper_list:
         if getattr(w.bill, 'last_action_date', False):
-            action_time = datetime.strptime(w.bill.last_action_date, '%Y-%m-%d %H:%M:%S')
+            action_time = datetime.strptime(
+                w.bill.last_action_date, '%Y-%m-%d %H:%M:%S'
+            )
         else:
             action_time = None
         data = {
