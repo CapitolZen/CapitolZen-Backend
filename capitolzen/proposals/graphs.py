@@ -1,3 +1,5 @@
+from uuid import uuid1
+import numpy as np
 from py2neo import Graph
 from rake_nltk import Rake
 from nltk.tokenize import word_tokenize
@@ -144,13 +146,20 @@ class BillGraph(BasicGraph):
         dictionary = corpora.Dictionary(gen_docs)
         corpus = [dictionary.doc2bow(gen_doc) for gen_doc in gen_docs]
         tf_idf = models.TfidfModel(corpus)
+        # Right now we're going to create micro shards containing the content
+        # to documents ES says are similiar. This could be modified to include
+        # any number of documents and could even be off boarded to it's own
+        # server.
+        file_system_location = '/tmp/tst-%s' % str(uuid1())
         sims = similarities.Similarity(
-            '/tmp/tst', tf_idf[corpus], num_features=len(dictionary)
+            file_system_location, tf_idf[corpus], num_features=len(dictionary)
         )
         query_doc = [w.lower() for w in word_tokenize(self.instance.content)]
         query_doc_bow = dictionary.doc2bow(query_doc)
         query_doc_tf_idf = tf_idf[query_doc_bow]
-        return sims[query_doc_tf_idf]
+        if len(sims):
+            return sims[query_doc_tf_idf]
+        return []
 
     def create_similarity_relation(self):
         # Find words of most interest / value in bill
@@ -161,7 +170,7 @@ class BillGraph(BasicGraph):
             query = """
             MATCH (bill:Bill {remote_id: $remote_id}),  
                 (related_bill:Bill {remote_id: $related_id})
-            CREATE (bill)-[r:SIMILAR_TO {
+            MERGE (bill)-[r:SIMILAR_TO {
                 content_similarity: $similarity_score
                 }]->(related_bill)
             RETURN r
@@ -169,7 +178,8 @@ class BillGraph(BasicGraph):
             self.graph.data(query, parameters={
                 "remote_id": self.instance.remote_id,
                 "related_id": self._build_related_lists()['ids'][idx - 1],
-                "similarity_score": score
+                # Have to use item because this is a np float 32
+                "similarity_score": score.item()
             })
 
     def run(self):

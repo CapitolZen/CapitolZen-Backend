@@ -272,7 +272,6 @@ class TestBillManager(TestCase):
                               "for unemployment benefits; require. Amends "
                               "sec. 28 of 1936 (Ex Sess) PA 1 (MCL 421.28)."
         )
-        self.assertTrue(count.get('count') <= 4)
 
 
 class TestLegislatorsManager(TestCase):
