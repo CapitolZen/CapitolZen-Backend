@@ -68,7 +68,7 @@ class BillGraph(BasicGraph):
         MATCH (bill:Bill {uuid: $bill_uuid}), 
             (legislator:Legislator {remote_id: $remote_id})
         MERGE (bill)<-[r:SPONSOR {
-            type: $type
+            type: $type,
             human_weight: $human_weight
         }]-(legislator)
         RETURN bill, legislator
