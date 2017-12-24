@@ -92,7 +92,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
         MATCH (bill:Bill {remote_id: $remote_id})-
             [rels:SIMILAR_TO*1..2]-(related_bills:Bill) 
         WHERE ALL (rel in rels WHERE rel.content_similarity > $similarity_score) 
-        WITH related_bills.remote_id as coll 
+        WITH related_bills.uuid as coll 
         UNWIND coll as x 
         WITH DISTINCT x 
         RETURN collect(x) AS related_ids
@@ -115,7 +115,7 @@ class Bill(AbstractBaseModel, MixinExternalData):
     @property
     def related_bills(self):
         return [
-            Bill.objects.get(remote_id=bill_id)
+            Bill.objects.get(id=bill_id)
             for bill_id in self.related_bill_ids
         ]
 
