@@ -206,7 +206,7 @@ class Legislator(AbstractBaseModel, MixinExternalData):
     actions = GenericRelation('users.Action', related_query_name="legislator")
 
     # External Data
-    remote_id = models.CharField(max_length=255, db_index=True)
+    remote_id = models.CharField(max_length=255, unique=True)
     state = models.CharField(max_length=255)
     active = models.BooleanField(default=True)
     chamber = models.CharField(max_length=255)

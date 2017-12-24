@@ -17,7 +17,7 @@ from capitolzen.proposals.api.app.serializers import (
     BillSerializer, LegislatorSerializer, CommitteeSerializer
 )
 
-from capitolzen.users.models import User, Action
+from capitolzen.users.models import Action
 
 from logging import getLogger
 
@@ -107,7 +107,10 @@ class CommitteeManager(CongressionalManager):
             'remote_id': remote_id,
             **source
         })
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            logger.error(serializer.errors)
+            logger.error(serializer.initial_data)
+            return None
         instance = serializer.save()
         return instance
 
@@ -163,7 +166,10 @@ class BillManager(CongressionalManager):
             'remote_id': remote_id,
             **source
         })
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            logger.error(serializer.errors)
+            logger.error(serializer.initial_data)
+            return None
         instance = serializer.save()
         return instance
 
@@ -176,7 +182,10 @@ class BillManager(CongressionalManager):
                 'remote_id': bill.remote_id,
                 **source
             })
-            serializer.is_valid(raise_exception=True)
+            if not serializer.is_valid():
+                logger.error(serializer.errors)
+                logger.error(serializer.initial_data)
+                return None
             instance = serializer.save()
             return instance
 
@@ -204,7 +213,10 @@ class LegislatorManager(CongressionalManager):
             'remote_id': remote_id,
             **source
         })
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            logger.error(serializer.errors)
+            logger.error(serializer.initial_data)
+            return None
         instance = serializer.save()
         LegislatorGraph(identifier=instance.id).run()
         return instance
