@@ -77,11 +77,12 @@ def stripe_delete_organization(sender, **kwargs):
 
     logger.debug("STRIPE ORG SYNC - %s - %s" % ('delete', organization.name))
 
-    transaction.on_commit(
-        lambda: stripe_manage_customer.apply_async(kwargs={
-            "organization_id": str(organization.id),
-            "operation": 'delete'
-        }))
+    if organization.stripe_customer_id:
+        transaction.on_commit(
+            lambda: stripe_manage_customer.apply_async(kwargs={
+                "organization_id": str(organization.stripe_customer_id),
+                "operation": 'delete'
+            }))
 
 
 ################################################################################################

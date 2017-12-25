@@ -18,7 +18,7 @@ def intercom_manage_organization(organization_id, operation):
     Create, Update, Delete organization in intercom
 
     :param organization_id:
-    :param op:
+    :param operation:
     :return:
     """
 
@@ -90,8 +90,9 @@ def stripe_manage_customer(organization_id, operation):
     Create, Update, Delete customer in stripe...
     Customer in stripe == Organization on our end.
 
-    :param organization_id:
-    :param op:
+    :param organization_id: when operation = delete, organization_id is actually
+    the stripe customer id.
+    :param operation: create || update || delete
     :return:
     """
 
@@ -137,7 +138,7 @@ def stripe_manage_customer(organization_id, operation):
 
     def _delete():
         try:
-            cu = stripe.Customer.retrieve(organization.stripe_customer_id)
+            cu = stripe.Customer.retrieve(organization_id)
             cu.delete()
         except StripeError:
             pass
