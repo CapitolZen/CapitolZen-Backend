@@ -32,10 +32,10 @@ def intercom_update_user(sender, **kwargs):
         logger.debug("INTERCOM USER SYNC - %s - %s" % ( 'create_or_update', user.username))
 
         transaction.on_commit(
-            lambda: intercom_manage_user.apply_async(kwargs={
-                'user_id': str(user.id),
-                'operation': 'create_or_update'
-            }))
+            lambda: intercom_manage_user.apply_async(args=[
+                str(user.id),
+                'create_or_update'
+            ]))
 
 
 @receiver(post_delete, sender=User)
@@ -50,11 +50,10 @@ def intercom_delete_user(sender, **kwargs):
         user = kwargs.get('instance')
 
         logger.debug("INTERCOM USER SYNC - %s - %s" % ('delete', user.username))
-
-        transaction.on_commit(lambda: intercom_manage_user.apply_async(kwargs={
-            'user_id': str(user.id),
-            'operation': 'delete'
-        }))
+        intercom_manage_user.apply_async(args=[
+            str(user.id),
+            'delete'
+        ])
 
 
 @receiver(user_added)
@@ -76,10 +75,10 @@ def user_manage_organizations(sender, **kwargs):
         logger.debug("INTERCOM USER SYNC - %s - %s" % ('organizations', user.username))
 
         transaction.on_commit(
-            lambda: intercom_manage_user.apply_async(kwargs={
-                'user_id': str(user.id),
-                'operation': 'create_or_update'
-            }))
+            lambda: intercom_manage_user.apply_async(args=[
+                str(user.id),
+                'create_or_update'
+            ]))
 
 ################################################################################
 # MISC

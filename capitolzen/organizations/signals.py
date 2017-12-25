@@ -28,10 +28,10 @@ def intercom_update_organization(sender, **kwargs):
         logger.debug("INTERCOM ORG SYNC - %s - %s" % ('create_or_update', organization.name))
 
         transaction.on_commit(
-            lambda: intercom_manage_organization.apply_async(kwargs={
-                "organization_id": str(organization.id),
-                "operation": 'create_or_update'
-            }))
+            lambda: intercom_manage_organization.apply_async(args=[
+                str(organization.id),
+                'create_or_update'
+            ]))
 
 
 @receiver(post_delete, sender=Organization)
@@ -41,12 +41,10 @@ def intercom_delete_organization(sender, **kwargs):
 
         logger.debug("INTERCOM ORG SYNC - %s - %s" % ('delete', organization.name))
 
-        transaction.on_commit(
-            lambda: intercom_manage_organization.apply_async(kwargs={
-                "organization_id": str(organization.id),
-                "operation": 'delete'
-            }))
-
+        intercom_manage_organization.apply_async(args=[
+            str(organization.id),
+            'delete'
+        ])
 
 ################################################################################################
 # STRIPE
@@ -65,10 +63,10 @@ def stripe_update_organization(sender, **kwargs):
     logger.debug("STRIPE ORG SYNC - %s - %s" % (operation, organization.name))
 
     transaction.on_commit(
-        lambda: stripe_manage_customer.apply_async(kwargs={
-            "organization_id": str(organization.id),
-            "operation": operation,
-        }))
+        lambda: stripe_manage_customer.apply_async(args=[
+            str(organization.id),
+            operation,
+        ]))
 
 
 @receiver(post_delete, sender=Organization)
@@ -78,12 +76,10 @@ def stripe_delete_organization(sender, **kwargs):
     logger.debug("STRIPE ORG SYNC - %s - %s" % ('delete', organization.name))
 
     if organization.stripe_customer_id:
-        transaction.on_commit(
-            lambda: stripe_manage_customer.apply_async(kwargs={
-                "organization_id": str(organization.stripe_customer_id),
-                "operation": 'delete'
-            }))
-
+        stripe_manage_customer.apply_async(args=[
+            str(organization.stripe_customer_id),
+            'delete'
+        ])
 
 ################################################################################################
 # MISC

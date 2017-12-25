@@ -8,8 +8,8 @@ from capitolzen.users.utils import get_intercom_client
 from capitolzen.organizations.models import Organization
 from capitolzen.organizations.utils import get_stripe_client
 
-from celery.utils.log import get_task_logger
-logger = get_task_logger(__name__)
+from logging import getLogger
+logger = getLogger('app')
 
 
 @shared_task()
@@ -21,7 +21,6 @@ def intercom_manage_organization(organization_id, operation):
     :param operation:
     :return:
     """
-
     intercom = get_intercom_client()
 
     if operation != "delete":
@@ -68,12 +67,15 @@ def intercom_manage_organization(organization_id, operation):
         return {'op': 'update', 'id': intercom_company.id}
 
     def _delete():
+        logger.debug(" -- INTERCOM ORG SYNC - %s - %s" % (operation, organization_id))
+        from pprint import pprint
         try:
             intercom_company = intercom.companies.find(company_id=str(organization_id))
+            pprint(intercom_company)
             intercom.companies.delete(intercom_company)
-            logger.debug(" -- INTERCOM ORG SYNC - %s - %s" % (operation, intercom_company.id))
-            return {'op': 'delete', 'id': intercom_company.id}
+            return {'op': 'delete', 'id': organization_id}
         except ResourceNotFound:
+            logger.debug(" -- INTERCOM ORG SYNC - Could not delete %s" % organization_id)
             pass
 
     if operation == "create_or_update":
