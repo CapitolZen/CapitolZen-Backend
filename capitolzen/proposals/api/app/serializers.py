@@ -11,7 +11,7 @@ from config.serializers import (
 from capitolzen.organizations.models import Organization
 from capitolzen.groups.models import Group
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee, Event
-
+from rest_framework import serializers
 
 class LegislatorSerializer(BaseModelSerializer):
     class Meta:
@@ -188,12 +188,32 @@ class WrapperSerializer(BaseInternalModelSerializer):
         'bill.sponsor': LegislatorSerializer,
     }
 
+    bill = ResourceRelatedField(
+        many=False, queryset=Bill.objects,
+        required=False,
+        allow_null=True)
 
-    bill = ResourceRelatedField(many=False, queryset=Bill.objects, required=False, allow_null=True)
     organization = ResourceRelatedField(
-        many=False, queryset=Organization.objects
+        many=False,
+        read_only=True,
     )
-    group = ResourceRelatedField(many=False, queryset=Group.objects)
+
+    group = ResourceRelatedField(
+        many=False,
+        queryset=Group.objects
+    )
+
+    def validate(self, attrs):
+        """
+        We don't allow the frontend to dictate the organization.
+        :param attrs:
+        :return:
+        """
+        if not self.context.get('request').organization:
+            raise serializers.ValidationError(detail="Cannot create without an organization")
+
+        attrs['organization'] = self.context.get('request').organization
+        return attrs
 
     class Meta:
         model = Wrapper
