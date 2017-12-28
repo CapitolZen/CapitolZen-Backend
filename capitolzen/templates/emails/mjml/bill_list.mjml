@@ -15,34 +15,11 @@
       <mj-section background-color="#ffffff">
         <mj-column>
 
-          <mj-text font-size="13px" color="#525252">
-            {{ message |safe }}
-          </mj-text>
-
+          <mj-text align="center" font-size="14px" color="#353339">{{ message |safe }}</mj-text>
         </mj-column>
       </mj-section>
       <mj-section border-radius="0px 0px 5px 5px" padding="0 0 20px 0" background-color="#ffffff">
         <mj-column>
-          <!--<mj-table>
-                <tr style="border-bottom:1px solid #ecedee;text-align:left;padding:15px 0;">
-                  <th style="padding: 0 15px 0 0;">ID</th>
-                  <th style="padding: 0 15px;">State</th>
-                  <th style="padding: 0 15px;">Sponsor</th>
-                  <th style="padding: 0 15px;">Info</th>
-                  <th style="padding: 0 0 0 15px;">View</th>
-                </tr>
-                {% for bill in bills %}
-                    <tr>
-                      <td style="padding: 0 15px 0 0;">{{bill.state_id}}</td>
-                      <td style="padding: 0 15px;">{{bill.state}}</td>
-                      <td style="padding: 0 0 0 15px;">{{bill.sponsor}}</td>
-                      <td style="padding: 0 0 0 15px;">{{bill.status}}</td>
-                      <td style="padding: 0 0 0 15px;">
-                          <a href="{{bill.link}}">View</a>
-                      </td>
-                    </tr>
-                {% endfor %}
-            </mj-table>!-->
           <mj-table>
             <tr style="font-size:13px;border-bottom:1px solid #ecedee;text-align:left;">
               <th style="padding: 0 15px 0 0;">ID</th>
@@ -62,9 +39,7 @@
             {% endfor %}
           </mj-table>
         </mj-column>
-
       </mj-section>
-
       <mj-include path="./partials/footer" />
       <!-- or 'footer.mjml' -->
 

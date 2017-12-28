@@ -5,7 +5,7 @@
     <mj-font name="Montserrat" href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500" />
     <mj-attributes>
       <mj-all font-family="Montserrat, Helvetica, Arial, sans-serif" />
-      <mj-text font-weight="400" font-size="16" color="#000000" line-height="24px" />
+      <mj-text font-weight="400" font-size="16" color="#353339" line-height="24px" />
       <mj-section padding="0" />
     </mj-attributes>
   </mj-head>

@@ -14,7 +14,7 @@
       <mj-section border-radius="0 0 5px 5px" background-color="#FFFFFF">
         <mj-column>
 
-          <mj-text align="center" font-size="14px" color="#525252">
+          <mj-text padding-bottom="30px" align="center" font-size="14px" color="#353339">
             {{ message |safe }}
           </mj-text>
 
