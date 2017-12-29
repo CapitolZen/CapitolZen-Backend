@@ -508,7 +508,8 @@ GRAPH_DATABASE = {
     "password": env('GRAPH_PASSWORD', default="neo4jpw"),
     "host": env('GRAPH_HOST', default='neo4j'),
     "secure": env.bool("GRAPH_SECURE", default=False),
-    "bolt": True
+    "bolt": True,
+    "bolt_port": env.int('GRAPH_PORT', default=7687)
 }
 
 # AWS
