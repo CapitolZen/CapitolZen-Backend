@@ -3,6 +3,7 @@ import pytz
 import requests_mock
 from unittest import mock
 from datetime import datetime
+from py2neo import Graph
 
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from elasticsearch.exceptions import NotFoundError
@@ -41,6 +42,9 @@ class TestBillManager(TestCase):
             [bill.delete() for bill in s.execute()]
         except NotFoundError:
             pass
+        Graph(**settings.GRAPH_DATABASE).data(
+            "MATCH (n) DETACH DELETE n"
+        )
 
     @mock.patch('capitolzen.proposals.managers.BillManager._get_remote_list')
     def test_get_remote_list(self, m):
@@ -74,9 +78,10 @@ class TestBillManager(TestCase):
 
     @requests_mock.mock(real_http=True)
     def test_get_remote_detail_summary_htm(self, m):
+        bill_id = "MIB00012114"
         with open('capitolzen/proposals/tests/sample_data/bills/'
-                  'MIB00012114.json') as data_file:
-            m.get('%s%s/MIB00012114/' % (settings.OPEN_STATES_URL, "bills"),
+                  '%s.json' % bill_id) as data_file:
+            m.get('%s%s/%s/' % (settings.OPEN_STATES_URL, "bills", bill_id),
                   json=json.load(data_file), status_code=200)
         with open('capitolzen/proposals/tests/sample_data/bills/'
                   '2017-HAR-0003.htm', 'rb') as data_file:
@@ -84,14 +89,31 @@ class TestBillManager(TestCase):
                   'resolutionadopted/House/htm/2017-HAR-0003.htm',
                   content=data_file.read(), status_code=200)
         self.manager(AVAILABLE_STATES[0].name).update(
-            None, "MIB00012114", None
+            None, bill_id, None
         )
-        ingest_attachment(str(Bill.objects.get(remote_id='MIB00012114').id))
+        ingest_attachment(str(Bill.objects.get(remote_id=bill_id).id))
+        bill = Bill.objects.get(remote_id=bill_id)
         self.assertIn(
             "Reps. Lauwers and Greig offered the following resolution: "
             "House Resolution No.",
-            Bill.objects.get(remote_id='MIB00012114').summary
+            bill.summary
         )
+        response = Graph(**settings.GRAPH_DATABASE).data(
+            'MATCH (bill:Bill {remote_id: $remote_id}) RETURN bill',
+            parameters={"remote_id": bill_id}
+        )
+        self.assertEqual(response[0]['bill']['title'], bill.title)
+        self.assertEqual(response[0]['bill']['uuid'], str(bill.id))
+
+        response = Graph(**settings.GRAPH_DATABASE).data(
+            'MATCH (bill:Bill {remote_id: $remote_id})<-[r]-(leg)'
+            ' RETURN bill, leg',
+            parameters={"remote_id": bill_id}
+        )
+        self.assertEqual(response[0]['leg']['remote_id'], "MIL000275")
+        self.assertEqual(response[0]['leg']['last_name'], "Greig")
+        self.assertEqual(response[1]['leg']['remote_id'], "MIL000236")
+        self.assertEqual(response[1]['leg']['last_name'], "Lauwers")
 
     @requests_mock.mock(real_http=True)
     def test_get_remote_detail_updates(self, m):
@@ -127,9 +149,10 @@ class TestBillManager(TestCase):
 
     @requests_mock.mock(real_http=True)
     def test_get_remote_detail_summary_pdf(self, m):
+        bill_id = 'ALB00011538'
         with open('capitolzen/proposals/tests/sample_data/bills/'
-                  'ALB00011538.json') as data_file:
-            m.get('%s%s/ALB00011538/' % (settings.OPEN_STATES_URL, "bills"),
+                  '%s.json' % bill_id) as data_file:
+            m.get('%s%s/%s/' % (settings.OPEN_STATES_URL, "bills", bill_id),
                   json=json.load(data_file), status_code=200)
         with open('capitolzen/proposals/tests/sample_data/bills/'
                   'SB4-enr.pdf', 'rb') as data_file:
@@ -137,16 +160,31 @@ class TestBillManager(TestCase):
                   'SearchableInstruments/2017rs/PrintFiles/SB4-enr.pdf',
                   content=data_file.read(), status_code=200)
         self.manager("AL").update(
-            None, "ALB00011538", None
+            None, bill_id, None
         )
-        ingest_attachment(str(Bill.objects.get(remote_id='ALB00011538').id))
+        ingest_attachment(str(Bill.objects.get(remote_id=bill_id).id))
+        bill = Bill.objects.get(remote_id=bill_id)
         self.assertIn(
             'Director of Legislative Services shall have all powers',
-            Bill.objects.get(remote_id='ALB00011538').summary
+            bill.summary
         )
         self.assertTrue(
-            len(Bill.objects.get(remote_id='ALB00011538').summary) < 240
+            len(bill.summary) < 240
         )
+        response = Graph(**settings.GRAPH_DATABASE).data(
+            'MATCH (bill:Bill {remote_id: $remote_id}) RETURN bill',
+            parameters={"remote_id": bill_id}
+        )
+        self.assertEqual(response[0]['bill']['title'], bill.title)
+        self.assertEqual(response[0]['bill']['uuid'], str(bill.id))
+
+        response = Graph(**settings.GRAPH_DATABASE).data(
+            'MATCH (bill:Bill {remote_id: $remote_id})<-[r]-(leg)'
+            ' RETURN bill, leg',
+            parameters={"remote_id": bill_id}
+        )
+        self.assertEqual(response[0]['leg']['remote_id'], "ALL000010")
+        self.assertEqual(response[0]['leg']['last_name'], "Dial")
 
     @requests_mock.mock()
     def test_get_remote_detail_no_data(self, m):
@@ -234,7 +272,6 @@ class TestBillManager(TestCase):
                               "for unemployment benefits; require. Amends "
                               "sec. 28 of 1936 (Ex Sess) PA 1 (MCL 421.28)."
         )
-        self.assertTrue(count.get('count') <= 4)
 
 
 class TestLegislatorsManager(TestCase):

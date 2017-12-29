@@ -10,12 +10,14 @@ import dateutil.parser
 
 from capitolzen.meta.notifications import create_asana_task
 
-from capitolzen.proposals.models import Bill, Legislator, Committee, Event, Wrapper
+from capitolzen.proposals.models import (
+    Bill, Legislator, Committee, Event, Wrapper
+)
 from capitolzen.proposals.api.app.serializers import (
     BillSerializer, LegislatorSerializer, CommitteeSerializer
 )
 
-from capitolzen.users.models import User, Action
+from capitolzen.users.models import Action
 
 from logging import getLogger
 
@@ -82,9 +84,6 @@ class CongressionalManager(object):
 
         return True
 
-    def update_local_instance(self, instance_id):
-        raise NotImplementedError()
-
 
 class CommitteeManager(CongressionalManager):
     index = "committees"
@@ -105,12 +104,12 @@ class CommitteeManager(CongressionalManager):
             'remote_id': remote_id,
             **source
         })
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            logger.error(serializer.errors)
+            logger.error(serializer.initial_data)
+            return None
         instance = serializer.save()
         return instance
-
-    def update_local_instance(self, instance_id):
-        pass
 
 
 class BillManager(CongressionalManager):
@@ -161,25 +160,12 @@ class BillManager(CongressionalManager):
             'remote_id': remote_id,
             **source
         })
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            logger.error(serializer.errors)
+            logger.error(serializer.initial_data)
+            return None
         instance = serializer.save()
         return instance
-
-    def update_local_instance(self, instance_id):
-        try:
-            bill = Bill.objects.get(id=instance_id)
-            source = self._get_remote_detail(bill.remote_id)
-            source = self._cleanup_source(source)
-            serializer = BillSerializer(bill, data={
-                'remote_id': bill.remote_id,
-                **source
-            })
-            serializer.is_valid(raise_exception=True)
-            instance = serializer.save()
-            return instance
-
-        except Bill.DoesNotExist:
-            return "Did not provide a valid ID"
 
 
 class LegislatorManager(CongressionalManager):
@@ -192,6 +178,7 @@ class LegislatorManager(CongressionalManager):
         )
 
     def update(self, local_id, remote_id, resource_info):
+        from capitolzen.proposals.graphs import LegislatorGraph
         source = self._get_remote_detail(remote_id)
         try:
             instance = Legislator.objects.get(remote_id=remote_id)
@@ -201,16 +188,17 @@ class LegislatorManager(CongressionalManager):
             'remote_id': remote_id,
             **source
         })
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            logger.error(serializer.errors)
+            logger.error(serializer.initial_data)
+            return None
         instance = serializer.save()
+        LegislatorGraph(identifier=instance.id).run()
         return instance
 
     def run(self):
         for human in self._get_remote_list():
             self.update(None, human['id'], human)
-
-    def update_local_instance(self, instance_id):
-        pass
 
 
 class EventManager(object):

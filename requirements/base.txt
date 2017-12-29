@@ -1,6 +1,6 @@
 #
 # Django Core
-Django==1.11.6
+Django==1.11.8
 
 #
 # Connections / Libs / Etc
@@ -10,7 +10,7 @@ redis>=2.10.5
 requests==2.18.4
 psycopg2==2.7.3.2
 celery[redis]==4.1.0
-boto3==1.4.7
+boto3==1.5.6
 ipython==6.2.1
 stripe==1.62.0
 python-intercom==3.1.0
@@ -51,7 +51,7 @@ django-debug-toolbar==1.8
 
 #
 # DRF
-djangorestframework==3.7.1
+djangorestframework==3.7.7
 coreapi==2.3.3
 djangorestframework-jwt==1.11.0
 djangorestframework-jsonapi==2.2.0
@@ -66,3 +66,7 @@ pyopenstates==1.1.0
 sumy==0.7.0
 beautifulsoup4==4.6.0
 numpy==1.13.0
+py2neo==3.1.2
+gensim==3.2.0
+textblob==0.15.0
+rake-nltk==1.0.1
