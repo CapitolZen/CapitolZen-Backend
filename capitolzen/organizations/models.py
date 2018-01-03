@@ -81,6 +81,7 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     available_states = ArrayField(models.CharField(
         max_length=255, blank=True, null=True), default=['MI']
     )
+    features = JSONField(default=list)
 
     def owner_user_account(self):
         """Because I can never remember how to get this"""

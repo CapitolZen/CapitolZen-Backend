@@ -25,6 +25,15 @@ def avatar_directory_path(instance, filename):
     return '{0}/misc/{1}'.format(instance.id, filename)
 
 
+def default_notifications():
+    return {
+        'bill:introduced': True,
+        'wrapper:updated': True,
+        'committee:meeting': [],
+        'user:mention': True
+    }
+
+
 class User(AbstractUser, AbstractNoIDModel):
     first_name = None
     last_name = None
@@ -35,13 +44,16 @@ class User(AbstractUser, AbstractNoIDModel):
         blank=True, null=True, max_length=255,
         upload_to=avatar_directory_path
     )
-    preferences = JSONField(default=list)
+
+    features = JSONField(default=list)
+    notification_preferences = JSONField(default=default_notifications)
 
     def __str__(self):
         return self.name or self.username
 
     class JSONAPIMeta:
         resource_name = "users"
+
 
     @staticmethod
     @allow_staff_or_superuser
