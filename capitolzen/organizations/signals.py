@@ -56,16 +56,12 @@ def stripe_update_organization(sender, **kwargs):
     :param kwargs:
     :return:
     """
-    created = kwargs.get('created')
     organization = kwargs.get('instance')
-    operation = 'create' if created else 'update'
-
-    logger.debug("STRIPE ORG SYNC - %s - %s" % (operation, organization.name))
-
+    logger.debug("STRIPE ORG SYNC - %s - %s" % ("create_or_update", organization.name))
     transaction.on_commit(
         lambda: stripe_manage_customer.apply_async(args=[
             str(organization.id),
-            operation,
+            "create_or_update",
         ]))
 
 
