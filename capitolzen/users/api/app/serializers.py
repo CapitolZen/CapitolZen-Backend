@@ -84,7 +84,7 @@ class UserSerializer(BaseInternalModelSerializer):
             'metadata',
             'organization_role',
             'features',
-            'preferences'
+            'notification_preferences'
         )
         read_only_fields = (
             'id',
