@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.conf import settings
 
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework.serializers import ValidationError
@@ -8,10 +9,10 @@ from config.serializers import (
     BaseInternalModelSerializer
 )
 
-from capitolzen.organizations.models import Organization
 from capitolzen.groups.models import Group
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee, Event
 from rest_framework import serializers
+
 
 class LegislatorSerializer(BaseModelSerializer):
     class Meta:
@@ -93,7 +94,8 @@ class BillSerializer(BaseModelSerializer):
             'introduced_date',
             'created_at',
             'updated_at',
-            'bill_text_analysis'
+            'bill_text_analysis',
+            'related_bill_ids'
         )
 
     class JSONAPIMeta:
@@ -125,7 +127,6 @@ class BillSerializer(BaseModelSerializer):
                 "identifier": str(instance.pk)
             }))
         return instance
-
 
 
 class CommitteeSerializer(BaseModelSerializer):
@@ -163,7 +164,12 @@ class CommitteeSerializer(BaseModelSerializer):
 class EventSerializer(BaseInternalModelSerializer):
     committee = ResourceRelatedField(many=False, queryset=Committee.objects, required=False, allow_null=True)
     legislator = ResourceRelatedField(many=False, queryset=Legislator.objects, required=False, allow_null=True)
-
+    created = serializers.DateTimeField(
+        format=settings.API_DATETIME_FORMAT,
+        read_only=True,
+        help_text="ISO 8601 formatted timestamp identifying when the object "
+                  "was created in the database."
+    )
     class Meta:
         model = Event
         fields = (
