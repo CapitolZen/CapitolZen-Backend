@@ -83,6 +83,8 @@ class UserSerializer(BaseInternalModelSerializer):
             'avatar',
             'metadata',
             'organization_role',
+            'features',
+            'preferences'
         )
         read_only_fields = (
             'id',
