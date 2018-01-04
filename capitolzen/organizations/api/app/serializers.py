@@ -34,7 +34,9 @@ class OrganizationSerializer(BaseInternalModelSerializer):
             'avatar',
             'available_states',
             'user_is_member',
-            'features'
+            'features',
+            'client_label',
+            'client_label_plural'
         )
 
     def create(self, validated_data):
