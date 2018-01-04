@@ -33,7 +33,8 @@ class OrganizationSerializer(BaseInternalModelSerializer):
             'plan_name',
             'avatar',
             'available_states',
-            'user_is_member'
+            'user_is_member',
+            'features'
         )
 
     def create(self, validated_data):
