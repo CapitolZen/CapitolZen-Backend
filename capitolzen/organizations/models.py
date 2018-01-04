@@ -81,7 +81,10 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     available_states = ArrayField(models.CharField(
         max_length=255, blank=True, null=True), default=['MI']
     )
+
     features = JSONField(default=list)
+    client_label = models.CharField(max_length=255, default='Client')
+    client_label_plural = models.CharField(max_length=255, default='Clients')
 
     def owner_user_account(self):
         """Because I can never remember how to get this"""
