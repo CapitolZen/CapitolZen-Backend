@@ -54,6 +54,29 @@ class User(AbstractUser, AbstractNoIDModel):
     class JSONAPIMeta:
         resource_name = "users"
 
+    def has_notification(self, action_type, **kwargs):
+        prefs = getattr(self, 'notification_preferences', False)
+
+        if not prefs:
+            return False
+
+        # Check for committee id because of all the lists
+        if action_type == 'committee:meeting':
+            if not kwargs.get('committee_id', False):
+                return False
+            committees = prefs.get('committee:meeting', [])
+
+            # This is getting kind of shitty...
+            if committees[0] == 'all':
+                return True
+
+            if not len(committees):
+                return False
+
+            return kwargs['committee_id'] in committees
+
+        # Finally check the easy shit
+        return prefs.get(action_type, False)
 
     @staticmethod
     @allow_staff_or_superuser
