@@ -1,8 +1,17 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from .models import Organization
-from .tasks import intercom_manage_organization, stripe_manage_customer
+from .tasks import (
+    intercom_manage_organization,
+    stripe_manage_customer,
+    chargebee_manage_customer)
+from .services import (
+    ChargebeeOrganizationSync,
+    IntercomOrganizationSync,
+    StripeOrganizationSync)
+
 from organizations.signals import user_added, user_removed
+
 from cacheops import invalidate_obj
 from capitolzen.groups.models import Group
 from django.db import transaction
@@ -22,7 +31,7 @@ def intercom_update_organization(sender, **kwargs):
     :param kwargs:
     :return:
     """
-    if settings.INTERCOM_ENABLE_SYNC:
+    if settings.INTERCOM_ENABLE_SYNC and not kwargs.get('created'):
         organization = kwargs.get('instance')
 
         logger.debug("INTERCOM ORG SYNC - %s - %s" % ('create_or_update', organization.name))
@@ -56,13 +65,14 @@ def stripe_update_organization(sender, **kwargs):
     :param kwargs:
     :return:
     """
-    organization = kwargs.get('instance')
-    logger.debug("STRIPE ORG SYNC - %s - %s" % ("create_or_update", organization.name))
-    transaction.on_commit(
-        lambda: stripe_manage_customer.apply_async(args=[
-            str(organization.id),
-            "create_or_update",
-        ]))
+    if not kwargs.get('created'):
+        organization = kwargs.get('instance')
+        logger.debug("STRIPE ORG SYNC - %s - %s" % ("create_or_update", organization.name))
+        transaction.on_commit(
+            lambda: stripe_manage_customer.apply_async(args=[
+                str(organization.id),
+                "create_or_update",
+            ]))
 
 
 @receiver(post_delete, sender=Organization)
@@ -78,8 +88,77 @@ def stripe_delete_organization(sender, **kwargs):
         ])
 
 ################################################################################################
+# CHARGEBEE
+################################################################################################
+@receiver(post_save, sender=Organization)
+def chargebee_update_organization(sender, **kwargs):
+    """
+    :param sender:
+    :param kwargs:
+    :return:
+    """
+    if not kwargs.get('created'):
+        organization = kwargs.get('instance')
+        logger.debug("CHARGEBEE ORG SYNC - %s - %s" % ("create_or_update", organization.name))
+        transaction.on_commit(
+            lambda: chargebee_manage_customer.apply_async(args=[
+                str(organization.id),
+                "create_or_update",
+            ]))
+
+
+@receiver(post_delete, sender=Organization)
+def chargebee_delete_organization(sender, **kwargs):
+    organization = kwargs.get('instance')
+
+    logger.debug("CHARGEBEE ORG SYNC - %s - %s" % ('delete', organization.name))
+
+    if organization.chargebee_customer_id:
+        chargebee_manage_customer.apply_async(args=[
+            str(organization.stripe_customer_id),
+            'delete'
+        ])
+
+################################################################################################
 # MISC
 ################################################################################################
+"""
+@receiver(post_save, sender=Organization)
+def setup_third_party_organization_stuff(sender, **kwargs):
+
+
+    Having lots of problems with sucking at celery and just general programming issues.
+
+    Not a big deal for update syncing, but for the initial resource creation we kind of need to be blocking
+    and specific.
+
+    :param sender:
+    :param kwargs:
+    :return:
+
+
+    if kwargs.get('created'):
+        from pprint import pprint
+        organization = kwargs.get('instance')
+
+        logger.debug("setup_third_party_organization_stuff - %s - %s" % ('START', organization.name))
+
+        # Intercom
+        IntercomOrganizationSync().execute(organization, "create_or_update")
+        logger.debug("setup_third_party_organization_stuff - %s - %s" % ('INTERCOM DONE', organization.name))
+
+        # Stripe
+        StripeOrganizationSync().execute(organization, "create_or_update")
+        logger.debug("setup_third_party_organization_stuff - %s - %s" % ('STRIPE DONE', organization.name))
+
+        # Chargebee
+        ChargebeeOrganizationSync().execute(organization, "create_or_update")
+        logger.debug("setup_third_party_organization_stuff - %s - %s" % ('CHARGEBEE DONE', organization.name))
+
+        pprint(organization.__dict__)
+"""
+
+
 @receiver(user_removed)
 @receiver(user_added)
 def invalidate_organization_cache(sender, **kwargs):

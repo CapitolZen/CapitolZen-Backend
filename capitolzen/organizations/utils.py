@@ -10,3 +10,4 @@ def get_stripe_client():
 def get_chargebee_client():
     import chargebee
     chargebee.configure(settings.CHARGEBEE_API_KEY, settings.CHARGEBEE_SITE)
+    return chargebee

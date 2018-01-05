@@ -32,7 +32,7 @@ class IntercomUserSync(object):
             companies.append({
                 'company_id': str(organization.id)
             })
-        data.companies = companies
+        data['companies'] = companies
         return data
 
     def _create_or_update(self):

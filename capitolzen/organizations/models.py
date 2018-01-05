@@ -18,7 +18,7 @@ from organizations.abstract import (
 )
 from capitolzen.meta.billing import BASIC, PlanChoices
 from capitolzen.organizations.notifications import email_member_invite
-
+from config.models import ModelDiffMixin
 
 def avatar_directory_path(instance, filename):
     """
@@ -55,6 +55,7 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     plan_name = models.CharField(max_length=256, blank=True, null=True)
 
     stripe_customer_id = models.CharField(max_length=256, blank=True)
+    chargebee_customer_id = models.CharField(max_length=256, blank=True)
     stripe_subscription_id = models.CharField(max_length=256, blank=True)
     stripe_payment_tokens = JSONField(blank=True, null=True)
 
@@ -84,7 +85,10 @@ class Organization(AbstractOrganization, AbstractBaseModel):
 
     def owner_user_account(self):
         """Because I can never remember how to get this"""
-        return self.owner.organization_user.user
+        if self.owner:
+            return self.owner.organization_user.user
+        else:
+            return None
 
     class Meta(AbstractOrganization.Meta):
         abstract = False

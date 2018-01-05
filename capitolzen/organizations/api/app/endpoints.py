@@ -24,6 +24,8 @@ from capitolzen.organizations.api.app.serializers import (
     OrganizationSerializer, OrganizationInviteSerializer
 )
 
+from capitolzen.organizations.utils import get_chargebee_client
+from django.conf import settings
 
 class OrganizationFilter(filters.FilterSet):
     class Meta:
@@ -90,6 +92,21 @@ class OrganizationViewSet(mixins.RetrieveModelMixin,
         serializer = OrganizationSerializer(org)
 
         return Response(serializer.data)
+
+    @detail_route(methods=['GET'])
+    def billing_session(self, request, pk):
+        organization = self.get_object()
+        chargebee = get_chargebee_client()
+
+        result = chargebee.PortalSession.create({
+            "redirect_url": "https://iframe.com",
+            "customer": {
+                "id": organization.chargebee_customer_id
+            }
+        })
+        portal_session = result.portal_session
+
+        return Response(portal_session.d)
 
 
 class InviteFilter(filters.FilterSet):
