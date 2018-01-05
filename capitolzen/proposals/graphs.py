@@ -181,10 +181,42 @@ class BillGraph(BasicGraph):
                 "similarity_score": score.item()
             })
 
+    def update_related_bills(self):
+        # Returns a list of related bills
+        graph = Graph(**settings.GRAPH_DATABASE)
+        query = """
+            MATCH (bill:Bill {remote_id: $remote_id})-
+                [rels:SIMILAR_TO*1..2]-(related_bills:Bill) 
+            WHERE ALL (rel in rels 
+                WHERE rel.content_similarity > $similarity_score) 
+            WITH related_bills.uuid as coll 
+            UNWIND coll as x 
+            WITH DISTINCT x 
+            RETURN collect(x) AS related_ids
+            """
+        response = graph.data(query, parameters={
+            "remote_id": self.instance.remote_id,
+            # TODO need to figure out a way to dynamically identify this
+            # similarity score as it may be too strict for some nodes
+            # and too open for others. Causing large lists, small lists, and
+            # no lists even though the bill may have some bills that relate to
+            # it.
+            "similarity_score": 0.125
+        })
+        try:
+            result = response[0]['related_ids']
+        except IndexError:
+            result = []
+        self.instance.related_bill_ids = result
+        self.instance.save()
+
+        return result
+
     def run(self):
         self.merge()
         self.link_to_sponsors()
         self.create_similarity_relation()
+        self.update_related_bills()
 
 
 class LegislatorGraph(BasicGraph):
