@@ -19,7 +19,6 @@ from capitolzen.users.notifications import email_user_password_reset_request
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import Action
 from capitolzen.organizations.services import (
-    ChargebeeOrganizationSync,
     IntercomOrganizationSync,
     StripeOrganizationSync)
 
@@ -182,12 +181,6 @@ class RegistrationSerializer(serializers.Serializer):
 
         # Stripe
         StripeOrganizationSync().execute(organization, "create_or_update")
-
-        # Chargebee
-        ChargebeeOrganizationSync().execute(organization, "create_or_update")
-
-        from pprint import pprint
-        pprint(organization.__dict__)
 
         return True
 

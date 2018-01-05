@@ -18,7 +18,7 @@ from organizations.abstract import (
 )
 from capitolzen.meta.billing import BASIC, PlanChoices
 from capitolzen.organizations.notifications import email_member_invite
-from config.models import ModelDiffMixin
+
 
 def avatar_directory_path(instance, filename):
     """
@@ -55,19 +55,15 @@ class Organization(AbstractOrganization, AbstractBaseModel):
     plan_name = models.CharField(max_length=256, blank=True, null=True)
 
     stripe_customer_id = models.CharField(max_length=256, blank=True)
-    chargebee_customer_id = models.CharField(max_length=256, blank=True)
     stripe_subscription_id = models.CharField(max_length=256, blank=True)
     stripe_payment_tokens = JSONField(blank=True, null=True)
 
+    # Billing
     billing_name = models.CharField(max_length=256, blank=True, null=True)
     billing_email = models.EmailField(max_length=256, blank=True, null=True)
     billing_phone = models.CharField(max_length=256, blank=True, null=True)
-    billing_address_one = models.CharField(
-        max_length=254, null=True, blank=True
-    )
-    billing_address_two = models.CharField(
-        max_length=254, blank=True, null=True
-    )
+    billing_address_one = models.CharField(max_length=254, null=True, blank=True)
+    billing_address_two = models.CharField(max_length=254, blank=True, null=True)
     billing_city = models.CharField(max_length=254, null=True, blank=True)
     billing_state = models.CharField(max_length=100, null=True, blank=True)
     billing_zip_code = models.CharField(max_length=10, null=True, blank=True)
@@ -128,20 +124,6 @@ class Organization(AbstractOrganization, AbstractBaseModel):
 
     def has_object_create_permission(self, request):
         return request.user.is_authenticated
-
-    def create_subscription(self, plan=BASIC):
-        stripe.api_key = 'asdf'
-        sub = stripe.subscription.create(
-            customer=self.stripe_customer_id,
-            plan=plan,
-        )
-
-        self.stripe_subscription_id = sub.id
-        self.save()
-
-    def update_subscription(self, plan, **kwargs):
-        # sub = self.stripe_subscription_id
-        return True
 
 
 class OrganizationUser(AbstractOrganizationUser):

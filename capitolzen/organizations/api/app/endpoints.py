@@ -24,8 +24,8 @@ from capitolzen.organizations.api.app.serializers import (
     OrganizationSerializer, OrganizationInviteSerializer
 )
 
-from capitolzen.organizations.utils import get_chargebee_client
-from django.conf import settings
+from capitolzen.organizations.utils import get_stripe_client
+
 
 class OrganizationFilter(filters.FilterSet):
     class Meta:
@@ -66,7 +66,6 @@ class OrganizationViewSet(mixins.RetrieveModelMixin,
                           mixins.UpdateModelMixin,
                           mixins.ListModelMixin,
                           viewsets.GenericViewSet):
-
     serializer_class = OrganizationSerializer
     permission_classes = (DRYPermissions,)
     queryset = Organization.objects.all()
@@ -90,23 +89,50 @@ class OrganizationViewSet(mixins.RetrieveModelMixin,
     def current(self, request):
         org = Organization.objects.filter(users=request.user).last()
         serializer = OrganizationSerializer(org)
-
         return Response(serializer.data)
 
     @detail_route(methods=['GET'])
-    def billing_session(self, request, pk):
+    def billing(self, request, pk):
         organization = self.get_object()
-        chargebee = get_chargebee_client()
+        stripe = get_stripe_client()
 
-        result = chargebee.PortalSession.create({
-            "redirect_url": "https://iframe.com",
-            "customer": {
-                "id": organization.chargebee_customer_id
-            }
-        })
-        portal_session = result.portal_session
+        data = {}
 
-        return Response(portal_session.d)
+        if organization.stripe_subscription_id:
+            data['subscription'] = stripe.Subscription.retrieve(organization.stripe_subscription_id)
+        else:
+            data['subscription'] = None
+
+        if organization.stripe_customer_id:
+            data['customer'] = stripe.Customer.retrieve(organization.stripe_customer_id)
+        else:
+            data['customer'] = None
+
+        return Response(data)
+
+    @detail_route(methods=['POST'])
+    def update_subscription(self, request, pk):
+        organization = self.get_object()
+        stripe = get_stripe_client()
+        data = request.data
+        new_plan = data.get('plan')
+
+        subscription = stripe.Subscription.retrieve(organization.stripe_subscription_id)
+        item_id = subscription['items']['data'][0].id
+
+        stripe.Subscription.modify(
+            organization.stripe_subscription_id,
+            items=[{
+                "id": item_id,
+                "plan": new_plan,
+            }],
+        )
+
+        subscription.save()
+        organization.plan_name = new_plan
+        organization.save()
+
+        return Response(subscription)
 
 
 class InviteFilter(filters.FilterSet):

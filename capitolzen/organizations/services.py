@@ -1,9 +1,8 @@
 from intercom.errors import ResourceNotFound
 from stripe.error import StripeError
-from chargebee.api_error import InvalidRequestError
 from capitolzen.users.utils import get_intercom_client
-from capitolzen.organizations.models import Organization
-from capitolzen.organizations.utils import get_stripe_client, get_chargebee_client
+from django.conf import settings
+from capitolzen.organizations.utils import get_stripe_client
 
 from logging import getLogger
 logger = getLogger('app')
@@ -122,6 +121,18 @@ class StripeOrganizationSync(object):
 
         if customer:
             self.organization.stripe_customer_id = customer.get('id')
+
+            # Also subscribe them to the free plan.
+            subscription = self.stripe.Subscription.create(
+                customer=self.organization.stripe_customer_id,
+                items=[
+                    {
+                        "plan": settings.STRIPE_DEFAULT_PLAN_ID,
+                    },
+                ]
+            )
+            self.organization.plan_name = settings.STRIPE_DEFAULT_PLAN_ID
+            self.organization.stripe_subscription_id = subscription.get('id')
             self.organization.save()
             return customer
         else:
@@ -172,80 +183,3 @@ class StripeOrganizationSync(object):
             return self._create_or_update()
         elif operation == "delete":
             return self._delete()
-
-
-class ChargebeeOrganizationSync(object):
-    """
-
-    """
-    chargebee = None
-    organization = None
-    organization_id = None
-
-    def __init__(self):
-        self.chargebee = get_chargebee_client()
-
-    def build_resource_data(self):
-        owner = self.organization.owner.organization_user.user
-
-        return {
-            'id': str(self.organization.id),
-            'company': self.organization.name,
-            'email': owner.username if owner else None,
-        }
-
-    def _create(self):
-        try:
-            response = self.chargebee.Customer.create(self.build_resource_data())
-        except InvalidRequestError:
-            return False
-
-        if response.customer:
-            self.organization.chargebee_customer_id = response.customer.id
-            self.organization.save()
-            return response.customer
-        else:
-            return False
-
-    def _create_or_update(self):
-        if self.organization.chargebee_customer_id:
-            #customer = self.stripe.Customer.retrieve(self.organization.stripe_customer_id)
-            return False
-        else:
-            customer = self._create()
-
-
-        #data = self.build_resource_data()
-
-        # for key in data:
-        #    setattr(customer, key, data[key])
-
-        # customer.save()
-        return customer
-
-    def _delete(self):
-        try:
-            result = self.chargebee.Customer.delete(self.organization_id)
-        except APIError:
-            return False
-
-    def execute(self, organization, operation):
-        """
-
-        :param organization:
-        :param operation:
-        :return:
-        """
-
-        if operation != "delete":
-            self.organization = organization
-            self.organization_id = organization.id
-        else:
-            self.organization = None
-            self.organization_id = organization
-
-        if operation == "create_or_update":
-            return self._create_or_update()
-        elif operation == "delete":
-            return self._delete()
-
