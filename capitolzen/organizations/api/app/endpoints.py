@@ -134,6 +134,18 @@ class OrganizationViewSet(mixins.RetrieveModelMixin,
 
         return Response(subscription)
 
+    @detail_route(methods=['POST'])
+    def update_source(self, request, pk):
+        organization = self.get_object()
+        stripe = get_stripe_client()
+        data = request.data
+        token = data.get('token').get('id')
+        customer = stripe.Customer.retrieve(organization.stripe_customer_id)
+        customer.source = token
+        customer.save()
+        return Response(customer)
+
+
 
 class InviteFilter(filters.FilterSet):
     class Meta:
