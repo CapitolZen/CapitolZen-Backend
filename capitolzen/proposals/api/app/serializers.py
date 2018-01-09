@@ -95,7 +95,6 @@ class BillSerializer(BaseModelSerializer):
             'created_at',
             'updated_at',
             'bill_text_analysis',
-            'related_bill_ids'
         )
 
     class JSONAPIMeta:
