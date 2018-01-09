@@ -13,14 +13,6 @@ from capitolzen.users.models import User, Action
 ###################################
 
 
-@receiver(post_save, sender=Bill)
-def create_introduction_actions(sender, **kwargs):
-    bill = kwargs.get('instance')
-    created = kwargs.get('created')
-    if created:
-        transaction.on_commit(lambda: _create_introduction_actions(bill))
-
-
 def _create_introduction_actions(bill):
     for user in User.objects.filter(is_active=True, notification_preferences__bill__introduced=True):
         a = Action.objects.create(
@@ -32,13 +24,13 @@ def _create_introduction_actions(bill):
 
         a.save()
 
-
-@receiver(post_save, sender=Event)
-def create_committee_actions(sender, **kwargs):
-    event = kwargs.get('instance')
+@receiver(post_save, sender=Bill)
+def create_introduction_actions(sender, **kwargs):
+    bill = kwargs.get('instance')
     created = kwargs.get('created')
     if created:
-        transaction.on_commit()
+        transaction.on_commit(lambda: _create_introduction_actions(bill))
+
 
 
 def _create_committee_actions(event):
@@ -47,3 +39,22 @@ def _create_committee_actions(event):
         Q(notification_preferences__committee_meeting=['all']) |
         Q(notification_preferences__committee_meeting__contains=event.committee.id)
     )
+
+    for user in users:
+        a = Action.objects.create(
+            user=user,
+            action_object=event,
+            title='committee:meeting',
+            priority=1
+        )
+
+        a.save()
+
+
+@receiver(post_save, sender=Event)
+def create_committee_actions(sender, **kwargs):
+    event = kwargs.get('instance')
+    created = kwargs.get('created')
+    if created:
+        transaction.on_commit(lambda: _create_committee_actions(event))
+

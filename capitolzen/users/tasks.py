@@ -1,8 +1,12 @@
 from celery import shared_task
+import inflect
 
 from datetime import datetime, timedelta
 
 from intercom.errors import ResourceNotFound
+
+from django.conf import settings
+from templated_email import send_templated_mail
 
 from capitolzen.proposals.models import Event, Bill
 
@@ -102,3 +106,48 @@ def user_action_defaults(user_id):
             title='committee:meeting'
         )
         a.save()
+
+
+@shared_task
+def create_daily_summary():
+    today = datetime.today()
+    p = inflect.engine()
+
+    for user in User.objects.filter(is_active=True):
+        bill_count = Action.objects.filter(user=user, title='bill:introduced', created__gte=today).count()
+        # bill_count = p.number_to_words(bill_count)
+        bills = "%s new bills" % bill_count
+
+        wrapper_count = Action.objects.filter(user=user, title='wrapper:updated', created__gte=today).count()
+        # wrapper_count = p.number_to_words(wrapper_count)
+        wrappers = "%s updated bills" % wrapper_count
+
+        committee_count = Action.objects.filter(user=user, title='committee:meeting', created__gte=today).count()
+        committees = "%s committee meetings" % committee_count
+
+        if bill_count or wrapper_count or committee_count:
+            copy = "<p>You have updates! View your Capitol Zen account to see the latest updates.<p>"
+            copy += "<p>You have:"
+            if bill_count:
+                copy += bills + ', '
+            if wrapper_count:
+                copy += wrappers + ', '
+            if committee_count:
+                copy += committees
+            copy += '.</p>'
+
+            url = "%s/dashboard" % settings.APP_FRONTEND
+
+            context = {
+                "message": copy,
+                "subject": "Your Capitol Zen Daily Update",
+                "action_cta": "View Now",
+                "action_url": url,
+            }
+
+            send_templated_mail(
+                template_name='simple_action',
+                from_email='hello@capitolzen.com',
+                recipient_list=user.username,
+                context=context,
+            )
