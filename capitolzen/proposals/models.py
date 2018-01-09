@@ -54,6 +54,11 @@ class Bill(AbstractBaseModel, MixinExternalData):
     bill_versions = JSONField(default=dict, blank=True, null=True)
     bill_text = models.TextField(null=True)
 
+    related_bill_ids = ArrayField(
+        models.CharField(max_length=36),
+        default=list
+    )
+
     updated_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(null=True)
 
@@ -83,41 +88,6 @@ class Bill(AbstractBaseModel, MixinExternalData):
         if not source:
             return False
         return source.get('url', False)
-
-    @property
-    def related_bill_ids(self):
-        # Returns a list of related bills
-        graph = Graph(**settings.GRAPH_DATABASE)
-        query = """
-        MATCH (bill:Bill {remote_id: $remote_id})-
-            [rels:SIMILAR_TO*1..2]-(related_bills:Bill) 
-        WHERE ALL (rel in rels WHERE rel.content_similarity > $similarity_score) 
-        WITH related_bills.uuid as coll 
-        UNWIND coll as x 
-        WITH DISTINCT x 
-        RETURN collect(x) AS related_ids
-        """
-        response = graph.data(query, parameters={
-            "remote_id": self.remote_id,
-            # TODO need to figure out a way to dynamically identify this
-            # similarity score as it may be too strict for some nodes
-            # and too open for others. Causing large lists, small lists, and
-            # no lists even though the bill may have some bills that relate to
-            # it.
-            "similarity_score": 0.125
-        })
-        try:
-            result = response[0]['related_ids']
-        except IndexError:
-            result = []
-        return result
-
-    @property
-    def related_bills(self):
-        return [
-            Bill.objects.get(id=bill_id)
-            for bill_id in self.related_bill_ids
-        ]
 
     @property
     def remote_status(self):
