@@ -284,7 +284,14 @@ class EventManager(object):
         args['description'] = str(agenda)
 
         if len(bill_list):
-            args['attachments'] = [{"billlist": bill_list}]
+            uuid_list = []
+            for state_id in bill_list:
+                try:
+                    b = Bill.objects.get(state_id=state_id)
+                    uuid_list.append(b.id)
+                except Exception:
+                    continue
+            args['attachments'] = [{"billlist": uuid_list}]
             self.generate_actions(bill_list)
         event = Event.objects.create(**args)
         event.save()
