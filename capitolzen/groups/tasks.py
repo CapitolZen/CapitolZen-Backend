@@ -25,9 +25,9 @@ def generate_report(report):
     sort = report.preferences.get('ordering', sort)
     order_key = "bill__%s" % sort['property']
     if sort['direction'] == "desc":
-        sort = "-"+sort
+        order_key = "-"+sort
 
-    wrappers = wrappers.order_by(sort)
+    wrappers = wrappers.order_by(order_key)
     bill_list = normalize_bill_data(wrappers)
 
     data = {
