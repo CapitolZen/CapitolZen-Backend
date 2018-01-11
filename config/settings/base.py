@@ -433,7 +433,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute=0, hour='4-21')
     },
     'create_intro_actions': {
-        'task': 'capitolzen.proposals.tasks.create_bill_introduction_actions',
+        'task': 'capitolzen.users.tasks.create_daily_summary',
         'schedule': crontab(minute=0, hour=9)
     },
     'cleanup_bills': {

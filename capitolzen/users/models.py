@@ -27,10 +27,10 @@ def avatar_directory_path(instance, filename):
 
 def default_notifications():
     return {
-        'bill:introduced': True,
-        'wrapper:updated': True,
-        'committee:meeting': [],
-        'user:mention': True
+        'bill_introduced': True,
+        'wrapper_updated': True,
+        'committee_meeting': [],
+        'user_mention': True
     }
 
 

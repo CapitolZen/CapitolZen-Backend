@@ -102,7 +102,7 @@ def run_organization_bill_updates():
 
 
 @shared_task
-def create_bill_introduction_actions():
+def create_bill_introduction_table():
     today = datetime.today()
 
     bills = Bill.objects.filter(created_at__gt=today)
