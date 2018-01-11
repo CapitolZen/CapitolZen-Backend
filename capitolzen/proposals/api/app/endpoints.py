@@ -252,9 +252,8 @@ class WrapperFilter(OrganizationFilterSet):
             return queryset
 
         queryset = queryset.filter(group=report.group)
-
         if report.filter:
-            prepared_filters = prepare_report_filters(report.filter, True)
+            prepared_filters = prepare_report_filters(report.filter)
             return queryset.filter(**prepared_filters)
 
         return queryset
@@ -294,7 +293,7 @@ class WrapperViewSet(OwnerBasedViewSet):
         wrappers = Wrapper.objects.filter(group=group)
         wrapper_filters = data.get('filters', False)
         if wrapper_filters:
-            prepared_filters = prepare_report_filters(wrapper_filters, True)
+            prepared_filters = prepare_report_filters(wrapper_filters)
             wrappers = wrappers.filter(**prepared_filters)
 
         serialized = WrapperSerializer(wrappers, many=True)

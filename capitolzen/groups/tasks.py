@@ -2,6 +2,7 @@ from json import dumps, loads
 
 from celery import shared_task
 from django.conf import settings
+from django.utils.text import slugify
 
 from capitolzen.meta.clients import aws_client
 from capitolzen.meta.notifications import email_user_report_link
@@ -20,12 +21,21 @@ def generate_report(report):
     if filters:
         wrappers = wrappers.filter(**filters)
 
+    sort = {"property": "state_id", "direction": "asc"}
+    sort = report.preferences.get('ordering', sort)
+    order_key = "bill__%s" % sort['property']
+    if sort['direction'] == "desc":
+        sort = "-"+sort
+
+    wrappers = wrappers.order_by(sort)
     bill_list = normalize_bill_data(wrappers)
+
     data = {
         "title": report.title,
         "id": str(report.id),
         "summary": report.description,
         "bills": bill_list,
+        "slug_title": slugify(report.title)
     }
 
     logo_path = report.preferences.get("logo", False)
