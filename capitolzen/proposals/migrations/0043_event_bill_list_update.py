@@ -13,7 +13,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('proposals', '0043_bill_related_bill_ids'),
+        ('proposals', '0042_bill_related_bill_ids'),
     ]
 
     def forwards(apps, schema_editor):
