@@ -230,6 +230,8 @@ class EventManager(object):
             create_asana_task('Committee:Missing %s' % parts[1].strip(), msg)
             return None
 
+        self.committee = committee
+
         args = {
             "chamber": chamber,
             "url": entry['link'],
@@ -296,17 +298,20 @@ class EventManager(object):
         event = Event.objects.create(**args)
         event.save()
 
-    @staticmethod
-    def generate_actions(bill_list):
+    def generate_actions(self, bill_list):
+        meta = {
+            "committee_id": self.committee.id
+        }
         for bill in bill_list:
             for wrapper in Wrapper.objects.filter(bill__state_id=bill):
                 if wrapper.group.active:
                     for user in wrapper.group.assigned_to.all():
                         action = Action.objects.create(
                             title='wrapper:updated',
-                            priority=-1,
+                            priority=1,
                             user=user,
-                            action_object=wrapper
+                            action_object=wrapper,
+                            metadata=meta
                         )
                         action.save()
 
