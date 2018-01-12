@@ -3,6 +3,8 @@ import base64
 import requests
 from py2neo import Graph
 
+from string import capwords
+
 from django.db import models
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.conf import settings
@@ -94,7 +96,10 @@ class Bill(AbstractBaseModel, MixinExternalData):
         if not self.history or not len(self.history):
             return 'no history available'
         latest = self.history[-1]
-        return latest['action']
+        action = latest['action'].lower()
+        if "electronically reproduced" in action:
+            latest = self.history[-2]
+        return capwords(latest['action'].lower())
 
     def update(self, source):
         for sponsor in source.get('sponsors', []):
