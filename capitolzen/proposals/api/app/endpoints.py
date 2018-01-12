@@ -151,10 +151,20 @@ class LegislatorViewSet(mixins.RetrieveModelMixin,
     ordering = ('state', 'last_name', 'first_name')
 
 
+class CommitteeFilter(BaseModelFilterSet):
+    class Meta:
+        model = Committee
+        fields = {
+            'chamber': ['exact'],
+            'name': ['exact', 'contains'],
+            'state': ['exact', 'contains']
+        }
+
 class CommitteeViewSet(mixins.RetrieveModelMixin,
                        mixins.ListModelMixin,
                        GenericBaseViewSet):
     serializer_class = CommitteeSerializer
+    filter_class = CommitteeFilter
     queryset = Committee.objects.all()
     ordering = ('state', 'name')
 
@@ -166,7 +176,7 @@ class EventFilter(BaseModelFilterSet):
             'state': ['exact'],
             'chamber': ['exact'],
             'event_type': ['exact'],
-            'time': ['lt', 'gt', 'exact']
+            'time': ['lt', 'lte', 'gte', 'gt', 'exact']
         }
 
 
