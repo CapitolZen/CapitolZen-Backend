@@ -209,6 +209,7 @@ class EventManager(object):
         self.url = state.committee_rss
         self.state = state.name
         self.timezone = timezone(state.timezone)
+        self.committee = None
 
     def _get_remote_list_response(self):
         feed = feedparser.parse(self.url)
@@ -229,6 +230,8 @@ class EventManager(object):
             msg += "no committee found for meeeting %s" % entry['link']
             create_asana_task('Committee:Missing %s' % parts[1].strip(), msg)
             return None
+
+        self.committee = committee
 
         args = {
             "chamber": chamber,
@@ -296,18 +299,20 @@ class EventManager(object):
         event = Event.objects.create(**args)
         event.save()
 
-    @staticmethod
-    def generate_actions(bill_list):
+    def generate_actions(self, bill_list):
         for bill in bill_list:
             for wrapper in Wrapper.objects.filter(bill__state_id=bill):
                 if wrapper.group.active:
                     for user in wrapper.group.assigned_to.all():
                         action = Action.objects.create(
                             title='wrapper:updated',
-                            priority=-1,
+                            priority=1,
                             user=user,
                             action_object=wrapper
                         )
+
+                        if self.committee:
+                            action.metadata = { "committee_id": self.committee.id }
                         action.save()
 
 
