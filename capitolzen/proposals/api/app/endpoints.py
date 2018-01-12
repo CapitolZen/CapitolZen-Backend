@@ -170,6 +170,14 @@ class CommitteeViewSet(mixins.RetrieveModelMixin,
 
 
 class EventFilter(BaseModelFilterSet):
+    future = filters.BooleanFilter(
+        method='future_events_filter'
+    )
+
+    def future_events_filter(self, queryset, name, value):
+        return queryset.filter(time__gte=datetime.today())
+
+
     class Meta:
         model = Event
         fields = {
