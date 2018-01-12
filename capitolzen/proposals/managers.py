@@ -299,9 +299,6 @@ class EventManager(object):
         event.save()
 
     def generate_actions(self, bill_list):
-        meta = {
-            "committee_id": self.committee.id
-        }
         for bill in bill_list:
             for wrapper in Wrapper.objects.filter(bill__state_id=bill):
                 if wrapper.group.active:
@@ -310,9 +307,11 @@ class EventManager(object):
                             title='wrapper:updated',
                             priority=1,
                             user=user,
-                            action_object=wrapper,
-                            metadata=meta
+                            action_object=wrapper
                         )
+
+                        if self.committee:
+                            action.metadata = { "committee_id": self.committee.id }
                         action.save()
 
 
