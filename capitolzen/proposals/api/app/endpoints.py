@@ -175,6 +175,7 @@ class EventViewSet(mixins.RetrieveModelMixin,
                    GenericBaseViewSet):
     serializer_class = EventSerializer
     filter_class = EventFilter
+    queryset = Event.objects.all()
 
     ordering = ('time', )
     search_fields = (
