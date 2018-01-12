@@ -209,6 +209,7 @@ class EventManager(object):
         self.url = state.committee_rss
         self.state = state.name
         self.timezone = timezone(state.timezone)
+        self.committee = None
 
     def _get_remote_list_response(self):
         feed = feedparser.parse(self.url)
