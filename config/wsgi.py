@@ -20,8 +20,6 @@ from django.core.wsgi import get_wsgi_application
 
 from whitenoise.django import DjangoWhiteNoise
 
-import sqreen
-sqreen.start()
 # This allows easy placement of apps within the interior
 # capitolzen directory.
 app_path = os.path.dirname(os.path.abspath(__file__)).replace('/config', '')
