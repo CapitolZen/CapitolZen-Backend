@@ -184,19 +184,6 @@ class OrganizationInvite(AbstractBaseModel):
         verbose_name = _("invite")
         verbose_name_plural = _("invites")
 
-    def create_user_for_invite(self):
-        """
-        Note: Maybe we should handle this logic during
-        pre_save automatically.
-
-        :return:
-        """
-
-        User = get_user_model()
-        name = self.metadata.get('name', None)
-        user = User.objects.create_user_with_auth0(self.email, name=name)
-        return user
-
     def send_user_invite(self):
         url = "%s/claim/%s" % (settings.APP_FRONTEND, self.id)
         email_member_invite(
