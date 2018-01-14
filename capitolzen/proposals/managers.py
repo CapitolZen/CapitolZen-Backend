@@ -311,7 +311,7 @@ class EventManager(object):
             for wrapper in Wrapper.objects.filter(bill__state_id=bill):
                 if wrapper.group.active:
                     for user in wrapper.group.assigned_to.all():
-                        action, created = Action.objects.get_or_create(
+                        action = Action.objects.create(
                             title='wrapper:committee_scheduled',
                             priority=2,
                             user=user,
