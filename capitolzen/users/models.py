@@ -203,6 +203,7 @@ class Action(AbstractBaseModel):
     type_choices = Choices(
         ('bill:introduced', 'Bill Introduced'),
         ('wrapper:updated', 'Bill Updated'),
+        ('wrapper:committee_scheduled', 'Saved Bill in Committee'),
         ('organization:user-add', 'User Joined'),
         ('organization:user-invite', 'User Invited'),
         ('user:mention', 'Mentioned'),

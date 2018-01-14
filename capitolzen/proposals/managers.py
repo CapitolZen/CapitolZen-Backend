@@ -295,24 +295,29 @@ class EventManager(object):
                 except Exception:
                     continue
             args['attachments'] = [{"billlist": uuid_list}]
-            self.generate_actions(bill_list)
         event = Event.objects.create(**args)
         event.save()
+        if len(bill_list):
+            self.generate_actions(event, bill_list)
 
-    def generate_actions(self, bill_list):
+
+    def generate_actions(self, event, bill_list):
+        meta = {
+            'eventid': event.id
+        }
+        if self.committee:
+            meta["committee_id"] = self.committee.id
         for bill in bill_list:
             for wrapper in Wrapper.objects.filter(bill__state_id=bill):
                 if wrapper.group.active:
                     for user in wrapper.group.assigned_to.all():
-                        action = Action.objects.create(
-                            title='wrapper:updated',
-                            priority=1,
+                        action, created = Action.objects.get_or_create(
+                            title='wrapper:committee_scheduled',
+                            priority=2,
                             user=user,
-                            action_object=wrapper
+                            action_object=wrapper,
+                            metadata=meta
                         )
-
-                        if self.committee:
-                            action.metadata = { "committee_id": self.committee.id }
                         action.save()
 
 
