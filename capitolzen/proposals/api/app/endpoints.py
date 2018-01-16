@@ -96,10 +96,10 @@ class BillViewSet(mixins.RetrieveModelMixin,
     queryset = Bill.objects.all()
     filter_class = BillFilter
     ordering_fields = (
-        'last_action_date',
         'state',
         'state_id',
-        'sponsor__party'
+        'sponsor__party',
+        'last_action_date',
     )
     search_fields = (
         'title',
@@ -167,6 +167,11 @@ class CommitteeViewSet(mixins.RetrieveModelMixin,
     filter_class = CommitteeFilter
     queryset = Committee.objects.all()
     ordering = ('state', 'name')
+
+    search_fields = (
+        'name',
+        'subcommittee'
+    )
 
 
 class EventFilter(BaseModelFilterSet):
