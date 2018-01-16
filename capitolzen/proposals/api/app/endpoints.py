@@ -168,6 +168,11 @@ class CommitteeViewSet(mixins.RetrieveModelMixin,
     queryset = Committee.objects.all()
     ordering = ('state', 'name')
 
+    search_fields = (
+        'name',
+        'subcommittee'
+    )
+
 
 class EventFilter(BaseModelFilterSet):
     future = filters.BooleanFilter(
