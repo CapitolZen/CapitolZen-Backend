@@ -143,7 +143,7 @@ class ReportViewSet(OwnerBasedViewSet):
 
     search_fields = (
         'title',
-        'author__name',
+        'user__name',
         'group__title',
         'description'
     )
