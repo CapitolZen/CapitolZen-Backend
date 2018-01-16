@@ -96,10 +96,10 @@ class BillViewSet(mixins.RetrieveModelMixin,
     queryset = Bill.objects.all()
     filter_class = BillFilter
     ordering_fields = (
-        'last_action_date',
         'state',
         'state_id',
-        'sponsor__party'
+        'sponsor__party',
+        'last_action_date',
     )
     search_fields = (
         'title',

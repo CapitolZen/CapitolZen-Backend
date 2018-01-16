@@ -436,10 +436,15 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'capitolzen.users.tasks.create_daily_summary',
         'schedule': crontab(minute=0, hour=9)
     },
+    'update_user_intercom_sync': {
+        'task': 'capitolzen.users.tasks.update_user_sync',
+        'schedule': crontab(minute=30, hour=10)
+    },
     'cleanup_bills': {
         'task': 'capitolzen.proposals.tasks.clean_missing_sponsors',
         'schedule': crontab(minute=0, hour=23)
-    }
+    },
+
 }
 
 # LOGGING CONFIGURATION

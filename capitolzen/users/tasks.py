@@ -8,7 +8,7 @@ from intercom.errors import ResourceNotFound
 from django.conf import settings
 from templated_email import send_templated_mail
 
-from capitolzen.proposals.models import Event, Bill
+from capitolzen.proposals.models import Event, Bill, Wrapper
 
 from capitolzen.users.models import User, Action
 from capitolzen.users.utils import get_intercom_client
@@ -39,6 +39,7 @@ def intercom_manage_user(user_id, operation):
         intercom_user.email = getattr(user, 'username', None)
         intercom_user.name = getattr(user, 'name', None)
         intercom_user.custom_attributes['Status'] = getattr(user, 'is_active', False)
+        intercom_user.custom_attributes['Active Actions'] = Action.objects.filter(user=user, state='active').count()
         companies = []
         for organization in user.organizations_organization.all():
             companies.append({
@@ -111,10 +112,11 @@ def user_action_defaults(user_id):
 @shared_task
 def create_daily_summary():
     today = datetime.today()
-    p = inflect.engine()
 
     for user in User.objects.filter(is_active=True):
+
         bill_count = Action.objects.filter(user=user, title='bill:introduced', created__gte=today).count()
+
         # bill_count = p.number_to_words(bill_count)
         bills = "%s new bills" % bill_count
 
@@ -151,3 +153,8 @@ def create_daily_summary():
                 recipient_list=user.username,
                 context=context,
             )
+
+@shared_task
+def update_user_sync():
+    for user in User.objects.filter(is_active=True):
+        intercom_manage_user(user.id, 'update')
