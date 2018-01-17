@@ -122,6 +122,72 @@ class Organization(AbstractOrganization, AbstractBaseModel):
             request.user.is_staff or \
             request.user.is_superuser
 
+    @staticmethod
+    def has_billing_permission(request):
+        if request.user.is_anonymous:
+            return False
+
+        if not request.organization:
+            return False
+
+        return True
+
+    def has_object_billing_permission(self, request):
+        if request.user.is_anonymous:
+            return False
+
+        if not request.organization:
+            return False
+
+        if request.organization.is_admin(request.user) or request.organization.is_owner(request.user):
+            return True
+
+        return False
+
+    @staticmethod
+    def has_update_subscription_permission(request):
+        if request.user.is_anonymous:
+            return False
+
+        if not request.organization:
+            return False
+
+        return True
+
+    def has_object_update_subscription_permission(self, request):
+        if request.user.is_anonymous:
+            return False
+
+        if not request.organization:
+            return False
+
+        if request.organization.is_admin(request.user) or request.organization.is_owner(request.user):
+            return True
+
+        return False
+
+    @staticmethod
+    def has_update_source_permission(request):
+        if request.user.is_anonymous:
+            return False
+
+        if not request.organization:
+            return False
+
+        return True
+
+    def has_object_update_source_permission(self, request):
+        if request.user.is_anonymous:
+            return False
+
+        if not request.organization:
+            return False
+
+        if request.organization.is_admin(request.user) or request.organization.is_owner(request.user):
+            return True
+
+        return False
+
     def has_object_create_permission(self, request):
         return request.user.is_authenticated
 
