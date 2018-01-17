@@ -1,6 +1,9 @@
 from django.http import JsonResponse
 
+from django.conf import settings
+
 from rest_framework import status
+from drfreverseproxy.views import ProxyView
 
 
 def index(request):
@@ -31,3 +34,16 @@ def bad_request_view(request):
     return JsonResponse({'status': status.HTTP_400_BAD_REQUEST,
                          'message': 'Bad Request'},
                         status=status.HTTP_400_BAD_REQUEST)
+
+
+class TriviaProxyView(ProxyView):
+    upstream = settings.TRIVIA_URL
+
+    def get_request_headers(self):
+        print('sup')
+        headers = super().get_request_headers()
+        print(headers)
+        return {
+            'X-Mashape-Key': settings.MASHAPE_KEY,
+            'Accept': 'application/json'
+        }
