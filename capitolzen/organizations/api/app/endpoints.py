@@ -96,17 +96,20 @@ class OrganizationViewSet(mixins.RetrieveModelMixin,
         organization = self.get_object()
         stripe = get_stripe_client()
 
-        data = {}
+        data = {
+            'subscription': None,
+            'customer': None,
+            'invoices': None,
+        }
 
         if organization.stripe_subscription_id:
             data['subscription'] = stripe.Subscription.retrieve(organization.stripe_subscription_id)
-        else:
-            data['subscription'] = None
 
         if organization.stripe_customer_id:
             data['customer'] = stripe.Customer.retrieve(organization.stripe_customer_id)
-        else:
-            data['customer'] = None
+
+        if organization.stripe_customer_id and organization.stripe_subscription_id:
+            data['invoices'] = stripe.Invoice.list(limit=5, customer=organization.stripe_customer_id)
 
         return Response(data)
 
@@ -144,7 +147,6 @@ class OrganizationViewSet(mixins.RetrieveModelMixin,
         customer.source = token
         customer.save()
         return Response(customer)
-
 
 
 class InviteFilter(filters.FilterSet):
