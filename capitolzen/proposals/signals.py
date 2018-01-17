@@ -14,7 +14,7 @@ from capitolzen.users.models import User, Action
 
 
 def _create_introduction_actions(bill):
-    for user in User.objects.filter(is_active=True, notification_preferences__bill__introduced=True):
+    for user in User.objects.filter(is_active=True, notification_preferences__bill_introduced=True):
         a = Action.objects.create(
             user=user,
             action_object=bill,
