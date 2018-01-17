@@ -141,6 +141,13 @@ class ReportViewSet(OwnerBasedViewSet):
     serializer_class = ReportSerializer
     filter_class = ReportFilter
 
+    search_fields = (
+        'title',
+        'user__name',
+        'group__title',
+        'description'
+    )
+
     # prefetch_for_includes = {
     #     '__all__': [],
     # }

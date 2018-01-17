@@ -96,10 +96,10 @@ class BillViewSet(mixins.RetrieveModelMixin,
     queryset = Bill.objects.all()
     filter_class = BillFilter
     ordering_fields = (
-        'last_action_date',
         'state',
         'state_id',
-        'sponsor__party'
+        'sponsor__party',
+        'last_action_date',
     )
     search_fields = (
         'title',
@@ -151,22 +151,45 @@ class LegislatorViewSet(mixins.RetrieveModelMixin,
     ordering = ('state', 'last_name', 'first_name')
 
 
+class CommitteeFilter(BaseModelFilterSet):
+    class Meta:
+        model = Committee
+        fields = {
+            'chamber': ['exact'],
+            'name': ['exact', 'contains'],
+            'state': ['exact', 'contains']
+        }
+
 class CommitteeViewSet(mixins.RetrieveModelMixin,
                        mixins.ListModelMixin,
                        GenericBaseViewSet):
     serializer_class = CommitteeSerializer
+    filter_class = CommitteeFilter
     queryset = Committee.objects.all()
     ordering = ('state', 'name')
 
+    search_fields = (
+        'name',
+        'subcommittee'
+    )
+
 
 class EventFilter(BaseModelFilterSet):
+    future = filters.BooleanFilter(
+        method='future_events_filter'
+    )
+
+    def future_events_filter(self, queryset, name, value):
+        return queryset.filter(time__gte=datetime.today())
+
+
     class Meta:
         model = Event
         fields = {
             'state': ['exact'],
             'chamber': ['exact'],
             'event_type': ['exact'],
-            'time': ['lt', 'gt', 'exact']
+            'time': ['lt', 'lte', 'gte', 'gt', 'exact']
         }
 
 
@@ -174,11 +197,8 @@ class EventViewSet(mixins.RetrieveModelMixin,
                    mixins.ListModelMixin,
                    GenericBaseViewSet):
     serializer_class = EventSerializer
-
-    def get_queryset(self):
-        return Event.objects.filter(
-            time__gte=datetime.now()
-        )
+    filter_class = EventFilter
+    queryset = Event.objects.all()
 
     ordering = ('time', )
     search_fields = (
@@ -252,9 +272,8 @@ class WrapperFilter(OrganizationFilterSet):
             return queryset
 
         queryset = queryset.filter(group=report.group)
-
         if report.filter:
-            prepared_filters = prepare_report_filters(report.filter, True)
+            prepared_filters = prepare_report_filters(report.filter)
             return queryset.filter(**prepared_filters)
 
         return queryset
@@ -294,7 +313,7 @@ class WrapperViewSet(OwnerBasedViewSet):
         wrappers = Wrapper.objects.filter(group=group)
         wrapper_filters = data.get('filters', False)
         if wrapper_filters:
-            prepared_filters = prepare_report_filters(wrapper_filters, True)
+            prepared_filters = prepare_report_filters(wrapper_filters)
             wrappers = wrappers.filter(**prepared_filters)
 
         serialized = WrapperSerializer(wrappers, many=True)

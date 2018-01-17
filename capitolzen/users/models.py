@@ -25,6 +25,15 @@ def avatar_directory_path(instance, filename):
     return '{0}/misc/{1}'.format(instance.id, filename)
 
 
+def default_notifications():
+    return {
+        'bill_introduced': True,
+        'wrapper_updated': True,
+        'committee_meeting': [],
+        'user_mention': True
+    }
+
+
 class User(AbstractUser, AbstractNoIDModel):
     first_name = None
     last_name = None
@@ -35,13 +44,39 @@ class User(AbstractUser, AbstractNoIDModel):
         blank=True, null=True, max_length=255,
         upload_to=avatar_directory_path
     )
-    preferences = JSONField(default=list)
+
+    features = JSONField(default=list)
+    notification_preferences = JSONField(default=default_notifications)
 
     def __str__(self):
         return self.name or self.username
 
     class JSONAPIMeta:
         resource_name = "users"
+
+    def has_notification(self, action_type, **kwargs):
+        prefs = getattr(self, 'notification_preferences', False)
+
+        if not prefs:
+            return False
+
+        # Check for committee id because of all the lists
+        if action_type == 'committee:meeting':
+            if not kwargs.get('committee_id', False):
+                return False
+            committees = prefs.get('committee:meeting', [])
+
+            # This is getting kind of shitty...
+            if committees[0] == 'all':
+                return True
+
+            if not len(committees):
+                return False
+
+            return kwargs['committee_id'] in committees
+
+        # Finally check the easy shit
+        return prefs.get(action_type, False)
 
     @staticmethod
     @allow_staff_or_superuser
@@ -168,6 +203,7 @@ class Action(AbstractBaseModel):
     type_choices = Choices(
         ('bill:introduced', 'Bill Introduced'),
         ('wrapper:updated', 'Bill Updated'),
+        ('wrapper:committee_scheduled', 'Saved Bill in Committee'),
         ('organization:user-add', 'User Joined'),
         ('organization:user-invite', 'User Invited'),
         ('user:mention', 'Mentioned'),

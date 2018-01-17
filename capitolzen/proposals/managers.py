@@ -209,6 +209,7 @@ class EventManager(object):
         self.url = state.committee_rss
         self.state = state.name
         self.timezone = timezone(state.timezone)
+        self.committee = None
 
     def _get_remote_list_response(self):
         feed = feedparser.parse(self.url)
@@ -229,6 +230,8 @@ class EventManager(object):
             msg += "no committee found for meeeting %s" % entry['link']
             create_asana_task('Committee:Missing %s' % parts[1].strip(), msg)
             return None
+
+        self.committee = committee
 
         args = {
             "chamber": chamber,
@@ -284,22 +287,36 @@ class EventManager(object):
         args['description'] = str(agenda)
 
         if len(bill_list):
-            args['attachments'] = [{"billlist": bill_list}]
-            self.generate_actions(bill_list)
+            uuid_list = []
+            for state_id in bill_list:
+                try:
+                    b = Bill.objects.get(state_id=state_id)
+                    uuid_list.append(b.id)
+                except Exception:
+                    continue
+            args['attachments'] = [{"billlist": uuid_list}]
         event = Event.objects.create(**args)
         event.save()
+        if len(bill_list):
+            self.generate_actions(event, bill_list)
 
-    @staticmethod
-    def generate_actions(bill_list):
+
+    def generate_actions(self, event, bill_list):
+        meta = {
+            'eventid': event.id
+        }
+        if self.committee:
+            meta["committee_id"] = self.committee.id
         for bill in bill_list:
             for wrapper in Wrapper.objects.filter(bill__state_id=bill):
                 if wrapper.group.active:
                     for user in wrapper.group.assigned_to.all():
                         action = Action.objects.create(
-                            title='wrapper:updated',
-                            priority=-1,
+                            title='wrapper:committee_scheduled',
+                            priority=2,
                             user=user,
-                            action_object=wrapper
+                            action_object=wrapper,
+                            metadata=meta
                         )
                         action.save()
 

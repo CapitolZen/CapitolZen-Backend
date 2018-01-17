@@ -79,6 +79,10 @@ class Organization(AbstractOrganization, AbstractBaseModel):
         max_length=255, blank=True, null=True), default=['MI']
     )
 
+    features = JSONField(default=list)
+    client_label = models.CharField(max_length=255, default='Client')
+    client_label_plural = models.CharField(max_length=255, default='Clients')
+
     def owner_user_account(self):
         """Because I can never remember how to get this"""
         if self.owner:
@@ -231,19 +235,6 @@ class OrganizationInvite(AbstractBaseModel):
     class Meta:
         verbose_name = _("invite")
         verbose_name_plural = _("invites")
-
-    def create_user_for_invite(self):
-        """
-        Note: Maybe we should handle this logic during
-        pre_save automatically.
-
-        :return:
-        """
-
-        User = get_user_model()
-        name = self.metadata.get('name', None)
-        user = User.objects.create_user_with_auth0(self.email, name=name)
-        return user
 
     def send_user_invite(self):
         url = "%s/claim/%s" % (settings.APP_FRONTEND, self.id)

@@ -141,10 +141,9 @@ class Comment(AbstractBaseModel):
         verbose_name_plural = "comments"
 
 
-def prepare_report_filters(data, is_dict=False):
+def prepare_report_filters(data):
     output = {}
-
-    if is_dict:
+    if type(data) == 'dict':
         filters = data
     else:
         filters = loads(data)

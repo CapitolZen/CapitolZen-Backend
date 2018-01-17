@@ -3,6 +3,7 @@ from capitolzen.users.models import User
 from capitolzen.users.utils import get_intercom_client
 
 from logging import getLogger
+from capitolzen.users.models import Action
 logger = getLogger('app')
 
 
@@ -23,9 +24,12 @@ class IntercomUserSync(object):
             'name': self.user.name,
             'companies': [],
             'custom_attributes': {
-                'Status': self.user.is_active
+                'Status': self.user.is_active,
+                'Active Actions': Action.objects.filter(user=self.user, state='active').count()
             }
         }
+
+        companies = []
 
         companies = []
         for organization in self.user.organizations_organization.all():
