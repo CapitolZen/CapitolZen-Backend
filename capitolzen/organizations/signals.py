@@ -113,7 +113,7 @@ def create_group_for_new_organization(sender, **kwargs):
 
     if created:
         Group.objects.create(
-            title=organization.name,
+            title="Your First Client",
             organization=organization,
             description="Your organization",
         )
