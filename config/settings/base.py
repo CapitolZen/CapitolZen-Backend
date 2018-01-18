@@ -567,8 +567,11 @@ ASANA_ENABLE_SYNC = env("ASANA_ENABLE_SYNC", default=False)
 ASANA_WORKSPACE = env("ASANA_WORKSPACE", default="313428278436952")
 
 # TRIVIA
-TRIVIA_URL = env("TRIVIA_URL", default='https://apifort-trivia-database-v1.p.mashape.com/v1/query/trivia')
-MASHAPE_KEY = env("MASHAPE_KEY", default='')
+REST_PROXY = {
+    'HOST': 'http://jservice.io/api/random?count=30',
+    'ACCEPT_MAPS': {'text/html': 'application/json'}
+}
+
 # Summarizing & URL Blocking
 # -----------------------------------------------------------------------------
 DEFAULT_SENTENCE_COUNT = 7
