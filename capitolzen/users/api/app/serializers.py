@@ -11,8 +11,7 @@ from rest_framework.serializers import Field
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
 
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
-from capitolzen.proposals.models import Committee
-from capitolzen.proposals.models import Bill, Legislator, Committee, Event
+from capitolzen.proposals.models import Bill, Event
 
 from capitolzen.users.utils import token_decode, token_encode
 from capitolzen.users.notifications import email_user_password_reset_request

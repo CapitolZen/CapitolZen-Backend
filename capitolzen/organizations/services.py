@@ -122,7 +122,7 @@ class StripeOrganizationSync(object):
         if customer:
             self.organization.stripe_customer_id = customer.get('id')
 
-            # Also subscribe them to the free plan.
+            # Also subscribe them to the default plan.
             subscription = self.stripe.Subscription.create(
                 customer=self.organization.stripe_customer_id,
                 items=[
