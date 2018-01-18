@@ -385,9 +385,6 @@ ACCOUNT_AUTHENTICATION_METHOD = 'username'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
-ACCOUNT_ALLOW_REGISTRATION = env.bool('DJANGO_ACCOUNT_ALLOW_REGISTRATION', True)
-ACCOUNT_ADAPTER = 'capitolzen.users.adapters.AccountAdapter'
-SOCIALACCOUNT_ADAPTER = 'capitolzen.users.adapters.SocialAccountAdapter'
 
 # Custom user app defaults
 # Select the correct user model
@@ -413,7 +410,6 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Detroit'
-
 
 CELERY_BEAT_SCHEDULE = {
     'import_committee': {
@@ -551,9 +547,14 @@ INTERCOM_ACCESS_TOKEN = env("INTERCOM_ACCESS_TOKEN", default="")
 INTERCOM_ENABLE_SYNC = True
 
 # STRIPE
+STRIPE_ENABLE_SYNC = True
 STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY", default="")
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
-
+STRIPE_DEFAULT_PLAN_ID = "basic"
+STRIPE_ACTIVE_PLANS = [
+    'basic',
+    'professional'
+]
 # STREAM
 STREAM_API_KEY = env("STREAM_API_KEY", default="")
 STREAM_API_SECRET = env("STREAM_API_SECRET", default="")

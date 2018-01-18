@@ -11,13 +11,15 @@ from rest_framework.serializers import Field
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
 
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
-from capitolzen.proposals.models import Committee
-from capitolzen.proposals.models import Bill, Legislator, Committee, Event
+from capitolzen.proposals.models import Bill, Event
 
 from capitolzen.users.utils import token_decode, token_encode
 from capitolzen.users.notifications import email_user_password_reset_request
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import Action
+from capitolzen.organizations.services import (
+    IntercomOrganizationSync,
+    StripeOrganizationSync)
 
 User = get_user_model()
 
@@ -164,7 +166,22 @@ class RegistrationSerializer(serializers.Serializer):
         organization = organization_serializer.instance
         organization.add_user(user)
 
-        # Let Intercom send the new organization email
+        #
+        # Holy shit this is real frustrating that I can't do this any other way...
+        # Lets see here...
+        # 1) Can't just let the normal celery tasks handle this because
+        #    We save the org so many times we get duplicate tasks trying to create
+        #    Multiple resources
+        #
+        # 2) Can't use kwargs.created in a signal because the owner hasn't been added
+        #    to the organization at that point (until we run organization.add_user
+        #    and we can't do that until we create, because we need an organization id.
+
+        # Intercom
+        IntercomOrganizationSync().execute(organization, "create_or_update")
+
+        # Stripe
+        StripeOrganizationSync().execute(organization, "create_or_update")
 
         return True
 
