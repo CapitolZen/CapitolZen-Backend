@@ -30,14 +30,15 @@ class CongressionalManager(object):
         'content-type': 'application/json'
     }
     domain = settings.OPEN_STATES_URL
+    state = None
+    index = None
+    cache_key = "%s-%s" % (index, state)
     cache_value = "updating"
     url = None
 
     def __init__(self, state):
         self.state = state
         self.url = "%s%s/" % (self.domain, self.index)
-        self.index = None
-        self.cache_key = "%s-%s" % (self.index, state)
 
     def _get_remote_detail_response(self, identifier):
         return get("%s%s/" % (self.url, identifier), headers=self.headers)
@@ -85,10 +86,7 @@ class CongressionalManager(object):
 
 
 class CommitteeManager(CongressionalManager):
-
-    def __init__(self, state):
-        super().__init__(state)
-        self.index = "committees"
+    index = "committees"
 
     def _get_remote_list_response(self):
         return get(
@@ -115,11 +113,8 @@ class CommitteeManager(CongressionalManager):
 
 
 class BillManager(CongressionalManager):
-
-    def __init__(self, state):
-        super().__init__(state)
-        self.chambers = ['upper', 'lower']
-        self.index = "bills"
+    chambers = ['upper', 'lower']
+    index = "bills"
 
     def _get_remote_list(self):
         full_list_of_bills = []
@@ -174,10 +169,7 @@ class BillManager(CongressionalManager):
 
 
 class LegislatorManager(CongressionalManager):
-
-    def __init__(self, state):
-        super().__init__(state)
-        self.index = "legislators"
+    index = "legislators"
 
     def _get_remote_list_response(self):
         return get(
@@ -211,12 +203,12 @@ class LegislatorManager(CongressionalManager):
 
 class EventManager(object):
     current_session = settings.CURRENT_SESSION
+    index = "committee_meetings"
 
     def __init__(self, state):
         self.url = state.committee_rss
         self.state = state.name
         self.timezone = timezone(state.timezone)
-        self.index = "committee_meetings"
         self.committee = None
 
     def _get_remote_list_response(self):
