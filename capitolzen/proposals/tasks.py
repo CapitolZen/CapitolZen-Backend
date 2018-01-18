@@ -164,7 +164,10 @@ def ingest_attachment(identifier):
         '\xa0', ' ').strip()
     instance.summary = summarize(instance.content)
     instance.save()
-    BillGraph(instance.id).run()
+    try:
+        BillGraph(instance.id).run()
+    except OSError:
+        pass
     return True
 
 
