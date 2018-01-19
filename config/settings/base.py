@@ -566,6 +566,12 @@ ASANA_PROJECT = env("ASANA_PROJECT", default="497390564241002")
 ASANA_ENABLE_SYNC = env("ASANA_ENABLE_SYNC", default=False)
 ASANA_WORKSPACE = env("ASANA_WORKSPACE", default="313428278436952")
 
+# TRIVIA
+REST_PROXY = {
+    'HOST': 'http://jservice.io/api/random?count=30',
+    'ACCEPT_MAPS': {'text/html': 'application/json'}
+}
+
 # Summarizing & URL Blocking
 # -----------------------------------------------------------------------------
 DEFAULT_SENTENCE_COUNT = 7

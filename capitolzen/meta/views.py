@@ -2,7 +2,6 @@ from django.http import JsonResponse
 
 from rest_framework import status
 
-
 def index(request):
     return JsonResponse({'status': status.HTTP_200_OK,
                          'message': 'Backend API'},
