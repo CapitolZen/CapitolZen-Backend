@@ -15,6 +15,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Add Gunicorn to installed apps
 INSTALLED_APPS += ['gunicorn', ]
 
+
 # APM (Sentry)
 # ------------------------------------------------------------------------------
 INSTALLED_APPS += [
