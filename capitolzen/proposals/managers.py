@@ -193,7 +193,10 @@ class LegislatorManager(CongressionalManager):
             logger.error(serializer.initial_data)
             return None
         instance = serializer.save()
-        LegislatorGraph(identifier=instance.id).run()
+        try:
+            LegislatorGraph(identifier=instance.id).run()
+        except OSError:
+            pass
         return instance
 
     def run(self):
