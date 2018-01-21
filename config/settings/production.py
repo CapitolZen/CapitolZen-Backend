@@ -1,6 +1,4 @@
 from .base import *  # noqa
-import os
-import raven
 
 # SECRET CONFIGURATION
 # ------------------------------------------------------------------------------
@@ -47,9 +45,6 @@ LOGGING['loggers']['sentry.errors'] = {
 
 RAVEN_CONFIG = {
     'dsn': 'https://46fd843f9b054ff8bdaade23e410b64c:555632fe5cb8420f9a404d1803bfffcd@sentry.io/275179',
-    # If you are using git, you can also automatically configure the
-    # release based on the git info.
-    'release': raven.fetch_git_sha(os.path.abspath(os.pardir)),
 }
 
 # Use Whitenoise to serve static files
