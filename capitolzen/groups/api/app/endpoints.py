@@ -162,19 +162,26 @@ class ReportViewSet(OwnerBasedViewSet):
 
     @detail_route(methods=['GET'])
     def url(self, request, pk):
-        report = Report.objects.get(pk=pk)
-        self.check_object_permissions(request, report)
-        url = generate_report(report)
-        if url:
+        self.check_permissions(request)
+        try:
+            report = Report.objects.get(pk=pk)
+            self.check_object_permissions(request, report)
+            url = generate_report(report)
+            if url:
+                return Response({
+                    "message": "report generated",
+                    "url": url,
+                    "status_code": status.HTTP_200_OK
+                })
+            else:
+                return Response({
+                    "message": "error generating report",
+                    "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR
+                })
+        except Exception:
             return Response({
-                "message": "report generated",
-                "url": url,
-                "status_code": status.HTTP_200_OK
-            })
-        else:
-            return Response({
-                "message": "error generating report",
-                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR
+                "message": "report not found",
+                "status_code": status.HTTP_404_NOT_FOUND
             })
 
     @detail_route(methods=['GET'])
