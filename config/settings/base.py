@@ -422,7 +422,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     'import_bills': {
         'task': 'capitolzen.proposals.tasks.spawn_bill_updates',
-        'schedule': crontab(minute=0, hour='3,5,8')
+        'schedule': crontab(minute=0, hour=5)
     },
     'import_meetings': {
         'task': 'capitolzen.proposals.tasks.spawn_committee_meeting_updates',
@@ -438,7 +438,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     'cleanup_bills': {
         'task': 'capitolzen.proposals.tasks.clean_missing_sponsors',
-        'schedule': crontab(minute=0, hour=23)
+        'schedule': crontab(minute=30, hour=6)
     },
 
 }

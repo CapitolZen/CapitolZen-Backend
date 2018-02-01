@@ -293,6 +293,7 @@ class WrapperViewSet(OwnerBasedViewSet):
     serializer_class = WrapperSerializer
     filter_class = WrapperFilter
     ordering = ('bill__state', 'bill__state_id')
+    ordering_fields = ('bill__updated_at',)
 
     def get_queryset(self):
         return Wrapper.objects.filter(
