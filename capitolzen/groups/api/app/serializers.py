@@ -10,6 +10,10 @@ from capitolzen.groups.models import Group, Report, Comment, File
 
 
 class GroupSerializer(BaseInternalModelSerializer):
+    included_serializers = {
+        'organization': OrganizationSerializer,
+    }
+
     organization = ResourceRelatedField(
         many=False,
         queryset=Organization.objects,
@@ -38,6 +42,9 @@ class GroupSerializer(BaseInternalModelSerializer):
             'assigned_to',
         )
         read_only_fields = ('id', 'created')
+
+    class JSONAPIMeta:
+       included_resources = ['organization']
 
 
 class ReportSerializer(BaseInternalModelSerializer):
@@ -79,8 +86,8 @@ class ReportSerializer(BaseInternalModelSerializer):
             'preferences'
         )
 
-    # class JSONAPIMeta:
-    #    included_resources = ['user', 'organization', 'group']
+    class JSONAPIMeta:
+       included_resources = ['user', 'organization', 'group']
 
 
 class CommentSerializer(BaseInternalModelSerializer):
