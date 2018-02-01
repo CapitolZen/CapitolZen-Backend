@@ -236,7 +236,7 @@ class WrapperSerializer(BaseInternalModelSerializer):
         )
 
     class JSONAPIMeta:
-        included_resources = ['bill', 'bill.sponsor']
+        included_resources = ['bill', 'bill.sponsor',]
 
     def create(self, validated_data):
         bill = validated_data.get('bill')

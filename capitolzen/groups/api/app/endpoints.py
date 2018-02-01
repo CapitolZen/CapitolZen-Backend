@@ -1,6 +1,8 @@
 from json import loads
 from logging import getLogger
 
+from django.db.models import Count
+
 from django_filters import rest_framework as filters
 from rest_framework import status, exceptions
 from rest_framework.decorators import detail_route, list_route
@@ -10,8 +12,10 @@ from common.utils.filters.sets import OrganizationFilterSet
 from common.utils.filters.filters import UUIDInFilter, IntInFilter
 
 from config.viewsets import OwnerBasedViewSet
+
 from capitolzen.proposals.models import Bill, Wrapper
 from capitolzen.proposals.api.app.serializers import BillSerializer
+
 from capitolzen.groups.models import Group, Report, File
 from capitolzen.groups.tasks import generate_report, email_report
 from capitolzen.groups.api.app.serializers import (
@@ -108,6 +112,43 @@ class GroupViewSet(OwnerBasedViewSet):
         return Response({"status_code": status.HTTP_200_OK,
                          "message": "Bill(s) added", "bills": bill_list})
 
+    @detail_route(methods=['GET'])
+    def stats(self, request, pk=None):
+        self.check_permissions(request)
+        group = self.get_object()
+        all_saved = Wrapper.objects.filter(group=group)
+        lower_passed = all_saved.exclude(bill__action_dates__passed_lower__isnull=False).count()
+        upper_passed = all_saved.exclude(bill__action_dates__passed_upper__isnull=False).count()
+        signed = all_saved.exclude(bill__action_dates__signed__isnull=False).count()
+        opposed = all_saved.filter(position='opposed').count()
+        support = all_saved.filter(position='support').count()
+        neutral = all_saved.filter(position='neutral').count()
+
+        committee_bill_query = Wrapper.objects.filter(group=group)\
+            .values('bill__current_committee__id', 'bill__current_committee__name', 'bill__current_committee__chamber')\
+            .annotate(num_vals=Count('id'))
+
+        top_committees = []
+        for cmte in committee_bill_query:
+            summary = {
+                'cmte_id': str(cmte['bill__current_committee__id']),
+                'name': cmte['bill__current_committee__name'],
+                'chamber': cmte['bill__current_committee__chamber'],
+                'count': cmte['num_vals'],
+            }
+            top_committees.append(summary)
+
+        data = {
+            'upper_passed_count': upper_passed,
+            'saved_count': all_saved.count(),
+            'lower_passed_count': lower_passed,
+            'signed': signed,
+            'top_committees': top_committees,
+            'support_count': support,
+            'oppose_count': opposed,
+            'neutral_count': neutral
+        }
+        return Response({"status_code": status.HTTP_200_OK, "stats": data})
 
 class ReportFilter(OrganizationFilterSet):
     user = filters.CharFilter(
