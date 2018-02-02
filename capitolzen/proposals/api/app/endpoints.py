@@ -111,16 +111,16 @@ class BillViewSet(mixins.RetrieveModelMixin,
     ordering = ('state', 'state_id', )
 
     @detail_route(methods=['GET'])
-    def vote(self, request, pk=None):
+    def votes(self, request, pk=None):
         bill = self.get_object()
-        data = {}
+        data = []
         for vote in bill.votes:
 
             yes_ids = [i['leg_id'] for i in vote['yes_votes']]
             no_ids = [i['leg_id'] for i in vote['no_votes']]
 
-            yays = Legislator.objects.filter(id__in=yes_ids)
-            nays = Legislator.objects.filter(id__in=no_ids)
+            yays = Legislator.objects.filter(remote_id__in=yes_ids).order_by('last_name', 'first_name')
+            nays = Legislator.objects.filter(remote_id__in=no_ids).order_by('last_name', 'first_name')
 
             record_list = []
 
@@ -142,7 +142,15 @@ class BillViewSet(mixins.RetrieveModelMixin,
                 }
                 record_list.append(record)
 
-            data[vote['chamber']] = record_list
+            summary = {
+                "vote_date": vote['date'],
+                "motion": vote['motion'],
+                "source": vote['sources'][0]['url'],
+                "records": record_list,
+                "chamber": vote['chamber']
+            }
+            data.append(summary)
+
 
         return Response({'data': data})
 
