@@ -110,6 +110,42 @@ class BillViewSet(mixins.RetrieveModelMixin,
     )
     ordering = ('state', 'state_id', )
 
+    @detail_route(methods=['GET'])
+    def vote(self, request, pk=None):
+        bill = self.get_object()
+        data = {}
+        for vote in bill.votes:
+
+            yes_ids = [i['leg_id'] for i in vote['yes_votes']]
+            no_ids = [i['leg_id'] for i in vote['no_votes']]
+
+            yays = Legislator.objects.filter(id__in=yes_ids)
+            nays = Legislator.objects.filter(id__in=no_ids)
+
+            record_list = []
+
+            for yay in yays:
+                record = {
+                    'vote': 'support',
+                    'name': yay.full_name,
+                    'id': str(yay.id),
+                    'party': yay.party
+                }
+                record_list.append(record)
+
+            for nay in nays:
+                record = {
+                    'vote': 'oppose',
+                    'name': nay.full_name,
+                    'id': str(nay.id),
+                    'party': nay.party
+                }
+                record_list.append(record)
+
+            data[vote['chamber']] = record_list
+
+        return Response({'data': data})
+
 
 class BillSearchView(es_views.ListElasticAPIView):
     es_client = Elasticsearch(
