@@ -10,7 +10,9 @@ from config.serializers import (
 )
 
 from capitolzen.groups.models import Group
+from capitolzen.groups.api.app.serializers import GroupSerializer
 from capitolzen.proposals.models import Bill, Wrapper, Legislator, Committee, Event
+
 from rest_framework import serializers
 
 
@@ -192,6 +194,7 @@ class WrapperSerializer(BaseInternalModelSerializer):
     included_serializers = {
         'bill': BillSerializer,
         'bill.sponsor': LegislatorSerializer,
+        'group': GroupSerializer,
     }
 
     bill = ResourceRelatedField(
@@ -236,7 +239,7 @@ class WrapperSerializer(BaseInternalModelSerializer):
         )
 
     class JSONAPIMeta:
-        included_resources = ['bill', 'bill.sponsor',]
+        included_resources = ['bill', 'bill.sponsor', 'group']
 
     def create(self, validated_data):
         bill = validated_data.get('bill')
