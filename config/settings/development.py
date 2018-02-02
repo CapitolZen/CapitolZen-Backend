@@ -8,7 +8,7 @@ from config.settings.base import *
 DEBUG = True
 TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 ALLOWED_HOSTS = ['*']
-CORS_ORIGIN_WHITELIST += ('localhost:4200', )
+CORS_ORIGIN_WHITELIST += ('localhost:4200', 'localhost:3000')
 INTERNAL_IPS = [
                 '127.0.0.1',
                 ]

@@ -72,3 +72,4 @@ gensim==3.2.0
 textblob==0.15.0
 rake-nltk==1.0.1
 sqreen==1.8.1
+raven==6.5.0
