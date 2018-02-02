@@ -52,7 +52,6 @@ class ModelDiffMixin(object):
 
 class AbstractNoIDModel(models.Model):
     """
-
     """
     created = models.DateTimeField(default=timezone.now, db_index=True)
     modified = models.DateTimeField(db_index=True, default=timezone.now)

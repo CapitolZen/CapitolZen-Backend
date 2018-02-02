@@ -12,4 +12,4 @@ django-anymail[sparkpost]==0.11.1
 
 # APM and Error Monitoring
 # --------------------------------------------------------
-opbeat==3.5.2
+raven==6.5.0

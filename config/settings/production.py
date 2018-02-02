@@ -6,26 +6,46 @@ from .base import *  # noqa
 # Raises ImproperlyConfigured exception if APPLICATION_SECRET_KEY not in os.environ
 SECRET_KEY = env('APPLICATION_SECRET_KEY')
 
+# MISC PROD STUFF
+# ------------------------------------------------------------------------------
 # This ensures that Django will be able to detect a secure connection
 # properly on Heroku.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Needed for APM management via Opbeat web interface https://opbeat.com
-MIDDLEWARE = ['opbeat.contrib.django.middleware.OpbeatAPMMiddleware', ] + \
-             MIDDLEWARE
-INSTALLED_APPS += ['gunicorn', 'opbeat.contrib.django', ]
+# Add Gunicorn to installed apps
+INSTALLED_APPS += ['gunicorn', ]
 
-# Ensure any opbeat logs get pumped to logging agent
-LOGGING['handlers']['opbeat'] = {
+
+# APM (Sentry)
+# ------------------------------------------------------------------------------
+INSTALLED_APPS += [
+    'raven.contrib.django.raven_compat',
+]
+
+MIDDLEWARE = [
+                 'raven.contrib.django.raven_compat.middleware.Sentry404CatchMiddleware',
+                 'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware'
+             ] + MIDDLEWARE
+
+LOGGING['handlers']['sentry'] = {
     'level': 'WARNING',
-    'class': 'opbeat.contrib.django.handlers.OpbeatHandler',
+    'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
 }
 
-LOGGING['loggers']['opbeat.errors'] = {
+LOGGING['loggers']['raven'] = {
+    'level': 'DEBUG',
     'handlers': ['console'],
-    'propagate': True,
-    'format': '%(message)s',
-    'level': 'CRITICAL',
+    'propagate': False,
+}
+
+LOGGING['loggers']['sentry.errors'] = {
+    'level': 'DEBUG',
+    'handlers': ['console'],
+    'propagate': False,
+}
+
+RAVEN_CONFIG = {
+    'dsn': 'https://46fd843f9b054ff8bdaade23e410b64c:555632fe5cb8420f9a404d1803bfffcd@sentry.io/275179',
 }
 
 # Use Whitenoise to serve static files
