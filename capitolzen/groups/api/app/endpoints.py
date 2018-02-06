@@ -123,6 +123,7 @@ class GroupViewSet(OwnerBasedViewSet):
         opposed = all_saved.filter(position='opposed').count()
         support = all_saved.filter(position='support').count()
         neutral = all_saved.filter(position='neutral').count()
+        noposition = all_saved.filter(position='none').count()
 
         committee_bill_query = Wrapper.objects.filter(group=group)\
             .values('bill__current_committee__id', 'bill__current_committee__name', 'bill__current_committee__chamber')\
@@ -148,7 +149,8 @@ class GroupViewSet(OwnerBasedViewSet):
             'top_committees': top_committees,
             'support_count': support,
             'oppose_count': opposed,
-            'neutral_count': neutral
+            'neutral_count': neutral,
+            'none_count': noposition
         }
         return Response({"status_code": status.HTTP_200_OK, "stats": data})
 
