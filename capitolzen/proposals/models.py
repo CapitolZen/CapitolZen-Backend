@@ -327,7 +327,14 @@ class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         null=True
     )
 
-    position = models.CharField(blank=True, max_length=255, default='neutral')
+    position_choices = Choices(
+        ('none', 'none'),
+        ('support', 'support'),
+        ('oppose', 'oppose'),
+        ('neutral', 'neutral')
+    )
+
+    position = models.CharField(blank=True, choices=position_choices, max_length=255, default='none')
     position_detail = models.TextField(blank=True, null=True)
     notes = JSONField(blank=True, default=list)
     starred = models.BooleanField(default=False)

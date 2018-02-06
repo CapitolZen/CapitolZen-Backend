@@ -126,7 +126,9 @@ class GroupViewSet(OwnerBasedViewSet):
 
         committee_bill_query = Wrapper.objects.filter(group=group)\
             .values('bill__current_committee__id', 'bill__current_committee__name', 'bill__current_committee__chamber')\
-            .annotate(num_vals=Count('id'))
+            .annotate(num_vals=Count('id'))\
+            .order_by('-num_vals')[:5]
+
 
         top_committees = []
         for cmte in committee_bill_query:
