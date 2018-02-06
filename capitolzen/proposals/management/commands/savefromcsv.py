@@ -54,50 +54,57 @@ class Command(BaseCommand):
             del contents[0]
             reader = csv.reader(contents)
             for row in reader:
+                if row:
+                    try:
+                        state_id = str(row[0]).strip()
+                        if state_id.startswith('SB 0'):
+                            print('sup')
+                            parts = state_id.split('SB 0')
+                            num = parts[1].lstrip()
+                            state_id = "SB %s" % num
 
-                try:
-                    state_id = str(row[0])
-                    bill = Bill.objects.get(state_id=state_id)
-                    wrapper, created = Wrapper.objects.get_or_create(
-                        bill=bill,
-                        group=group,
-                        organization=org,
-                    )
-                    if created:
-                        if row[1]:
-                            wrapper.summary = row[1]
+                        bill = Bill.objects.get(state_id=state_id)
+                        wrapper, created = Wrapper.objects.get_or_create(
+                            bill=bill,
+                            group=group,
+                            organization=org,
+                        )
+                        if created:
+                            if row[1]:
+                                wrapper.summary = row[1]
 
-                        position = row[2].lower().strip()
-                        if position == 'support' or position == 'oppose':
-                            wrapper.position = position
+                            if row[2]:
+                                position = row[2].lower().strip()
+                                if position == 'support' or position == 'oppose':
+                                    wrapper.position = position
 
-                        if row[3]:
-                            doc = MobileDoc()
-                            doc.add_p(row[3])
-                            wrapper.notes = []
-                            id = uuid4()
-                            user = org.owner_user_account()
+                            if row[3]:
+                                doc = MobileDoc()
+                                doc.add_p(row[3])
+                                wrapper.notes = []
+                                id = uuid4()
+                                user = org.owner_user_account()
 
-                            note = {
-                                'doc': doc.data,
-                                'id': str(id),
-                                'user': UserSerializer(user).data,
-                                'userid': user.id,
-                                'ispublic': False,
-                                'timestamp': datetime.today().isoformat()
-                            }
-                            notes = [note]
-                            wrapper.notes = notes
+                                note = {
+                                    'doc': doc.data,
+                                    'id': str(id),
+                                    'user': UserSerializer(user).data,
+                                    'userid': user.id,
+                                    'ispublic': False,
+                                    'timestamp': datetime.today().isoformat()
+                                }
+                                notes = [note]
+                                wrapper.notes = notes
 
-                        wrapper.save()
-                        self.stdout.write(self.style.SUCCESS('wrapper created for %s') % state_id)
+                            wrapper.save()
+                            self.stdout.write(self.style.SUCCESS('wrapper created for %s') % state_id)
 
-                    else:
-                        self.stdout.write(self.style.NOTICE('wrapper previous created for %s') % state_id)
-                except Exception as e:
-                    self.stdout.write(self.style.WARNING('error finding %s' % row[0]))
-                    self.stdout.write(self.style.WARNING(e))
-                    continue
+                        else:
+                            self.stdout.write(self.style.NOTICE('wrapper previous created for %s') % state_id)
+                    except Exception as e:
+                        self.stdout.write(self.style.WARNING('error finding %s' % row[0]))
+                        self.stdout.write(self.style.WARNING(e))
+                        continue
 
-        except Exception:
-            raise CommandError('Organization needs correct id %s' % org_id)
+        except Exception as err:
+            raise CommandError("Exception: {0}".format(err))
