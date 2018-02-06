@@ -42,11 +42,6 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         blank=True, null=True, max_length=255, upload_to=avatar_directory_path
     )
 
-    contacts = JSONField(blank=True, null=True)
-    attachments = JSONField(blank=True, null=True)
-    saved_filters = JSONField(default=dict)
-    group_label = models.CharField(default="Client", max_length=255)
-
     assigned_to = models.ManyToManyField(get_user_model())
 
     class JSONAPIMeta:
