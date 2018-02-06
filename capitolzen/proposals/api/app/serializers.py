@@ -55,15 +55,47 @@ class LegislatorSerializer(BaseModelSerializer):
         instance.save()
         return instance
 
+class CommitteeSerializer(BaseModelSerializer):
+    class Meta:
+        model = Committee
+        fields = (
+            'name',
+            'state',
+            'chamber',
+            'remote_id',
+            'parent_id',
+            'subcommittee',
+            'created_at',
+            'updated_at'
+        )
+
+    def create(self, validated_data):
+        remote_id = validated_data.pop('remote_id')
+        instance, _ = Committee.objects.get_or_create(
+            remote_id=remote_id,
+            defaults={
+                **validated_data
+            }
+        )
+
+        return instance
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
 
 class BillSerializer(BaseModelSerializer):
     included_serializers = {
         'sponsor': LegislatorSerializer,
+        'current_committee': CommitteeSerializer
     }
 
     current_committee = ResourceRelatedField(
         many=False,
-        queryset=Legislator.objects,
+        queryset=Committee.objects,
         required=False
     )
 
@@ -101,7 +133,7 @@ class BillSerializer(BaseModelSerializer):
         )
 
     class JSONAPIMeta:
-        included_resources = ['sponsor']
+        included_resources = ['sponsor', 'current_committee']
 
     def create(self, validated_data):
         from capitolzen.proposals.tasks import ingest_attachment
@@ -128,38 +160,6 @@ class BillSerializer(BaseModelSerializer):
             lambda: ingest_attachment.apply_async(kwargs={
                 "identifier": str(instance.pk)
             }))
-        return instance
-
-
-class CommitteeSerializer(BaseModelSerializer):
-    class Meta:
-        model = Committee
-        fields = (
-            'name',
-            'state',
-            'chamber',
-            'remote_id',
-            'parent_id',
-            'subcommittee',
-            'created_at',
-            'updated_at'
-        )
-
-    def create(self, validated_data):
-        remote_id = validated_data.pop('remote_id')
-        instance, _ = Committee.objects.get_or_create(
-            remote_id=remote_id,
-            defaults={
-                **validated_data
-            }
-        )
-
-        return instance
-
-    def update(self, instance, validated_data):
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
         return instance
 
 
