@@ -246,7 +246,7 @@ class UserViewSet(mixins.RetrieveModelMixin,
 class ActionFilter(BaseModelFilterSet):
     class Meta:
         model = Action
-        ordering = ['-priority', '-created']
+        ordering = ['-priority', '-bill__state_id']
         fields = {
             'id': ['exact'],
             'created': ['lt', 'gt'],
