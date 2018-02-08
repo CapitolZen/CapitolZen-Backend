@@ -58,7 +58,6 @@ class Command(BaseCommand):
                     try:
                         state_id = str(row[0]).strip()
                         if state_id.startswith('SB 0'):
-                            print('sup')
                             parts = state_id.split('SB 0')
                             num = parts[1].lstrip()
                             state_id = "SB %s" % num

@@ -82,6 +82,7 @@ class CongressionalManager(object):
                 self.update(None, remote_id, resource)
             cache.delete(self.cache_key)
 
+        cache.delete(self.cache_key)
         return True
 
 

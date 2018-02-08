@@ -19,9 +19,9 @@ class MixinExternalData:
     @staticmethod
     @allow_staff_or_superuser
     def has_write_permission(request):
-        return True
+        return False
 
     @staticmethod
     @allow_staff_or_superuser
     def has_create_permission(request):
-        return True
+        return False
