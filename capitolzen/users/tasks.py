@@ -2,8 +2,7 @@ from celery import shared_task
 import inflect
 
 from datetime import datetime, timedelta
-
-from capitolzen.proposals.models import Event, Bill
+from django.utils import timezone
 
 from capitolzen.users.models import User, Action
 from capitolzen.users.services import IntercomUserSync
@@ -61,12 +60,12 @@ def create_daily_summary():
 
     for user in User.objects.filter(is_active=True):
 
-        bill_count = Action.objects.filter(user=user, title='bill:introduced', created__gte=today).count()
+        bill_count = Bill.objects.filter(created__gte=today).count()
 
         # bill_count = p.number_to_words(bill_count)
         bills = "%s new bills" % bill_count
 
-        wrapper_count = Action.objects.filter(user=user, title='wrapper:updated', created__gte=today).count()
+        wrapper_count = Wrapper.objects.filter(organization__users=user, bill__updated__gte=today)
         # wrapper_count = p.number_to_words(wrapper_count)
         wrappers = "%s updated bills" % wrapper_count
 
