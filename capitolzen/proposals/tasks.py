@@ -94,7 +94,7 @@ def run_organization_bill_updates():
                     for wrapper in wrappers:
                         a = Action.objects.create(
                             user=user,
-                            action_object=wrapper,
+                            wrapper=wrapper,
                             priority=4,
                             title='wrapper:updated'
                         )

@@ -317,7 +317,7 @@ class EventManager(object):
                             title='wrapper:committee_scheduled',
                             priority=2,
                             user=user,
-                            action_object=wrapper,
+                            wrapper=wrapper,
                             metadata=meta
                         )
                         action.save()

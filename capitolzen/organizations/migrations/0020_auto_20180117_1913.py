@@ -14,25 +14,29 @@ def forwards(apps, schema_editor):
     Organization = apps.get_model('organizations', 'Organization')
 
     for organization in Organization.objects.all().iterator():
-        if organization.stripe_subscription_id:
-            subscription = stripe.Subscription.retrieve(organization.stripe_subscription_id)
-            subscription.delete()
-            organization.stripe_subscription_id = None
-            organization.plan_name = None
+        try:
+            if organization.stripe_subscription_id:
+                subscription = stripe.Subscription.retrieve(organization.stripe_subscription_id)
+                subscription.delete()
+                organization.stripe_subscription_id = None
+                organization.plan_name = None
 
-        StripeOrganizationSync().execute(organization, "create_or_update")
+            StripeOrganizationSync().execute(organization, "create_or_update")
 
-        subscription = stripe.Subscription.create(
-            customer=organization.stripe_customer_id,
-            items=[
-                {
-                    "plan": settings.STRIPE_DEFAULT_PLAN_ID,
-                },
-            ]
-        )
-        organization.plan_name = settings.STRIPE_DEFAULT_PLAN_ID
-        organization.stripe_subscription_id = subscription.get('id')
-        organization.save()
+            subscription = stripe.Subscription.create(
+                customer=organization.stripe_customer_id,
+                items=[
+                    {
+                        "plan": settings.STRIPE_DEFAULT_PLAN_ID,
+                    },
+                ]
+            )
+
+            organization.plan_name = settings.STRIPE_DEFAULT_PLAN_ID
+            organization.stripe_subscription_id = subscription.get('id')
+            organization.save()
+        except Exception:
+            continue
 
 
 class Migration(migrations.Migration):

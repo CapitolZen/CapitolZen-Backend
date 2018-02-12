@@ -261,7 +261,7 @@ class ActionFilter(BaseModelFilterSet):
         'bill__sponsor__last_name'
         'title',
         'user__name',
-        'committee__name'
+
     )
 
 

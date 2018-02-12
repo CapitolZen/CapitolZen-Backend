@@ -38,7 +38,7 @@ def user_action_defaults(user_id):
     for bill in Bill.objects.filter(created_at__gt=today):
         a = Action.objects.create(
             user=user,
-            action_object=bill,
+            bill=bill,
             title='bill:introduced',
             priority=0
         )
@@ -47,7 +47,7 @@ def user_action_defaults(user_id):
     for event in Event.objects.filter(time__gte=today, time__lt=next_week):
         a = Action.objects.create(
             user=user,
-            action_object=event,
+            event=event,
             priority=-1,
             title='committee:meeting'
         )

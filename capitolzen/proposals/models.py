@@ -20,8 +20,6 @@ from capitolzen.proposals.mixins import MixinExternalData
 
 
 class Bill(AbstractBaseModel, MixinExternalData):
-    actions = GenericRelation('users.Action', related_query_name="bills")
-
     # External Data
     state = models.TextField(max_length=255, null=True)
     state_id = models.CharField(max_length=255, null=True)
@@ -213,7 +211,6 @@ class LegislatorManager(models.Manager):
 
 class Legislator(AbstractBaseModel, MixinExternalData):
     objects = LegislatorManager()
-    actions = GenericRelation('users.Action', related_query_name="legislator")
 
     # External Data
     remote_id = models.CharField(max_length=255, unique=True)
@@ -250,7 +247,6 @@ class Legislator(AbstractBaseModel, MixinExternalData):
 
 
 class Committee(AbstractBaseModel, MixinExternalData):
-    actions = GenericRelation('users.Action', related_query_name="committee")
 
     name = models.CharField(max_length=255)
     state = models.CharField(max_length=255)
@@ -271,8 +267,6 @@ class Committee(AbstractBaseModel, MixinExternalData):
 
 
 class Event(AbstractBaseModel, MixinExternalData):
-    actions = GenericRelation('users.Action', related_query_name="event")
-
     state = models.CharField(max_length=255)
     chamber = models.CharField(max_length=255)
     time = models.DateTimeField()
@@ -305,7 +299,6 @@ class Event(AbstractBaseModel, MixinExternalData):
 
 
 class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
-    actions = GenericRelation('users.Action', related_query_name="wrapper")
     organization = models.ForeignKey(
         'organizations.Organization',
         on_delete=models.CASCADE,
