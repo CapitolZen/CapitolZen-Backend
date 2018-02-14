@@ -53,35 +53,38 @@ def user_action_defaults(user_id):
         )
         a.save()
 
-
 @shared_task
 def create_daily_summary():
     today = datetime.today()
+    yesterday = today - timedelta(days=1)
 
     for user in User.objects.filter(is_active=True):
 
-        bill_count = Bill.objects.filter(created__gte=today).count()
+        bill_count = Bill.objects.filter(created__gt=yesterday).count()
 
         # bill_count = p.number_to_words(bill_count)
-        bills = "%s new bills" % bill_count
+        bills = "%s New Introduced Bills" % bill_count2
 
-        wrapper_count = Wrapper.objects.filter(organization__users=user, bill__updated__gte=today)
+        wrapper_count = Wrapper.objects.filter(organization__users=user, bill__created__gt=yesterday).count()
         # wrapper_count = p.number_to_words(wrapper_count)
-        wrappers = "%s updated bills" % wrapper_count
+        wrappers = "%s Updated Saved Bills" % wrapper_count
 
-        committee_count = Action.objects.filter(user=user, title='committee:meeting', created__gte=today).count()
-        committees = "%s committee meetings" % committee_count
+        committee_count = Action.objects.filter(user=user, title='committee:meeting', created__gt=yesterday).count()
+        committees = "%s Committee Meetings" % committee_count
+
 
         if bill_count or wrapper_count or committee_count:
-            copy = "<p>You have updates! View your Capitol Zen account to see the latest updates.<p>"
-            copy += "<p>You have:"
+            copy = "<p>You have updates! View your Capitol Zen account to see the latest updates. "
+            copy += "You have:</p>"
+
             if bill_count:
-                copy += bills + ', '
+                copy += '<p><strong>%s</strong></p>' % bills
             if wrapper_count:
-                copy += wrappers + ', '
+                copy += '<p><strong>%s</strong></p>' % wrappers
             if committee_count:
-                copy += committees
-            copy += '.</p>'
+                copy += '<p><strong>%s</strong></p>' % committees
+
+            copy += '<p>View your Capitol Zen To Do list to review everything new in one place!</p>'
 
             url = "%s/dashboard" % settings.APP_FRONTEND
 
@@ -95,7 +98,7 @@ def create_daily_summary():
             send_templated_mail(
                 template_name='simple_action',
                 from_email='hello@capitolzen.com',
-                recipient_list=user.username,
+                recipient_list=[user.username],
                 context=context,
             )
 
