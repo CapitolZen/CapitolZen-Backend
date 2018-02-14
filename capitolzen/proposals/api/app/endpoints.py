@@ -293,6 +293,19 @@ class WrapperFilter(OrganizationFilterSet):
     introduced_range = filters.CharFilter(name='first', method='action_date_range_filter')
     active_range = filters.CharFilter(name='last', method='action_date_range_filter')
 
+    bill_modified_before = filters.IsoDateTimeFilter(
+        name='bill__updated_at',
+        label='bill updated Before',
+        help_text='ISO-8601. Example: 2017-09-16T15:16:12Z',
+        lookup_expr='lte')
+
+    bill_modified_after = filters.IsoDateTimeFilter(
+        name='bill__updated_at',
+        label='bill updated After',
+        help_text='ISO-8601. Example: 2017-09-16T15:16:12Z',
+        lookup_expr='gte'
+    )
+
     def filter_bill_by_state(self, queryset, name, value):
         return queryset.filter(bill__state=value)
 

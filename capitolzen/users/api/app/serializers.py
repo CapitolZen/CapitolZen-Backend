@@ -1,3 +1,4 @@
+from collections import OrderedDict
 
 from django.contrib.auth import get_user_model
 
@@ -5,10 +6,10 @@ from rest_framework_json_api import serializers
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework.validators import UniqueValidator
 
-
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
 
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
+from capitolzen.proposals.models import Bill, Event, Committee, Wrapper
 
 from capitolzen.users.utils import token_decode, token_encode
 from capitolzen.users.notifications import email_user_password_reset_request
@@ -355,8 +356,26 @@ class ActionSerializer(BaseInternalModelSerializer):
         queryset=User.objects,
     )
 
+    bill = ResourceRelatedField(
+        many=False,
+        queryset=Bill.objects
+    )
+
+    wrapper = ResourceRelatedField(
+        many=False,
+        queryset=Wrapper.objects
+    )
+
+    event = ResourceRelatedField(
+        many=False,
+        queryset=Event.objects
+    )
+
     included_serializers = {
         'user': UserSerializer,
+        'bill': 'capitolzen.proposals.api.app.serializers.BillSerializer',
+        'event': 'capitolzen.proposals.api.app.serializers.EventSerializer',
+        'wrapper': 'capitolzen.proposals.api.app.serializers.WrapperSerializer',
     }
 
     class Meta:
@@ -374,4 +393,5 @@ class ActionSerializer(BaseInternalModelSerializer):
         )
 
     class JSONAPIMeta:
-        included_resources = ['user']
+        included_resources = ['bill', 'event', 'wrapper', 'wrapper.group', 'wrapper.bill',
+                              'bill.sponsor', 'bill.current_committee']

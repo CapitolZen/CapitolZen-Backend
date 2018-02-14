@@ -69,6 +69,8 @@ class GroupViewSet(OwnerBasedViewSet):
     serializer_class = GroupSerializer
     filter_class = GroupFilter
     queryset = Group.objects.all()
+    ordering = ('title',)
+    ordering_fields = ('title', 'created', 'modified', 'active')
 
     @list_route(methods=['GET'], serializer_class=BillSerializer)
     def bills(self, request):

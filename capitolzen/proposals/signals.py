@@ -4,8 +4,10 @@ from django.db.models import Q
 
 from django.dispatch import receiver
 
-from capitolzen.proposals.models import Bill, Event
+from capitolzen.proposals.models import Bill, Event, Wrapper
 from capitolzen.users.models import User, Action
+from capitolzen.groups.models import Group
+
 
 
 ###################################
@@ -24,12 +26,30 @@ def _create_introduction_actions(bill):
 
         a.save()
 
+def _create_bill_update_action(bill):
+    for user in User.objects.filter(is_active=True, notification_preferences__wrapper_updated=True):
+        groups = Group.objects.filter(assigned_to=user)
+        for group in groups:
+            try:
+                wrapper = Wrapper.objects.get(group=group, bill=bill)
+                a = Action.objects.create(
+                    user=user,
+                    wrapper=wrapper,
+                    title='wrapper:updated',
+                    priority=2
+                )
+                a.save()
+            except Exception:
+                continue
+
 @receiver(post_save, sender=Bill)
 def create_introduction_actions(sender, **kwargs):
     bill = kwargs.get('instance')
     created = kwargs.get('created')
     if created:
         transaction.on_commit(lambda: _create_introduction_actions(bill))
+    else:
+        transaction.on_commit(lambda : _create_bill_update_action(bill))
 
 
 

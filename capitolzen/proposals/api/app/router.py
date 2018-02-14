@@ -16,7 +16,7 @@ router.register(r'wrappers', WrapperViewSet, base_name="wrappers")
 router.register(r'events', EventViewSet, base_name='events')
 
 urlpatterns = [
-    url(r'^bills/search/$', BillSearchView.as_view(), name='bill-search'),
+    #url(r'^bills/search/$', BillSearchView.as_view(), name='bill-search'),
     url(r'^', include(router.urls)),
 
 ]
