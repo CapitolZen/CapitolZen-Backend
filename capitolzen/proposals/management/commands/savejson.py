@@ -21,7 +21,6 @@ class Command(BaseCommand):
             org = Organization.objects.get(id=org_id)
             data = self.fetch_json(url)
             keys = data.keys()
-            print(keys)
             for key in keys:
 
                 group, created = Group.objects.get_or_create(organization=org, title=key)

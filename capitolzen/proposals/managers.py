@@ -66,23 +66,21 @@ class CongressionalManager(object):
         raise NotImplementedError()
 
     def is_updating(self):
-        return cache.get(self.cache_key) == self.cache_value
+        # return cache.get(self.cache_key) == self.cache_value
+        # Need a temporary solution until we find a better one
+        return False
 
     def run(self):
         """
         TODO: If error, delete cache key so we can re-run
+        TODO: Re-implement thread safety
         :return:
         """
         # Make sure this is thread / worker friendly and we're not trying
         # to update the same thing twice
-        if cache.get(self.cache_key) is None:
-            cache.set(self.cache_key, self.cache_value, None)
-            for resource in self._get_remote_list():
-                remote_id = resource.pop('id')
-                self.update(None, remote_id, resource)
-            cache.delete(self.cache_key)
-
-        cache.delete(self.cache_key)
+        for resource in self._get_remote_list():
+            remote_id = resource.pop('id')
+            self.update(None, remote_id, resource)
         return True
 
 
@@ -319,7 +317,7 @@ class EventManager(object):
                             title='wrapper:committee_scheduled',
                             priority=2,
                             user=user,
-                            action_object=wrapper,
+                            wrapper=wrapper,
                             metadata=meta
                         )
                         action.save()

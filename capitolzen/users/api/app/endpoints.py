@@ -31,7 +31,6 @@ from capitolzen.users.models import User, Action
 
 
 class UserFilter(filters.FilterSet):
-
     current = filters.BooleanFilter(
         name="current",
         label="Current",
@@ -244,25 +243,24 @@ class UserViewSet(mixins.RetrieveModelMixin,
 
 
 class ActionFilter(BaseModelFilterSet):
+    group = filters.UUIDFilter(
+        name='wrapper__group__id',
+        lookup_expr='exact',
+        label='actions for wrappers of groups',
+        help_text='title of group'
+    )
+
     class Meta:
         model = Action
-        ordering = ['-priority', '-bill__state_id']
+        ordering = ['-priority', ]
         fields = {
             'id': ['exact'],
             'created': ['lt', 'gt'],
             'modified': ['lt', 'gt'],
             'state': ['exact'],
-            'priority': ['lt', 'gt', 'exact']
+            'priority': ['lt', 'gt', 'exact'],
+            'title': ['exact']
         }
-
-    search_fields = (
-        'bill__title',
-        'bill__state_id',
-        'bill__sponsor__last_name'
-        'title',
-        'user__name',
-        'committee__name'
-    )
 
 
 class ActionsViewSet(BasicViewSet):
@@ -272,3 +270,27 @@ class ActionsViewSet(BasicViewSet):
 
     filter_class = ActionFilter
     serializer_class = ActionSerializer
+
+    ordering_fields = ('bill__state_id', 'bill__created_at', 'bill__updated_at')
+    search_fields = (
+        'bill__title',
+        'bill__state_id',
+        'bill__sponsor__last_name',
+        'title'
+    )
+
+    @list_route(methods=['get'])
+    def stats(self, request):
+        if not getattr(request, 'user', False):
+            return Response({"message": "INvalid request", "status": status.HTTP_403_FORBIDDEN})
+        user = request.user
+
+        queryset = Action.objects.filter(user=user, state='active')
+
+        data = {
+            'introduced': queryset.filter(title='bill:introduced').count(),
+            'updated': queryset.filter(title='wrapper:updated').count(),
+            'total': queryset.count()
+        }
+
+        return Response({"status_code": status.HTTP_200_OK, "stats": data})

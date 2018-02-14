@@ -3,7 +3,7 @@ from pytz import UTC
 
 from django.conf import settings
 
-from capitolzen.document_analysis.summarize import summarize_text
+# from capitolzen.document_analysis.summarize import summarize_text
 
 from capitolzen.meta.states import AVAILABLE_STATES
 
@@ -25,10 +25,10 @@ def time_convert(time):
         return time
 
 
-def summarize(content):
-    if content is None:
-        return ""
-    return summarize_text(content)
+# def summarize(content):
+#     if content is None:
+#         return ""
+#     return summarize_text(content)
 
 
 def normalize_bill_data(wrapper_list, time_format='%m/%d/%Y'):

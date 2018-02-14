@@ -176,7 +176,6 @@ class User(AbstractUser, AbstractNoIDModel):
 
 
 class Action(AbstractBaseModel):
-
     user = models.ForeignKey(
         'users.User',
         on_delete=models.CASCADE
@@ -189,6 +188,11 @@ class Action(AbstractBaseModel):
     object_id = models.UUIDField(null=True, blank=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
     action_object = GenericForeignKey('content_type', 'object_id')
+
+    bill = models.ForeignKey('proposals.Bill')
+    event = models.ForeignKey('proposals.Event')
+    wrapper = models.ForeignKey('proposals.Wrapper')
+
     state_choices = Choices(
         ('active', 'Active'),
         ('dismissed', 'Dismissed'),

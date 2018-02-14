@@ -5,13 +5,11 @@ from django.contrib.auth import get_user_model
 from rest_framework_json_api import serializers
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework.validators import UniqueValidator
-from rest_framework_json_api.utils import  get_resource_type_from_instance
-from rest_framework.serializers import Field
 
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
 
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
-from capitolzen.proposals.models import Bill, Event
+from capitolzen.proposals.models import Bill, Event, Committee, Wrapper
 
 from capitolzen.users.utils import token_decode, token_encode
 from capitolzen.users.notifications import email_user_password_reset_request
@@ -352,32 +350,33 @@ class ChangeUserOrganizationRoleSerializer(serializers.Serializer):
         model = User
 
 
-class ActionObjectRelatedField(Field):
-    """
-    A custom field to use for the `tagged_object` generic relationship.
-    """
-
-    def to_representation(self, value):
-
-        resource_type = get_resource_type_from_instance(value)
-
-        return OrderedDict([('type', resource_type), ('id', str(value.id))])
-
-    def to_internal_value(self, data):
-
-        if data['type'] == 'bills':
-            return Bill.objects.get(id=data['id'])
-        elif data['type'] == 'events':
-            return Event.objects.get(id=data['id'])
-
-
 class ActionSerializer(BaseInternalModelSerializer):
     user = ResourceRelatedField(
         many=False,
         queryset=User.objects,
     )
 
-    action_object = ActionObjectRelatedField()
+    bill = ResourceRelatedField(
+        many=False,
+        queryset=Bill.objects
+    )
+
+    wrapper = ResourceRelatedField(
+        many=False,
+        queryset=Wrapper.objects
+    )
+
+    event = ResourceRelatedField(
+        many=False,
+        queryset=Event.objects
+    )
+
+    included_serializers = {
+        'user': UserSerializer,
+        'bill': 'capitolzen.proposals.api.app.serializers.BillSerializer',
+        'event': 'capitolzen.proposals.api.app.serializers.EventSerializer',
+        'wrapper': 'capitolzen.proposals.api.app.serializers.WrapperSerializer',
+    }
 
     class Meta:
         model = Action
@@ -388,5 +387,11 @@ class ActionSerializer(BaseInternalModelSerializer):
             'title',
             'priority',
             'created',
-            'action_object'
+            'bill',
+            'event',
+            'wrapper'
         )
+
+    class JSONAPIMeta:
+        included_resources = ['bill', 'event', 'wrapper', 'wrapper.group', 'wrapper.bill',
+                              'bill.sponsor', 'bill.current_committee']
