@@ -63,7 +63,7 @@ def create_daily_summary():
         bill_count = Bill.objects.filter(created__gt=yesterday).count()
 
         # bill_count = p.number_to_words(bill_count)
-        bills = "%s New Introduced Bills" % bill_count2
+        bills = "%s New Introduced Bills" % bill_count
 
         wrapper_count = Wrapper.objects.filter(organization__users=user, bill__created__gt=yesterday).count()
         # wrapper_count = p.number_to_words(wrapper_count)
