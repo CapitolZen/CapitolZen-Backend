@@ -189,9 +189,9 @@ class Action(AbstractBaseModel):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
     action_object = GenericForeignKey('content_type', 'object_id')
 
-    bill = models.ForeignKey('proposals.Bill')
-    event = models.ForeignKey('proposals.Event')
-    wrapper = models.ForeignKey('proposals.Wrapper')
+    bill = models.ForeignKey('proposals.Bill', blank=True, null=True)
+    event = models.ForeignKey('proposals.Event', blank=True, null=True)
+    wrapper = models.ForeignKey('proposals.Wrapper', blank=True, null=True)
 
     state_choices = Choices(
         ('active', 'Active'),
