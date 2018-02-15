@@ -15,13 +15,12 @@ def forwards(apps, schema_editor):
 
         if content == 'bill':
             action.bill_id = fk
-
-        if content == 'wrapper':
+        elif content == 'wrapper':
             action.wrapper_id = fk
-
-        if content == 'event':
+        elif content == 'event':
             action.event_id = fk
-
+        else:
+            raise Exception
         action.save()
 
 class Migration(migrations.Migration):
