@@ -20,7 +20,7 @@ def forwards(apps, schema_editor):
         elif content == 'event':
             action.event_id = fk
         else:
-            raise Exception
+            pass
         action.save()
 
 class Migration(migrations.Migration):
