@@ -94,13 +94,16 @@ def create_daily_summary():
                 "action_cta": "View Now",
                 "action_url": url,
             }
+            try:
+                send_templated_mail(
+                    template_name='simple_action',
+                    from_email='hello@capitolzen.com',
+                    recipient_list=[user.username],
+                    context=context,
+                )
+            except Exception:
+                continue
 
-            send_templated_mail(
-                template_name='simple_action',
-                from_email='hello@capitolzen.com',
-                recipient_list=[user.username],
-                context=context,
-            )
 
 @shared_task
 def update_user_sync():
