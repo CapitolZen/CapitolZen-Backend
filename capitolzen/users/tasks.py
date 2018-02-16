@@ -97,7 +97,7 @@ def create_daily_summary():
             try:
                 send_templated_mail(
                     template_name='simple_action',
-                    from_email='hello@capitolzen.com',
+                    from_email='CapitolZenUpdates@capitolzen.com',
                     recipient_list=[user.username],
                     context=context,
                 )
