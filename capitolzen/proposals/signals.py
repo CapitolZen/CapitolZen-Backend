@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from django.db.models.signals import post_save
 from django.db import transaction
 from django.db.models import Q
@@ -27,20 +29,22 @@ def _create_introduction_actions(bill):
         a.save()
 
 def _create_bill_update_action(bill):
-    for user in User.objects.filter(is_active=True, notification_preferences__wrapper_updated=True):
-        groups = Group.objects.filter(assigned_to=user)
-        for group in groups:
-            try:
-                wrapper = Wrapper.objects.get(group=group, bill=bill)
-                a = Action.objects.create(
-                    user=user,
-                    wrapper=wrapper,
-                    title='wrapper:updated',
-                    priority=2
-                )
-                a.save()
-            except Exception:
-                continue
+    yesterday = datetime.today() - timedelta(days=1)
+    if bill.updated_after(yesterday):
+        for user in User.objects.filter(is_active=True, notification_preferences__wrapper_updated=True):
+            groups = Group.objects.filter(assigned_to=user)
+            for group in groups:
+                try:
+                    wrapper = Wrapper.objects.get(group=group, bill=bill)
+                    a = Action.objects.create(
+                        user=user,
+                        wrapper=wrapper,
+                        title='wrapper:updated',
+                        priority=2
+                    )
+                    a.save()
+                except Exception:
+                    continue
 
 @receiver(post_save, sender=Bill)
 def create_introduction_actions(sender, **kwargs):

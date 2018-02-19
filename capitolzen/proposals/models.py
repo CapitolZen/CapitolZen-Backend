@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import base64
 import requests
-from py2neo import Graph
+from datetime import datetime, timedelta
 
 from string import capwords
 
@@ -98,6 +98,10 @@ class Bill(AbstractBaseModel, MixinExternalData):
         if "electronically reproduced" in action:
             latest = self.history[-2]
         return capwords(latest['action'].lower())
+
+    def updated_after(self, lookback):
+        last_action = datetime.strptime(self.last_action_date, '%Y-%m-%d %I:%M:%S')
+        return last_action > lookback
 
     def update(self, source):
         for sponsor in source.get('sponsors', []):
