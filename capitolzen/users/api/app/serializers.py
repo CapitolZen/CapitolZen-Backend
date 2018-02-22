@@ -358,17 +358,20 @@ class ActionSerializer(BaseInternalModelSerializer):
 
     bill = ResourceRelatedField(
         many=False,
-        queryset=Bill.objects
+        queryset=Bill.objects,
+        required=False
     )
 
     wrapper = ResourceRelatedField(
         many=False,
-        queryset=Wrapper.objects
+        queryset=Wrapper.objects,
+        required=False
     )
 
     event = ResourceRelatedField(
         many=False,
-        queryset=Event.objects
+        queryset=Event.objects,
+        required=False
     )
 
     included_serializers = {
