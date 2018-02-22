@@ -1,12 +1,14 @@
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework_json_api import serializers
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
+from django.contrib.auth import get_user_model
+from hashid_field.rest import HashidSerializerCharField
+
 from capitolzen.organizations.models import Organization
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
 from capitolzen.users.models import User
 from capitolzen.users.api.app.serializers import UserSerializer
-from django.contrib.auth import get_user_model
-from capitolzen.groups.models import Group, Report, Comment, File
+from capitolzen.groups.models import Group, Report, Comment, File, ReportLink
 
 
 class GroupSerializer(BaseInternalModelSerializer):
@@ -86,6 +88,42 @@ class ReportSerializer(BaseInternalModelSerializer):
 
     class JSONAPIMeta:
        included_resources = ['user', 'organization', 'group']
+
+
+class ReportLinkSerializer(BaseInternalModelSerializer):
+    id = HashidSerializerCharField(source_field='groups.ReportLink.id')
+    organization = ResourceRelatedField(
+        many=False,
+        queryset=Organization.objects
+    )
+    group = ResourceRelatedField(
+        many=False,
+        queryset=Group.objects
+    )
+    report = ResourceRelatedField(
+        many=False,
+        queryset=Report.objects
+    )
+
+    included_serializers = {
+        'report': ReportSerializer,
+        'group': GroupSerializer,
+    }
+
+    class Meta:
+        model = ReportLink
+        fields = (
+            'id',
+            'contact_list',
+            'view_counter',
+            'visibility',
+            'report',
+            'group',
+            'organization'
+        )
+
+    class JSONAPIMeta:
+       included_resources = ['report', 'group']
 
 
 class CommentSerializer(BaseInternalModelSerializer):

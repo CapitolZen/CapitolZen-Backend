@@ -10,6 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 from model_utils import Choices
 
+from hashid_field import HashidAutoField
+
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import User
 from django.contrib.auth import get_user_model
@@ -65,7 +67,24 @@ def report_directory_path(instance, filename):
     return '{0}/reports/{1}'.format(instance.organization.id, filename)
 
 
-# TODO Permissions
+def prepare_report_filters(data):
+    output = {}
+    if type(data) == 'dict':
+        filters = data
+    else:
+        filters = loads(data)
+
+    for key, value in filters.items():
+        if key.endswith('__range'):
+            output[key] = value.split(',')
+            continue
+        if value.startswith('{') and value.endswith('}'):
+            output[key] = '2006-01-01'
+            continue
+        output[key] = value
+
+    return output
+
 class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     user = models.ForeignKey('users.User', blank=True)
     organization = models.ForeignKey(
@@ -75,9 +94,7 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     group = models.ForeignKey('groups.Group')
     attachments = JSONField(blank=True, default=dict)
     filter = JSONField(blank=True, default=dict)
-    scheduled = models.BooleanField(default=False)
     status = FSMField(default='draft')
-    static = models.BooleanField(default=False)
     publish_date = models.DateTimeField(blank=True, null=True)
     publish_output = models.CharField(blank=True, max_length=255)
     title = models.CharField(default="Generated Report", max_length=255)
@@ -86,6 +103,19 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     recurring = models.BooleanField(default=False)
     preferences = JSONField(default=dict)
     static_list = ArrayField(models.TextField(), blank=True, null=True)
+
+    report_types = Choices(
+        ('details', 'details'),
+        ('scorecard', 'scorecard'),
+        ('overview', 'overview'),
+        ('latest', 'latest')
+    )
+
+    report_type = models.CharField(choices=report_types, max_length=255, default='details')
+
+    @property
+    def file_title(self):
+        return "%s-%s" % (self.group.title, self.title)
 
     class JSONAPIMeta:
         resource_name = "reports"
@@ -136,23 +166,29 @@ class Comment(AbstractBaseModel):
         verbose_name_plural = "comments"
 
 
-def prepare_report_filters(data):
-    output = {}
-    if type(data) == 'dict':
-        filters = data
-    else:
-        filters = loads(data)
 
-    for key, value in filters.items():
-        if key.endswith('__range'):
-            output[key] = value.split(',')
-            continue
-        if value.startswith('{') and value.endswith('}'):
-            output[key] = '2006-01-01'
-            continue
-        output[key] = value
 
-    return output
+
+class ReportLink(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+    id = HashidAutoField(primary_key=True)
+    report = models.ForeignKey(Report, on_delete=models.CASCADE)
+    organization = models.ForeignKey(
+        'organizations.Organization',
+        on_delete=models.CASCADE
+    )
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+
+    usage_choices = Choices(
+        ('unlimited', 'Anyone with link'),
+        ('organization', 'Anyone in my org'),
+        ('once', 'just once'),
+        ('contacts', 'in list of emails')
+    )
+
+    view_counter = models.IntegerField(default=0)
+    visibility = models.CharField(choices=usage_choices, default='organization', db_index=True, max_length=255)
+    contact_list = ArrayField(models.CharField(max_length=255, blank=True, null=True))
+
 
 
 def file_directory_path(instance, filename):

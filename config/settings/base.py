@@ -539,6 +539,9 @@ ELASTICSEARCH_DSL = {
     },
 }
 
+# HASHID
+HASHID_FIELD_SALT = env("HASHID_FIELD_SALT", default="asdfasdfsadfsadfdsafdsa")
+
 # SLACK
 SLACK_URL = env("UPDRAFT_SLACK_URL", default='')
 
