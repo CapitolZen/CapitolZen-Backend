@@ -430,7 +430,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     'create_intro_actions': {
         'task': 'capitolzen.users.tasks.create_daily_summary',
-        'schedule': crontab(minute=0, hour=9)
+        'schedule': crontab(minute=0, hour=9, day_of_month='mon-fri')
     },
     'update_user_intercom_sync': {
         'task': 'capitolzen.users.tasks.update_user_sync',
