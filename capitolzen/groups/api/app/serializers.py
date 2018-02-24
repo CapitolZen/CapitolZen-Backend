@@ -80,8 +80,6 @@ class ReportSerializer(BaseInternalModelSerializer):
             'description',
             'attachments',
             'status',
-            'scheduled',
-            'publish_date',
             'user',
             'preferences'
         )

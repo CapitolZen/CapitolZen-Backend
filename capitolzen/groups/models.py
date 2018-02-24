@@ -95,14 +95,12 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     attachments = JSONField(blank=True, default=dict)
     filter = JSONField(blank=True, default=dict)
     status = FSMField(default='draft')
-    publish_date = models.DateTimeField(blank=True, null=True)
     publish_output = models.CharField(blank=True, max_length=255)
     title = models.CharField(default="Generated Report", max_length=255)
     description = models.TextField(blank=True, null=True)
     template = JSONField(default=dict)
     recurring = models.BooleanField(default=False)
     preferences = JSONField(default=dict)
-    static_list = ArrayField(models.TextField(), blank=True, null=True)
 
     report_types = Choices(
         ('details', 'details'),
