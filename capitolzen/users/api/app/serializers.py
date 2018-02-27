@@ -396,5 +396,5 @@ class ActionSerializer(BaseInternalModelSerializer):
         )
 
     class JSONAPIMeta:
-        included_resources = ['bill',  'wrapper', 'wrapper.group', 'wrapper.bill',
+        included_resources = ['bill', 'event', 'wrapper', 'wrapper.group', 'wrapper.bill',
                               'bill.sponsor', 'bill.current_committee']
