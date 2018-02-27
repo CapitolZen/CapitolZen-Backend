@@ -352,6 +352,12 @@ class WrapperViewSet(OwnerBasedViewSet):
     ordering = ('bill__state', 'bill__state_id')
     ordering_fields = ('bill__updated_at',)
 
+    search_fields = (
+        'bill__state_id',
+        'bill__title',
+        'summary'
+    )
+
     def get_queryset(self):
         return Wrapper.objects.filter(
             organization__users=self.request.user
