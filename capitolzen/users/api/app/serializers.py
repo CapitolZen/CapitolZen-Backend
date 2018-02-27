@@ -359,19 +359,19 @@ class ActionSerializer(BaseInternalModelSerializer):
     bill = ResourceRelatedField(
         many=False,
         queryset=Bill.objects,
-        required=False
+        allow_null=True
     )
 
     wrapper = ResourceRelatedField(
         many=False,
         queryset=Wrapper.objects,
-        required=False
+        allow_null=True
     )
 
     event = ResourceRelatedField(
         many=False,
         queryset=Event.objects,
-        required=False
+        allow_null=True
     )
 
     included_serializers = {
