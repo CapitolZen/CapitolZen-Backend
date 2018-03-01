@@ -4,6 +4,7 @@ from logging import getLogger
 from django.db.models import Count
 
 from django_filters import rest_framework as filters
+
 from rest_framework import status, exceptions
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
@@ -16,10 +17,10 @@ from config.viewsets import OwnerBasedViewSet
 from capitolzen.proposals.models import Bill, Wrapper
 from capitolzen.proposals.api.app.serializers import BillSerializer
 
-from capitolzen.groups.models import Group, Report, File
+from capitolzen.groups.models import Group, Report, File, ReportLink
 from capitolzen.groups.tasks import generate_report, email_report
 from capitolzen.groups.api.app.serializers import (
-    GroupSerializer, ReportSerializer, FileSerializer
+    GroupSerializer, ReportSerializer, FileSerializer, ReportLinkSerializer
 )
 
 logger = getLogger('app')
@@ -238,6 +239,46 @@ class ReportViewSet(OwnerBasedViewSet):
             "status_code": status.HTTP_200_OK,
             "message": "Report hopefully emailed"
         })
+
+
+class ReportLinkFilter(OrganizationFilterSet):
+    group = filters.CharFilter(
+        name='group',
+        label='Group',
+        help_text='Id of group',
+        lookup_expr='exact'
+    )
+
+    class Meta(OrganizationFilterSet.Meta):
+        model = Report
+
+
+class ReportLinkViewSet(OwnerBasedViewSet):
+    queryset = ReportLink.objects.all()
+    serializer_class = ReportLinkSerializer
+    filter_class = ReportLinkFilter
+
+    @detail_route(methods=['GET'])
+    def check(self, request, pk):
+        if not pk:
+            Response(
+                {
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "Missing requirement"
+                }
+            ).status_code(status.HTTP_400_BAD_REQUEST)
+
+        if request.user.is_authenticated():
+            self.check_permissions(request)
+
+        link = self.get_object()
+        if link.has_object_read_permission(request):
+            return Response({"report": str(link.report.id), "status": status.HTTP_200_OK}).status_code(status.HTTP_200_OK)
+
+        if link.is_contacts:
+            return Response({"status": "must_validate_email", "message": "must provide valid email address"})
+
+        return Response({"status": status.HTTP_403_FORBIDDEN, "message": "Unauthorized"}).status_code(status.HTTP_403_FORBIDDEN)
 
 
 class FileFilter(OrganizationFilterSet):

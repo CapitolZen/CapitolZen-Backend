@@ -81,7 +81,8 @@ class ReportSerializer(BaseInternalModelSerializer):
             'attachments',
             'status',
             'user',
-            'preferences'
+            'preferences',
+
         )
 
     class JSONAPIMeta:
@@ -103,11 +104,6 @@ class ReportLinkSerializer(BaseInternalModelSerializer):
         queryset=Report.objects
     )
 
-    included_serializers = {
-        'report': ReportSerializer,
-        'group': GroupSerializer,
-    }
-
     class Meta:
         model = ReportLink
         fields = (
@@ -119,10 +115,6 @@ class ReportLinkSerializer(BaseInternalModelSerializer):
             'group',
             'organization'
         )
-
-    class JSONAPIMeta:
-       included_resources = ['report', 'group']
-
 
 class CommentSerializer(BaseInternalModelSerializer):
     referenced_object = ResourceRelatedField(

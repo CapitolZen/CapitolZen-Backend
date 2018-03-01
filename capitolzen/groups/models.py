@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 from json import loads
 
+from base64 import b64decode
+
 from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -98,18 +100,16 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     publish_output = models.CharField(blank=True, max_length=255)
     title = models.CharField(default="Generated Report", max_length=255)
     description = models.TextField(blank=True, null=True)
-    template = JSONField(default=dict)
-    recurring = models.BooleanField(default=False)
     preferences = JSONField(default=dict)
 
     report_types = Choices(
-        ('details', 'details'),
         ('scorecard', 'scorecard'),
-        ('overview', 'overview'),
-        ('latest', 'latest')
+        ('table', 'table'),
+        ('list', 'list'),
+        ('slideshow', 'slideshow')
     )
 
-    report_type = models.CharField(choices=report_types, max_length=255, default='details')
+    display_type = models.CharField(choices=report_types, max_length=255, default='list')
 
     @property
     def file_title(self):
@@ -179,14 +179,39 @@ class ReportLink(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     usage_choices = Choices(
         ('unlimited', 'Anyone with link'),
         ('organization', 'Anyone in my org'),
-        ('once', 'just once'),
-        ('contacts', 'in list of emails')
+        ('contacts', 'in list of emails'),
+        ('once', 'just once') # not implemented
     )
 
     view_counter = models.IntegerField(default=0)
     visibility = models.CharField(choices=usage_choices, default='organization', db_index=True, max_length=255)
     contact_list = ArrayField(models.CharField(max_length=255, blank=True, null=True))
 
+    @property
+    def is_contacts(self):
+        return self.visibility == "contacts"
+
+    def has_object_read_permission(self, request):
+        """
+        Need to overwrite the default permissions class to allow anon access to report
+        """
+        if self.visibility == "unlimited":
+            return True
+
+        if self.visibility == "organization":
+            return request.organization == self.organization
+
+        if self.visibility == "contacts":
+            if request.organization == self.organization:
+                return True
+
+            email = request.GET.get('email', False)
+            if not email:
+                return False
+
+            return b64decode(email) in self.contact_list
+
+        return False
 
 
 def file_directory_path(instance, filename):
