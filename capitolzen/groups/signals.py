@@ -5,28 +5,6 @@ from django.conf import settings
 from django.db import transaction
 from capitolzen.organizations.tasks import intercom_update_organization_attributes
 
-
-@receiver(post_save, sender=Group)
-def create_group_default_report(sender, **kwargs):
-    group = kwargs.get('instance')
-    organization = group.organization
-
-    if getattr(organization, 'owner', False):
-        user = organization.owner_user_account()
-        preferences = {
-            'layout': 'detail_list'
-        }
-        report = Report.objects.create(
-            user=user,
-            group=group,
-            organization=organization,
-            title="All Saved Bills",
-            preferences=preferences
-        )
-
-        report.save()
-
-
 @receiver(post_save, sender=Group)
 def update_group_count(sender, **kwargs):
     if settings.INTERCOM_ENABLE_SYNC:
