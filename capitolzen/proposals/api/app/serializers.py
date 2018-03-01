@@ -242,10 +242,5 @@ class WrapperSerializer(BaseInternalModelSerializer):
         included_resources = ['bill', 'bill.sponsor', 'group']
 
     def create(self, validated_data):
-        bill = validated_data.get('bill')
-        group = validated_data.get('group')
-        if bill:
-            queryset = Wrapper.objects.filter(bill_id=bill.id, group_id=group.id)
-            if queryset.exists():
-                raise ValidationError('Wrapper already exists for this data')
-        return Wrapper.objects.create(**validated_data)
+        wrapper, created = Wrapper.objects.get_or_create(**validated_data)
+        return wrapper
