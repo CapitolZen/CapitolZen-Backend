@@ -90,6 +90,10 @@ class Organization(AbstractOrganization, AbstractBaseModel):
         else:
             return None
 
+    def is_guest(self, user):
+        return True if self.organization_users.filter(user=user, is_guest=True) else False
+
+
     class Meta(AbstractOrganization.Meta):
         abstract = False
         verbose_name = _("organization")
@@ -200,6 +204,9 @@ class OrganizationUser(AbstractOrganizationUser):
     """
     Default OrganizationUser model.
     """
+
+    is_guest = models.BooleanField(default=False)
+
     class Meta(AbstractOrganizationUser.Meta):
         abstract = False
         verbose_name = _("organization user")

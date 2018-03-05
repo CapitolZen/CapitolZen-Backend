@@ -21,6 +21,7 @@ from django.contrib.auth import get_user_model
 from config.models import AbstractBaseModel
 
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
+from capitolzen.groups.mixins import MixinResourceOwnedByPage
 
 
 def avatar_directory_path(instance, filename):
@@ -93,7 +94,10 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         'organizations.Organization',
         on_delete=models.CASCADE
     )
+
     group = models.ForeignKey('groups.Group')
+    page = models.ForeignKey('groups.Page', blank=True, null=True)
+
     attachments = JSONField(blank=True, default=dict)
     filter = JSONField(blank=True, default=dict)
     status = FSMField(default='draft')
@@ -134,86 +138,6 @@ class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         return prepare_report_filters(self.filter)
 
 
-class Comment(AbstractBaseModel):
-    author = models.ForeignKey('users.User', on_delete=models.CASCADE)
-    reactions = JSONField(blank=True, null=True)
-    text = models.TextField()
-    documents = JSONField(blank=True, default=dict)
-
-    VISIBILITY_OPTIONS = (
-        ('public', 'anyone'),
-        ('group', 'just group contacts'),
-        ('private', 'just organization')
-    )
-
-    visibility = models.CharField(
-        choices=VISIBILITY_OPTIONS,
-        max_length=255
-    )
-
-    referenced_id = models.UUIDField()
-    referenced_object = GenericForeignKey('content_type', 'referenced_id')
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-
-    class JSONAPIMeta:
-        resource_name = "comments"
-
-    class Meta:
-        abstract = False
-        verbose_name = "comment"
-        verbose_name_plural = "comments"
-
-
-
-
-
-class ReportLink(AbstractBaseModel, MixinResourcedOwnedByOrganization):
-    id = HashidAutoField(primary_key=True)
-    report = models.ForeignKey(Report, on_delete=models.CASCADE)
-    organization = models.ForeignKey(
-        'organizations.Organization',
-        on_delete=models.CASCADE
-    )
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
-
-    usage_choices = Choices(
-        ('unlimited', 'Anyone with link'),
-        ('organization', 'Anyone in my org'),
-        ('contacts', 'in list of emails'),
-        ('once', 'just once') # not implemented
-    )
-
-    view_counter = models.IntegerField(default=0)
-    visibility = models.CharField(choices=usage_choices, default='organization', db_index=True, max_length=255)
-    contact_list = ArrayField(models.CharField(max_length=255, blank=True, null=True))
-
-    @property
-    def is_contacts(self):
-        return self.visibility == "contacts"
-
-    def has_object_read_permission(self, request):
-        """
-        Need to overwrite the default permissions class to allow anon access to report
-        """
-        if self.visibility == "unlimited":
-            return True
-
-        if self.visibility == "organization":
-            return request.organization == self.organization
-
-        if self.visibility == "contacts":
-            if request.organization == self.organization:
-                return True
-
-            email = request.GET.get('email', False)
-            if not email:
-                return False
-
-            return b64decode(email) in self.contact_list
-
-        return False
-
-
 def file_directory_path(instance, filename):
     """
     format directory path for file library
@@ -228,6 +152,7 @@ class File(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     organization = models.ForeignKey(
         'organizations.Organization', on_delete=models.CASCADE
     )
+
     user = models.ForeignKey('users.User')
     file = models.FileField(
         max_length=255, null=True, blank=True,
@@ -254,3 +179,79 @@ class File(AbstractBaseModel, MixinResourcedOwnedByOrganization):
 
     class JSONAPIMeta:
         resource_name = "files"
+
+
+def generate_preview():
+    return {
+        "preview": None,
+        "summary": None,
+        "pubname": None,
+        "keywords": []
+    }
+
+
+class Link(AbstractBaseModel, MixinResourcedOwnedByOrganization, MixinResourceOwnedByPage):
+    url = models.URLField()
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    scraped_data = JSONField(default=generate_preview)
+
+    class Meta:
+        verbose_name = _("link")
+        verbose_name_plural = _("links")
+
+    class JSONAPIMeta:
+        resource_name = "links"
+
+
+class Update(AbstractBaseModel, MixinResourcedOwnedByOrganization, MixinResourceOwnedByPage):
+    user = models.ForeignKey('users.User')
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
+
+    files = models.ManyToManyField('groups.File', blank=True, null=True)
+    links = models.ManyToManyField('groups.Link', blank=True, null=True)
+    wrappers = models.ManyToManyField('proposals.Wrapper', blank=True, null=True)
+    reports = models.ManyToManyField('groups.Report', blank=True, null=True)
+
+    document = JSONField(default=dict)
+    title = models.TextField(max_length=255)
+
+    status_choices = Choices(
+        ('draft', 'draft'),
+        ('published', 'published')
+    )
+    status = models.TextField(choices=status_choices, max_length=255, default='draft')
+
+    class Meta:
+        verbose_name = _("update")
+        verbose_name_plural = _("updates")
+
+    class JSONAPIMeta:
+        resource_name = "updates"
+
+
+class Page(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+    id = HashidAutoField(primary_key=True)
+
+    organization = models.ForeignKey(
+        'organizations.Organization',
+        on_delete=models.CASCADE
+    )
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
+    author = models.ForeignKey('users.User', blank=True, null=True)
+    usage_choices = Choices(
+        ('anyone', 'Anyone with link'),
+        ('organization', 'Anyone in my org'),
+    )
+    visibility = models.CharField(choices=usage_choices, default='organization', db_index=True, max_length=255)
+
+    title = models.CharField(max_length=255, default='My Group Page')
+    description = models.TextField(blank=True, null=True)
+    published = models.BooleanField(default=False)
+
+
+    class Meta:
+        verbose_name = _("page")
+        verbose_name_plural = _("pages")
+
+    class JSONAPIMeta:
+        resource_name = "pages"

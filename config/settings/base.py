@@ -378,6 +378,8 @@ CORS_ALLOW_METHODS = (
 
 CORS_ALLOW_HEADERS = default_headers + (
     'X-Organization',
+    'X-Contact',
+    'X-Group'
 )
 
 # Some really nice defaults

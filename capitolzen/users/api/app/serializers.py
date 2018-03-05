@@ -63,7 +63,10 @@ class UserSerializer(BaseInternalModelSerializer):
             return "Admin"
 
         if organization.organization_users.filter(user=obj):
-            return "Member"
+            if obj.is_guest:
+                return "Guest"
+            else:
+                return "Member"
 
         return None
 

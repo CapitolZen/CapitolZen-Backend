@@ -8,6 +8,8 @@ from django_filters import rest_framework as filters
 from rest_framework import status, exceptions
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
 
 from common.utils.filters.sets import OrganizationFilterSet
 from common.utils.filters.filters import UUIDInFilter, IntInFilter
@@ -17,10 +19,10 @@ from config.viewsets import OwnerBasedViewSet
 from capitolzen.proposals.models import Bill, Wrapper
 from capitolzen.proposals.api.app.serializers import BillSerializer
 
-from capitolzen.groups.models import Group, Report, File, ReportLink
+from capitolzen.groups.models import Group, Report, File, Page, Link, Update
 from capitolzen.groups.tasks import generate_report, email_report
 from capitolzen.groups.api.app.serializers import (
-    GroupSerializer, ReportSerializer, FileSerializer, ReportLinkSerializer
+    GroupSerializer, ReportSerializer, FileSerializer, PageSerializer, LinkSerializer, UpdateSerializer
 )
 
 logger = getLogger('app')
@@ -241,57 +243,15 @@ class ReportViewSet(OwnerBasedViewSet):
         })
 
 
-class ReportLinkFilter(OrganizationFilterSet):
-    group = filters.CharFilter(
-        name='group',
-        label='Group',
-        help_text='Id of group',
-        lookup_expr='exact'
-    )
-
-    class Meta(OrganizationFilterSet.Meta):
-        model = Report
-
-
-class ReportLinkViewSet(OwnerBasedViewSet):
-    queryset = ReportLink.objects.all()
-    serializer_class = ReportLinkSerializer
-    filter_class = ReportLinkFilter
-
-    @detail_route(methods=['GET'])
-    def check(self, request, pk):
-        if not pk:
-            Response(
-                {
-                    "status_code": status.HTTP_400_BAD_REQUEST,
-                    "message": "Missing requirement"
-                }
-            ).status_code(status.HTTP_400_BAD_REQUEST)
-
-        if request.user.is_authenticated():
-            self.check_permissions(request)
-
-        link = self.get_object()
-        if link.has_object_read_permission(request):
-            return Response({"report": str(link.report.id), "status": status.HTTP_200_OK}).status_code(status.HTTP_200_OK)
-
-        if link.is_contacts:
-            return Response({"status": "must_validate_email", "message": "must provide valid email address"})
-
-        return Response({"status": status.HTTP_403_FORBIDDEN, "message": "Unauthorized"}).status_code(status.HTTP_403_FORBIDDEN)
-
-
 class FileFilter(OrganizationFilterSet):
     class Meta:
         model = File
-        ordering = ['name']
         fields = {
             'id': ['exact'],
             'created': ['lt', 'gt'],
             'modified': ['lt', 'gt'],
             'name': ['icontains'],
         }
-    search_fields = ('file', 'name', 'description')
 
 
 class FileViewSet(OwnerBasedViewSet):
@@ -301,3 +261,56 @@ class FileViewSet(OwnerBasedViewSet):
 
     filter_class = FileFilter
     serializer_class = FileSerializer
+    ordering = ['name']
+    ordering_fields = ['created', 'modified']
+    search_fields = ('file', 'name', 'description')
+
+
+
+class PageFilter(OrganizationFilterSet):
+    class Meta:
+        model = Page
+        fields = {
+            'group': ['exact'],
+            'author': ['exact'],
+            'visibility': ['exact'],
+            'published': ['exact']
+        }
+
+
+class PageViewSet(OwnerBasedViewSet):
+    filter_class = PageFilter
+    serializer_class = PageSerializer
+    queryset = Page.objects.all()
+    ordering = ['title']
+    search_fields = ('title', 'author__name', 'description')
+
+
+class UpdateFilterSet(OrganizationFilterSet):
+    class Meta:
+        model = Update
+        fields = {
+            'user': ['exact'],
+            'status': ['exact']
+        }
+
+class UpdateViewSet(OwnerBasedViewSet):
+    serializer_class = UpdateSerializer
+    queryset = Update.objects.all()
+    ordering = ['-created']
+    search_fields = ('title', 'document')
+
+
+class LinkFilterSet(OrganizationFilterSet):
+    class Meta:
+        model = Link
+        fields = {
+            'group': ['exact']
+        }
+
+
+class LinkViewSet(OwnerBasedViewSet):
+    queryset = Link.objects.all()
+    serializer_class = LinkSerializer
+    ordering = ['-created']
+    search_fields = ('url', 'scraped_data')

@@ -33,10 +33,16 @@ class MixinResourcedOwnedByOrganization(object):
         if not hasattr(self, 'organization'):
             return False
 
+        if self.organization.is_guest(request.user):
+            return False
+
         return self.organization.is_member(request.user)
 
     def has_object_create_permission(self, request):
         if not hasattr(self, 'organization'):
+            return False
+
+        if self.organization.is_guest(request.user):
             return False
 
         return self.organization.is_member(request.user)
