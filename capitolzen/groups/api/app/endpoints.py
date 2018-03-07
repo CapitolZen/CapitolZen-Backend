@@ -287,11 +287,22 @@ class PageViewSet(OwnerBasedViewSet):
 
 
 class UpdateFilterSet(OrganizationFilterSet):
+
+    group_page = filters.CharFilter(
+        method='filter_page',
+        lookup_expr='exact',
+        name='page',
+    )
+
+    def filter_page(self, queryset, name, value):
+        return queryset.filter(page__id=value)
+
     class Meta:
         model = Update
         fields = {
             'user': ['exact'],
-            'status': ['exact']
+            'published': ['exact'],
+            'group_page': ['exact']
         }
 
 class UpdateViewSet(OwnerBasedViewSet):
@@ -299,6 +310,7 @@ class UpdateViewSet(OwnerBasedViewSet):
     queryset = Update.objects.all()
     ordering = ['-created']
     search_fields = ('title', 'document')
+    filter_class = UpdateFilterSet
 
 
 class LinkFilterSet(OrganizationFilterSet):

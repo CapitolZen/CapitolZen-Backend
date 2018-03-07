@@ -153,6 +153,8 @@ class File(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         'organizations.Organization', on_delete=models.CASCADE
     )
 
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, null=True, blank=True)
+
     user = models.ForeignKey('users.User')
     file = models.FileField(
         max_length=255, null=True, blank=True,
@@ -194,7 +196,7 @@ class Link(AbstractBaseModel, MixinResourcedOwnedByOrganization, MixinResourceOw
     url = models.URLField()
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     scraped_data = JSONField(default=generate_preview)
-
+    page = models.ForeignKey('groups.Page', on_delete=models.CASCADE)
     class Meta:
         verbose_name = _("link")
         verbose_name_plural = _("links")
@@ -203,10 +205,11 @@ class Link(AbstractBaseModel, MixinResourcedOwnedByOrganization, MixinResourceOw
         resource_name = "links"
 
 
-class Update(AbstractBaseModel, MixinResourcedOwnedByOrganization, MixinResourceOwnedByPage):
+class Update(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     user = models.ForeignKey('users.User')
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
-
+    page = models.ForeignKey('groups.Page', on_delete=models.CASCADE, related_name='update')
+    organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE)
     files = models.ManyToManyField('groups.File', blank=True, null=True)
     links = models.ManyToManyField('groups.Link', blank=True, null=True)
     wrappers = models.ManyToManyField('proposals.Wrapper', blank=True, null=True)
@@ -215,11 +218,7 @@ class Update(AbstractBaseModel, MixinResourcedOwnedByOrganization, MixinResource
     document = JSONField(default=dict)
     title = models.TextField(max_length=255)
 
-    status_choices = Choices(
-        ('draft', 'draft'),
-        ('published', 'published')
-    )
-    status = models.TextField(choices=status_choices, max_length=255, default='draft')
+    published = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("update")

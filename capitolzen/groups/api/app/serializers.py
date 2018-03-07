@@ -1,4 +1,4 @@
-from rest_framework_json_api.relations import ResourceRelatedField
+from rest_framework_json_api.relations import ResourceRelatedField, PrimaryKeyRelatedField
 from rest_framework_json_api import serializers
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
 from django.contrib.auth import get_user_model
@@ -99,7 +99,8 @@ class FileSerializer(BaseInternalModelSerializer):
     )
     group = ResourceRelatedField(
         many=False,
-        queryset=Group.objects
+        queryset=Group.objects,
+        required=False
     )
     user = ResourceRelatedField(many=False, queryset=get_user_model().objects)
     user_path = serializers.CharField(allow_blank=True, required=False, allow_null=True)
@@ -123,7 +124,7 @@ class FileSerializer(BaseInternalModelSerializer):
 
 
 class PageSerializer(BaseInternalModelSerializer):
-    id = HashidSerializerCharField()
+    id = HashidSerializerCharField(source_field='groups.Page.id', required=False)
     organization = ResourceRelatedField(
         many=False, queryset=Organization.objects
     )
@@ -158,6 +159,7 @@ class PageSerializer(BaseInternalModelSerializer):
             'group',
             'author'
         )
+        read_only_fields = ('id',)
 
     class JSONAPIMeta:
        included_resources = ['author', 'organization', 'group']
@@ -170,7 +172,6 @@ class LinkSerializer(BaseInternalModelSerializer):
     scraped_data = serializers.JSONField()
 
     included_serializers = {
-        'organization': OrganizationSerializer,
         'group': GroupSerializer,
         'page': PageSerializer
     }
@@ -184,8 +185,8 @@ class LinkSerializer(BaseInternalModelSerializer):
                   'scraped_data')
         read_only_fields = ('id',)
 
-        class JSONAPIMeta:
-            included_resources = ['user', 'organization', 'group']
+    class JSONAPIMeta:
+        included_resources = ['page', 'group']
 
 
 
@@ -194,13 +195,22 @@ class UpdateSerializer(BaseInternalModelSerializer):
         many=False,
         queryset=get_user_model().objects
     )
-    group = ResourceRelatedField(many=False, queryset=Group.objects)
-    page = ResourceRelatedField(many=False, queryset=Page.objects)
 
-    files = ResourceRelatedField(many=True, queryset=File.objects)
-    links = ResourceRelatedField(many=True, queryset=Link.objects)
-    wrappers = ResourceRelatedField(many=True, queryset=Wrapper.objects)
-    reports = ResourceRelatedField(many=True, queryset=Report.objects)
+    included_serializers = {
+        'group': GroupSerializer,
+        'page': PageSerializer,
+        'user': UserSerializer,
+        'files': FileSerializer,
+        'wrappers': 'proposals.api.app.serializers.WrapperSerializer'
+    }
+
+    group = ResourceRelatedField(many=False, queryset=Group.objects)
+    page = ResourceRelatedField(pk_field=HashidSerializerCharField(source_field='groups.Page.id'), queryset=Page.objects.all(), many=False)
+    organization = ResourceRelatedField(many=False, queryset=Organization.objects)
+    files = ResourceRelatedField(many=True, queryset=File.objects, required=False)
+    links = ResourceRelatedField(many=True, queryset=Link.objects, required=False)
+    wrappers = ResourceRelatedField(many=True, queryset=Wrapper.objects, required=False)
+    reports = ResourceRelatedField(many=True, queryset=Report.objects, required=False)
 
     document = serializers.JSONField()
 
@@ -210,8 +220,16 @@ class UpdateSerializer(BaseInternalModelSerializer):
             'id',
             'user',
             'group',
+            'organization',
             'page',
             'document',
             'title',
-
+            'published',
+            'reports',
+            'wrappers',
+            'files',
+            'links',
         )
+
+    class JSONAPIMeta:
+        included_resources = ['user', 'page', 'group', 'files', 'wrappers', 'wrappers.bill']

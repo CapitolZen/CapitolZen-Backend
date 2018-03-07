@@ -64,3 +64,15 @@ class OrganizationFilterSet(BaseModelFilterSet):
 
     class Meta(BaseModelFilterSet.Meta):
         fields = {**BaseModelFilterSet.Meta.fields}
+
+
+class GroupFilterSet(BaseModelFilterSet):
+    group = filters.CharFilter(
+        method='filter_group'
+    )
+
+    def filter_group(self, queryset, name, value):
+        return queryset.filter(group__id=value)
+
+    class Meta(BaseModelFilterSet):
+        fields = {**BaseModelFilterSet.Meta.fields}
