@@ -314,6 +314,7 @@ REST_FRAMEWORK = {
     ),
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=3),
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_ALLOW_REFRESH': True,
 }
 
 JSON_API_FORMAT_KEYS = 'dasherize'
@@ -321,7 +322,7 @@ JSON_API_FILTER_KEYWORD = 'filter\[(?P<field>\w+)\]'
 
 # I suppose technically this is some mix of auth + api
 REST_USE_JWT = True
-
+JWT_ALLOW_REFRESH = True
 
 # PASSWORD STORAGE SETTINGS
 # ------------------------------------------------------------------------------

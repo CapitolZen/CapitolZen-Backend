@@ -47,7 +47,8 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         blank=True, null=True, max_length=255, upload_to=avatar_directory_path
     )
 
-    assigned_to = models.ManyToManyField(get_user_model())
+    assigned_to = models.ManyToManyField(get_user_model(), related_name='assigned_to_users')
+    guest_users = models.ManyToManyField(get_user_model(), related_name='guest_users_users')
 
     class JSONAPIMeta:
         resource_name = "groups"

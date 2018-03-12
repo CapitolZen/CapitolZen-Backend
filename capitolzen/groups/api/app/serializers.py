@@ -9,13 +9,14 @@ from capitolzen.organizations.api.app.serializers import OrganizationSerializer
 
 from capitolzen.proposals.models import Wrapper
 
-from capitolzen.users.api.app.serializers import UserSerializer
 from capitolzen.groups.models import Group, Report, File, Page, Link, Update
 
 
 class GroupSerializer(BaseInternalModelSerializer):
     included_serializers = {
         'organization': OrganizationSerializer,
+        'assigned_to': 'users.api.app.serializers.UserSerializer',
+        'guest_users': 'users.api.app.serializers.UserSerializer'
     }
 
     organization = ResourceRelatedField(
@@ -31,6 +32,12 @@ class GroupSerializer(BaseInternalModelSerializer):
         required=False,
     )
 
+    guest_users = ResourceRelatedField(
+        queryset=get_user_model().objects,
+        many=True,
+        required=False
+    )
+
     class Meta:
         model = Group
         fields = (
@@ -42,17 +49,17 @@ class GroupSerializer(BaseInternalModelSerializer):
             'created',
             'avatar',
             'assigned_to',
+            'guest_users'
         )
         read_only_fields = ('id', 'created')
 
     class JSONAPIMeta:
-       included_resources = ['organization']
+       included_resources = ['organization', 'assigned_to', 'guest_users']
 
 
 class ReportSerializer(BaseInternalModelSerializer):
     included_serializers = {
-        'user': UserSerializer,
-        'organization': OrganizationSerializer,
+        'user': 'users.api.app.serializers.UserSerializer',
         'group': GroupSerializer,
     }
 
@@ -88,7 +95,7 @@ class ReportSerializer(BaseInternalModelSerializer):
         )
 
     class JSONAPIMeta:
-       included_resources = ['user', 'organization', 'group']
+       included_resources = ['user', 'group']
 
 
 
@@ -139,7 +146,7 @@ class PageSerializer(BaseInternalModelSerializer):
     )
 
     included_serializers = {
-        'author': UserSerializer,
+        'author': 'users.api.app.serializers.UserSerializer',
         'organization': OrganizationSerializer,
         'group': GroupSerializer,
     }
@@ -199,7 +206,7 @@ class UpdateSerializer(BaseInternalModelSerializer):
     included_serializers = {
         'group': GroupSerializer,
         'page': PageSerializer,
-        'user': UserSerializer,
+        'user': 'users.api.app.serializers.UserSerializer',
         'files': FileSerializer,
         'wrappers': 'proposals.api.app.serializers.WrapperSerializer'
     }

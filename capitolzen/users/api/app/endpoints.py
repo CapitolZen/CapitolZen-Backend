@@ -23,7 +23,7 @@ from capitolzen.users.api.app.serializers import (
     ChangePasswordSerializer,
     RegistrationSerializer, ResetPasswordRequestSerializer,
     ResetPasswordSerializer,
-    ChangeUserOrganizationRoleSerializer, ChangeUserStatusSerializer,
+    ChangeUserOrganizationRoleSerializer, ChangeUserStatusSerializer, GuestUserCreateSerializer,
     ActionSerializer, UserSerializer
 )
 
@@ -37,11 +37,21 @@ class UserFilter(filters.FilterSet):
         method="filter_current"
     )
 
+    guest = filters.CharFilter(
+        method="filter_guest"
+    )
+
     def filter_current(self, queryset, name, value):
         if value:
             return queryset.filter(id=self.request.user.id)
         else:
             return queryset
+
+    def filter_guest(self, queryset, name, value):
+        if value:
+            return queryset.filter(guest_users_users=value)
+        else:
+            return queryset.filter(guest_uers_users=None)
 
     class Meta:
         model = User
@@ -241,6 +251,19 @@ class UserViewSet(mixins.RetrieveModelMixin,
                 {"status": status.HTTP_400_BAD_REQUEST},
                 status=status.HTTP_400_BAD_REQUEST)
 
+    @list_route(methods=['post'], serializer_class=GuestUserCreateSerializer)
+    def create_guest(self, request, id=None):
+        data = request.data
+        data['organization'] = request.organization.id
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        if instance:
+            return Response(UserSerializer(instance).data)
+        else:
+            return Response(
+                {"status": status.HTTP_400_BAD_REQUEST},
+                status=status.HTTP_400_BAD_REQUEST)
 
 class ActionFilter(BaseModelFilterSet):
     group = filters.UUIDFilter(

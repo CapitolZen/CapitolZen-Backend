@@ -1,9 +1,10 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import Group, Report
+from .models import Group, Update
 from django.conf import settings
 from django.db import transaction
 from capitolzen.organizations.tasks import intercom_update_organization_attributes
+from capitolzen.groups.tasks import notify_group_guests_of_update
 
 @receiver(post_save, sender=Group)
 def update_group_count(sender, **kwargs):
@@ -16,12 +17,12 @@ def update_group_count(sender, **kwargs):
             ]))
 
 
-@receiver(post_save, sender=Report)
-def update_report_count(sender, **kwargs):
-    if settings.INTERCOM_ENABLE_SYNC:
-        report = kwargs.get('instance')
+@receiver(post_save, sender=Update)
+def send_update_notifications(sender, **kwargs):
+    update = kwargs.get('instance')
+    created = kwargs.get('created')
+
+    if created:
         transaction.on_commit(
-            lambda: intercom_update_organization_attributes.apply_async(args=[
-                str(report.organization.id)
-            ])
+            lambda: notify_group_guests_of_update.apply_async(args=[str(update.id)])
         )

@@ -8,11 +8,6 @@ class MixinResourceOwnedByPage(object):
 
     @allow_staff_or_superuser
     def has_object_read_permission(self, request):
-        print(request.__dict__)
-        if self.page.visibility == 'anyone':
-            return True
-
         if request.organization == self.page.group.organization:
             return True
 
-        return True

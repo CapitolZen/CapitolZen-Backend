@@ -32,3 +32,39 @@ def email_user_password_reset_request(to, **extra_context):
         recipient_list=to,
         context=context,
     )
+
+
+def email_user_page_updates(to, **extra_context):
+    """
+    This email is automatically triggered to alert a guest user of a new updated post
+    :param to:
+    :param extra_context:
+    :return:
+    """
+
+    if to is not list:
+        to = [to]
+    else:
+        raise Exception()
+
+    message = "<p>You have a new a new update published by %s.</p>" % extra_context['page_name']
+    message += "<p>Click the link below to read the entire update.</p> "
+
+    url = "%s/r?p=%s&token=%s" % (settings.APP_FRONTEND, extra_context['page_id'], extra_context['token'])
+    from_email = '%s <hello@capitolzen.com>' % extra_context['author_name']
+
+    context = {
+        "message": message,
+        "subject": "New Updates from %s" % extra_context['author_name'],
+        "action_cta": "Read Update",
+        "action_url": url,
+        **extra_context
+    }
+
+    send_templated_mail(
+        template_name='simple_action',
+        from_email=from_email,
+        headers={'Reply-To': extra_context['author_email']},
+        recipient_list=to,
+        context=context
+    )
