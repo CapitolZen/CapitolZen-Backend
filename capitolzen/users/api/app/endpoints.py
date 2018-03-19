@@ -48,10 +48,7 @@ class UserFilter(filters.FilterSet):
             return queryset
 
     def filter_guest(self, queryset, name, value):
-        if value:
-            return queryset.filter(guest_users_users=value)
-        else:
-            return queryset.filter(guest_uers_users=None)
+        return queryset.filter(guest_users_users=value)
 
     class Meta:
         model = User
@@ -68,9 +65,11 @@ class UserFilterBackend(DRYPermissionFiltersBase):
     def filter_list_queryset(self, request, queryset, view):
         if request.user.is_anonymous():
             raise NotAuthenticated()
-
         if hasattr(request, 'organization') and request.organization:
-            return queryset.filter(organizations_organization=request.organization)
+            qs = queryset.filter(organizations_organization=request.organization)
+            if not request.GET.get('guest', None):
+                qs = qs.filter(guest_users_users=None)
+            return qs
 
         if request.user.is_superuser or request.user.is_staff:
             return queryset

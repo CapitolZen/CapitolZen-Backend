@@ -1,11 +1,11 @@
-from rest_framework_json_api.relations import ResourceRelatedField, PrimaryKeyRelatedField
+from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework_json_api import serializers
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
 from django.contrib.auth import get_user_model
 from hashid_field.rest import HashidSerializerCharField
 
 from capitolzen.organizations.models import Organization
-from capitolzen.organizations.api.app.serializers import OrganizationSerializer
+from capitolzen.organizations.api.app.serializers import OrganizationSerializer, AnonOrganizationSerializer
 
 from capitolzen.proposals.models import Wrapper
 
@@ -180,8 +180,8 @@ class PageSerializer(BaseInternalModelSerializer):
 
     included_serializers = {
         'author': 'users.api.app.serializers.UserSerializer',
-        'organization': OrganizationSerializer,
-        'group': GroupSerializer,
+        'organization': AnonOrganizationSerializer,
+        'group': AnonGroupSerializer,
     }
 
     class Meta:
@@ -237,7 +237,7 @@ class UpdateSerializer(BaseInternalModelSerializer):
     )
 
     included_serializers = {
-        'group': GroupSerializer,
+        'group': AnonGroupSerializer,
         'page': PageSerializer,
         'user': 'users.api.app.serializers.UserSerializer',
         'files': FileSerializer,

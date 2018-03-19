@@ -76,7 +76,12 @@ class OrganizationViewSet(mixins.RetrieveModelMixin,
         if user.is_anonymous:
             return AnonOrganizationSerializer
 
-        if self.request.organization.is_guest(user):
+        # Note: This isn't super clear, but if for some reason the org isn't in the request object,
+        # we don't want to return too much data
+        if self.request.organization:
+            if self.request.organization.is_guest(user):
+                return AnonOrganizationSerializer
+        else:
             return AnonOrganizationSerializer
 
         return OrganizationSerializer
