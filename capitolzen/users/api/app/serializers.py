@@ -54,7 +54,6 @@ class UserSerializer(BaseInternalModelSerializer):
         organization = request.organization
 
         if not organization:
-            print('nno organaization')
             return None
 
         if organization.is_owner(obj):

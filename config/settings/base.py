@@ -81,6 +81,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'config.middleware.ActiveOrganizationMiddleware',
+    'config.middleware.PageAccessMiddleWare',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -379,8 +380,7 @@ CORS_ALLOW_METHODS = (
 
 CORS_ALLOW_HEADERS = default_headers + (
     'X-Organization',
-    'X-Contact',
-    'X-Group'
+    'X-Page',
 )
 
 # Some really nice defaults

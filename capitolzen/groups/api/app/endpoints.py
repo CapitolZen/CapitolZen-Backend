@@ -22,7 +22,7 @@ from capitolzen.proposals.api.app.serializers import BillSerializer
 from capitolzen.groups.models import Group, Report, File, Page, Link, Update
 from capitolzen.groups.tasks import generate_report, email_report
 from capitolzen.groups.api.app.serializers import (
-    GroupSerializer, ReportSerializer, FileSerializer, PageSerializer, LinkSerializer, UpdateSerializer
+    GroupSerializer, ReportSerializer, FileSerializer, PageSerializer, LinkSerializer, UpdateSerializer, AnonGroupSerializer
 )
 
 logger = getLogger('app')
@@ -69,11 +69,21 @@ class GroupFilter(OrganizationFilterSet):
 
 
 class GroupViewSet(OwnerBasedViewSet):
-    serializer_class = GroupSerializer
     filter_class = GroupFilter
     queryset = Group.objects.all()
     ordering = ('title',)
     ordering_fields = ('title', 'created', 'modified', 'active')
+
+    def get_serializer_class(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return AnonGroupSerializer
+
+        if self.request.organization.is_guest(user):
+            return AnonGroupSerializer
+
+        return GroupSerializer
+
 
     @list_route(methods=['GET'], serializer_class=BillSerializer)
     def bills(self, request):

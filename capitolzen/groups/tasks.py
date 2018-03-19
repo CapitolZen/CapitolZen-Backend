@@ -111,6 +111,6 @@ def notify_group_guests_of_update(update_id):
     }
 
     for user in update.group.guest_users.filter(is_active=True):
-        token = token_encode(user, **{'organization_id': str(update.organization.id), 'page_id': str(update.page.id)})
+        token = token_encode(user, **{'organization_id': str(update.organization.id), 'page_id': str(update.page.id), 'update_id': str(update.id)})
         context['token'] = token
         email_user_page_updates(user.username, **context)

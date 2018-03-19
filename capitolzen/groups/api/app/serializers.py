@@ -57,6 +57,39 @@ class GroupSerializer(BaseInternalModelSerializer):
        included_resources = ['organization', 'assigned_to', 'guest_users']
 
 
+class AnonGroupSerializer(BaseInternalModelSerializer):
+    included_serializers = {
+        'organization': OrganizationSerializer,
+        'assigned_to': 'users.api.app.serializers.UserSerializer',
+    }
+
+    organization = ResourceRelatedField(
+        many=False,
+        queryset=Organization.objects,
+        required=False
+    )
+    avatar = RemoteFileField(required=False)
+    assigned_to = ResourceRelatedField(
+        queryset=get_user_model().objects,
+        many=True,
+        required=False,
+    )
+
+    class Meta:
+        model = Group
+        fields = (
+            'id',
+            'title',
+            'organization',
+            'avatar',
+            'assigned_to',
+        )
+        read_only_fields = ('id', 'created')
+
+    class JSONAPIMeta:
+       included_resources = ['organization', 'assigned_to']
+
+
 class ReportSerializer(BaseInternalModelSerializer):
     included_serializers = {
         'user': 'users.api.app.serializers.UserSerializer',

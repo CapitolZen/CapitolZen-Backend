@@ -21,7 +21,7 @@ from capitolzen.organizations.models import (
     Organization, OrganizationInvite
 )
 from capitolzen.organizations.api.app.serializers import (
-    OrganizationSerializer, OrganizationInviteSerializer
+    OrganizationSerializer, AnonOrganizationSerializer, OrganizationInviteSerializer
 )
 
 from capitolzen.organizations.utils import get_stripe_client
@@ -66,11 +66,20 @@ class OrganizationViewSet(mixins.RetrieveModelMixin,
                           mixins.UpdateModelMixin,
                           mixins.ListModelMixin,
                           viewsets.GenericViewSet):
-    serializer_class = OrganizationSerializer
     permission_classes = (DRYPermissions,)
     queryset = Organization.objects.all()
     filter_backends = (OrganizationFilterBackend, DjangoFilterBackend)
     filter_class = OrganizationFilter
+
+    def get_serializer_class(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return AnonOrganizationSerializer
+
+        if self.request.organization.is_guest(user):
+            return AnonOrganizationSerializer
+
+        return OrganizationSerializer
 
     @detail_route(methods=['POST'])
     def asset_upload(self, request, pk):

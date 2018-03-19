@@ -46,6 +46,16 @@ class OrganizationSerializer(BaseInternalModelSerializer):
         return org
 
 
+class AnonOrganizationSerializer(BaseInternalModelSerializer):
+    avatar = RemoteFileField(required=False)
+    class Meta:
+        model = Organization
+        fields = (
+            'name',
+            'avatar',
+            'features'
+        )
+
 class OrganizationInviteSerializer(BaseInternalModelSerializer):
 
     organization = ResourceRelatedField(
