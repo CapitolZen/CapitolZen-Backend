@@ -67,7 +67,7 @@ class UserFilterBackend(DRYPermissionFiltersBase):
             raise NotAuthenticated()
         if hasattr(request, 'organization') and request.organization:
             qs = queryset.filter(organizations_organization=request.organization)
-            if not request.GET.get('guest', None):
+            if not request.GET.get('guest', None) and not request.GET.get('current', False):
                 qs = qs.filter(guest_users_users=None)
             return qs
 

@@ -8,7 +8,11 @@ from django_filters import rest_framework as filters
 from rest_framework import status, exceptions
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from django_filters.rest_framework import DjangoFilterBackend
+
+from dry_rest_permissions.generics import (
+   DRYPermissionFiltersBase
+)
 
 
 from common.utils.filters.sets import OrganizationFilterSet
@@ -78,8 +82,8 @@ class GroupViewSet(OwnerBasedViewSet):
         user = self.request.user
         if user.is_anonymous:
             return AnonGroupSerializer
-
-        if self.request.organization.is_guest(user):
+        org = getattr(self.request, 'organization', False)
+        if org and self.request.organization.is_guest(user):
             return AnonGroupSerializer
 
         return GroupSerializer
@@ -296,6 +300,14 @@ class PageViewSet(OwnerBasedViewSet):
     search_fields = ('title', 'author__name', 'description')
 
 
+class UpdateFilterBackend(DRYPermissionFiltersBase):
+    def filter_list_queryset(self, request, queryset, view):
+        if request.organization.is_admin(request.user):
+            return queryset.filter()
+
+        return queryset.filter(page=request.page)
+    
+
 class UpdateFilterSet(OrganizationFilterSet):
 
     group_page = filters.CharFilter(
@@ -321,6 +333,7 @@ class UpdateViewSet(OwnerBasedViewSet):
     ordering = ['-created']
     search_fields = ('title', 'document')
     filter_class = UpdateFilterSet
+    filter_backends = (UpdateFilterBackend, DjangoFilterBackend)
 
 
 class LinkFilterSet(OrganizationFilterSet):

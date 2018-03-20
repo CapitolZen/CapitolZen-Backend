@@ -48,12 +48,18 @@ class OrganizationSerializer(BaseInternalModelSerializer):
 
 class AnonOrganizationSerializer(BaseInternalModelSerializer):
     avatar = RemoteFileField(required=False)
+    user_is_member = serializers.ReadOnlyField()
+
     class Meta:
         model = Organization
         fields = (
+            'id',
             'name',
             'avatar',
-            'features'
+            'features',
+            'client_label',
+            'client_label_plural',
+            'user_is_member'
         )
 
 class OrganizationInviteSerializer(BaseInternalModelSerializer):

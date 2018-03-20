@@ -252,7 +252,7 @@ class UpdateSerializer(BaseInternalModelSerializer):
     wrappers = ResourceRelatedField(many=True, queryset=Wrapper.objects, required=False)
     reports = ResourceRelatedField(many=True, queryset=Report.objects, required=False)
 
-    document = serializers.JSONField()
+    document = serializers.JSONField(required=False)
 
     class Meta:
         model = Update

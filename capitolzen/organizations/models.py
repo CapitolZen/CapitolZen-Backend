@@ -120,6 +120,8 @@ class Organization(AbstractOrganization, AbstractBaseModel):
         return request.user.is_authenticated()
 
     def has_object_read_permission(self, request):
+        print('sup 2')
+
         return self.is_member(request.user) or \
             request.user.is_staff or \
             request.user.is_superuser
@@ -159,7 +161,6 @@ class Organization(AbstractOrganization, AbstractBaseModel):
 
         if not request.organization:
             return False
-
         return True
 
     def has_object_update_subscription_permission(self, request):

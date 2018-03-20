@@ -77,14 +77,16 @@ class OrganizationViewSet(mixins.RetrieveModelMixin,
             return AnonOrganizationSerializer
 
         # Note: This isn't super clear, but if for some reason the org isn't in the request object,
-        # we don't want to return too much data
-        if self.request.organization:
+        # we don't want to return too much data. However sometimes, the org isn't in the request object (like during
+        # user registration/org creation.) so FML.
+        org = getattr(self.request, 'organization', False)
+        if org:
             if self.request.organization.is_guest(user):
                 return AnonOrganizationSerializer
+            else:
+                return  OrganizationSerializer
         else:
             return AnonOrganizationSerializer
-
-        return OrganizationSerializer
 
     @detail_route(methods=['POST'])
     def asset_upload(self, request, pk):

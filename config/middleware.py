@@ -36,23 +36,21 @@ class ActiveOrganizationMiddleware(object):
 
 
 def get_page_dependencies(request):
-    print()
     page_id = request.META.get('HTTP_X_PAGE')
     if page_id is None:
         return None
 
     try:
         page = Page.objects.get(id=page_id)
+        if str(page.organization.id) != request.META.get('HTTP_X_ORGANIZATION'):
+            return None
         if page.visibility == 'anyone':
             return None
         else:
-            if request.organization.id != page.organziatoin.id:
-                return None
-            else:
-                return {
-                    "page": page,
-                    "group": page.group
-                }
+            return {
+                "page": page,
+                "group": page.group
+            }
 
     except Exception:
         return None
@@ -69,5 +67,5 @@ class PageAccessMiddleWare(object):
     def process_request(self, request):
         data = get_page_dependencies(request)
         if data:
-            request.page = SimpleLazyObject(data['page'])
-            request.group = SimpleLazyObject(data['group'])
+            request.page = data['page']
+            request.group = data['group']
