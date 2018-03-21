@@ -28,7 +28,7 @@ def email_user_password_reset_request(to, **extra_context):
 
     send_templated_mail(
         template_name='simple_action',
-        from_email='hello@capitolzen.com',
+        from_email='Capitol Zen Password <hello@capitolzen.com>',
         recipient_list=to,
         context=context,
     )

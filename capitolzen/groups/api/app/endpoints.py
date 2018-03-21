@@ -59,6 +59,19 @@ class GroupFilter(OrganizationFilterSet):
         help_text="Filter Groups on a Bill They Do Not Have"
     )
 
+    has_page = filters.BooleanFilter(
+        name="page",
+        label="has page",
+        help_text="Filter groups have page",
+        method='filter_page'
+    )
+
+    def filter_page(self, queryset, name, value):
+        if value:
+            return queryset.exclude(page__isnull=True)
+        else:
+            return queryset.exclude(page__isnull=False)
+
     assigned_to = IntInFilter(
         name="assigned_to",
         label="Assigned To",
@@ -106,30 +119,6 @@ class GroupViewSet(OwnerBasedViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-
-    @detail_route(methods=['POST'])
-    def add_bill(self, request, pk=None):
-        if not pk:
-            Response(
-                {
-                    "status_code": status.HTTP_400_BAD_REQUEST,
-                    "message": "Missing requirement"
-                }
-            ).status_code(status.HTTP_400_BAD_REQUEST)
-        group = Group.objects.get(pk=pk)
-        data = request.body.decode('utf-8')
-        data = loads(data)
-        bills = Bill.objects.filter(id__in=data['bills'])
-        bill_list = []
-        for bill in bills:
-            w = Wrapper.objects.create(
-                organization=group.organization,
-                bill=bill,
-            )
-            bill_list.append(w.id)
-
-        return Response({"status_code": status.HTTP_200_OK,
-                         "message": "Bill(s) added", "bills": bill_list})
 
     @detail_route(methods=['GET'])
     def stats(self, request, pk=None):
@@ -258,6 +247,12 @@ class ReportViewSet(OwnerBasedViewSet):
 
 
 class FileFilter(OrganizationFilterSet):
+    group = filters.CharFilter(
+        name='group',
+        label='Group',
+        help_text='Id of group',
+        lookup_expr='exact'
+    )
     class Meta:
         model = File
         fields = {
@@ -282,6 +277,13 @@ class FileViewSet(OwnerBasedViewSet):
 
 
 class PageFilter(OrganizationFilterSet):
+    group = filters.CharFilter(
+        name='group',
+        label='Group',
+        help_text='Id of group',
+        lookup_expr='exact'
+    )
+
     class Meta:
         model = Page
         fields = {
@@ -306,7 +308,7 @@ class UpdateFilterBackend(DRYPermissionFiltersBase):
             return queryset.filter()
 
         return queryset.filter(page=request.page)
-    
+
 
 class UpdateFilterSet(OrganizationFilterSet):
 
@@ -333,7 +335,7 @@ class UpdateViewSet(OwnerBasedViewSet):
     ordering = ['-created']
     search_fields = ('title', 'document')
     filter_class = UpdateFilterSet
-    filter_backends = (UpdateFilterBackend, DjangoFilterBackend)
+    filter_backends = OwnerBasedViewSet.filter_backends + (UpdateFilterBackend, DjangoFilterBackend)
 
 
 class LinkFilterSet(OrganizationFilterSet):

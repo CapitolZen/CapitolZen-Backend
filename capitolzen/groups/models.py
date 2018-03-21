@@ -208,7 +208,7 @@ class Link(AbstractBaseModel, MixinResourcedOwnedByOrganization, MixinResourceOw
 
 class Update(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     user = models.ForeignKey('users.User')
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='group')
     page = models.ForeignKey('groups.Page', on_delete=models.CASCADE, related_name='update')
     organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE)
     files = models.ManyToManyField('groups.File', blank=True, null=True)
