@@ -307,9 +307,10 @@ class UpdateFilterBackend(DRYPermissionFiltersBase):
         org = getattr(request, 'organization', None)
         if org and org.is_admin(request.user):
             return queryset.filter()
+        if getattr(request, 'page', False):
+            return queryset.filter(page=request.page)
 
-        return queryset.filter(page=request.page)
-
+        return queryset
 
 class UpdateFilterSet(OrganizationFilterSet):
 
