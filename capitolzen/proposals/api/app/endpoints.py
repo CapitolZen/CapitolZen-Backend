@@ -4,7 +4,12 @@ from elasticsearch import Elasticsearch, RequestsHttpConnection
 
 from django.db.models import Q
 from django.conf import settings
-from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
+
+from dry_rest_permissions.generics import (
+   DRYPermissionFiltersBase
+)
+
 
 from django_filters import rest_framework as filters
 
@@ -346,11 +351,22 @@ class WrapperFilter(OrganizationFilterSet):
         }
 
 
+class WrapperFilterBackend(DRYPermissionFiltersBase):
+    def filter_list_queryset(self, request, queryset, view):
+        org = getattr(request, 'organization', None)
+        if org and org.is_admin(request.user):
+            return queryset
+
+        return queryset.filter(group=request.page.group)
+
+
+
 class WrapperViewSet(OwnerBasedViewSet):
     serializer_class = WrapperSerializer
     filter_class = WrapperFilter
     ordering = ('bill__state', 'bill__state_id')
     ordering_fields = ('bill__updated_at',)
+    filter_backends = (WrapperFilterBackend, ) + OwnerBasedViewSet.filter_backends
 
     search_fields = (
         'bill__state_id',
