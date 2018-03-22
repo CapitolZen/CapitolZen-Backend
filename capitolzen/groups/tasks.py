@@ -107,7 +107,10 @@ def notify_group_guests_of_update(update_id):
         'author_name': update.user.name,
         'author_email': update.user.username,
         'page_id': update.page.id,
-        'page_name': update.page.title
+        'update_id': str(update.id),
+        'page_name': update.page.title,
+        'organization_name': update.organization.name,
+        'update_title': update.title,
     }
 
     for user in update.group.guest_users.filter(is_active=True):

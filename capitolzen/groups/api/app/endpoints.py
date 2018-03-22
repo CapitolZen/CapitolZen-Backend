@@ -304,7 +304,8 @@ class PageViewSet(OwnerBasedViewSet):
 
 class UpdateFilterBackend(DRYPermissionFiltersBase):
     def filter_list_queryset(self, request, queryset, view):
-        if request.organization.is_admin(request.user):
+        org = getattr(request, 'organization', None)
+        if org and org.is_admin(request.user):
             return queryset.filter()
 
         return queryset.filter(page=request.page)

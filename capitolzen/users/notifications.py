@@ -47,10 +47,11 @@ def email_user_page_updates(to, **extra_context):
     else:
         raise Exception()
 
-    message = "<p>You have a new a new update published by %s.</p>" % extra_context['page_name']
+    message = "<p>You have a new a new update published by %s at %s:</p>" % (extra_context['author_name'], extra_context['organization_name'])
+    message += "<p><em>%s</em></p>" % extra_context['update_title']
     message += "<p>Click the link below to read the entire update.</p> "
 
-    url = "%s/r?p=%s&token=%s" % (settings.APP_FRONTEND, extra_context['page_id'], extra_context['token'])
+    url = "%s/r?p=%s&u=%s&token=%s" % (settings.APP_FRONTEND, extra_context['page_id'], extra_context['update_id'], extra_context['token'])
     from_email = '%s <hello@capitolzen.com>' % extra_context['author_name']
 
     context = {
