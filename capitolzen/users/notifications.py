@@ -65,7 +65,6 @@ def email_user_page_updates(to, **extra_context):
     send_templated_mail(
         template_name='simple_action',
         from_email=from_email,
-        headers={'Reply-To': extra_context['author_email']},
         recipient_list=to,
         context=context
     )
