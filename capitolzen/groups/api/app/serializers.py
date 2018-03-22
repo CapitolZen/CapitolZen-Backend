@@ -269,7 +269,9 @@ class UpdateSerializer(BaseInternalModelSerializer):
             'wrappers',
             'files',
             'links',
+            'created',
+            'modified',
         )
 
     class JSONAPIMeta:
-        included_resources = ['user', 'page', 'group', 'files', 'wrappers', 'wrappers.bill']
+        included_resources = ['user', 'page', 'group', 'files', 'wrappers', 'wrappers.bill', 'wrappers.bill.sponsor']
