@@ -81,6 +81,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'config.middleware.ActiveOrganizationMiddleware',
+    'config.middleware.PageAccessMiddleWare',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -314,6 +315,7 @@ REST_FRAMEWORK = {
     ),
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=3),
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_ALLOW_REFRESH': True,
 }
 
 JSON_API_FORMAT_KEYS = 'dasherize'
@@ -321,7 +323,7 @@ JSON_API_FILTER_KEYWORD = 'filter\[(?P<field>\w+)\]'
 
 # I suppose technically this is some mix of auth + api
 REST_USE_JWT = True
-
+JWT_ALLOW_REFRESH = True
 
 # PASSWORD STORAGE SETTINGS
 # ------------------------------------------------------------------------------
@@ -378,6 +380,7 @@ CORS_ALLOW_METHODS = (
 
 CORS_ALLOW_HEADERS = default_headers + (
     'X-Organization',
+    'X-Page',
 )
 
 # Some really nice defaults
@@ -538,6 +541,9 @@ ELASTICSEARCH_DSL = {
             env("ELASTIC_SEARCH_URL", default='elastic:changeme@elasticsearch')
     },
 }
+
+# HASHID
+HASHID_FIELD_SALT = env("HASHID_FIELD_SALT", default="asdfasdfsadfsadfdsafdsa")
 
 # SLACK
 SLACK_URL = env("UPDRAFT_SLACK_URL", default='')

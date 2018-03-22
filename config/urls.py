@@ -1,7 +1,8 @@
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.conf import settings
-from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
+from rest_framework_jwt.views import obtain_jwt_token
+from .jwt_endpoint import cz_verify_jwt_token
 from rest_framework.documentation import include_docs_urls
 
 app_api_urls = [
@@ -18,7 +19,7 @@ urlpatterns = [
     url(r'^docs/', include_docs_urls(title='API', patterns=app_api_urls)),
     url(r'^health/', include('health_check.urls')),
     url(r'^api-token-auth/', obtain_jwt_token),
-    url(r'^api-token-refresh/', refresh_jwt_token),
+    url(r'^api-token-refresh/', cz_verify_jwt_token),
 ]
 
 urlpatterns += app_api_urls

@@ -4,9 +4,16 @@ from logging import getLogger
 from django.db.models import Count
 
 from django_filters import rest_framework as filters
+
 from rest_framework import status, exceptions
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+
+from dry_rest_permissions.generics import (
+   DRYPermissionFiltersBase
+)
+
 
 from common.utils.filters.sets import OrganizationFilterSet
 from common.utils.filters.filters import UUIDInFilter, IntInFilter
@@ -16,10 +23,10 @@ from config.viewsets import OwnerBasedViewSet
 from capitolzen.proposals.models import Bill, Wrapper
 from capitolzen.proposals.api.app.serializers import BillSerializer
 
-from capitolzen.groups.models import Group, Report, File
+from capitolzen.groups.models import Group, Report, File, Page, Link, Update
 from capitolzen.groups.tasks import generate_report, email_report
 from capitolzen.groups.api.app.serializers import (
-    GroupSerializer, ReportSerializer, FileSerializer
+    GroupSerializer, ReportSerializer, FileSerializer, PageSerializer, LinkSerializer, UpdateSerializer, AnonGroupSerializer
 )
 
 logger = getLogger('app')
@@ -52,6 +59,19 @@ class GroupFilter(OrganizationFilterSet):
         help_text="Filter Groups on a Bill They Do Not Have"
     )
 
+    has_page = filters.BooleanFilter(
+        name="page",
+        label="has page",
+        help_text="Filter groups have page",
+        method='filter_page'
+    )
+
+    def filter_page(self, queryset, name, value):
+        if value:
+            return queryset.exclude(page__isnull=True)
+        else:
+            return queryset.exclude(page__isnull=False)
+
     assigned_to = IntInFilter(
         name="assigned_to",
         label="Assigned To",
@@ -66,11 +86,21 @@ class GroupFilter(OrganizationFilterSet):
 
 
 class GroupViewSet(OwnerBasedViewSet):
-    serializer_class = GroupSerializer
     filter_class = GroupFilter
     queryset = Group.objects.all()
     ordering = ('title',)
     ordering_fields = ('title', 'created', 'modified', 'active')
+
+    def get_serializer_class(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return AnonGroupSerializer
+        org = getattr(self.request, 'organization', False)
+        if org and self.request.organization.is_guest(user):
+            return AnonGroupSerializer
+
+        return GroupSerializer
+
 
     @list_route(methods=['GET'], serializer_class=BillSerializer)
     def bills(self, request):
@@ -89,30 +119,6 @@ class GroupViewSet(OwnerBasedViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-
-    @detail_route(methods=['POST'])
-    def add_bill(self, request, pk=None):
-        if not pk:
-            Response(
-                {
-                    "status_code": status.HTTP_400_BAD_REQUEST,
-                    "message": "Missing requirement"
-                }
-            ).status_code(status.HTTP_400_BAD_REQUEST)
-        group = Group.objects.get(pk=pk)
-        data = request.body.decode('utf-8')
-        data = loads(data)
-        bills = Bill.objects.filter(id__in=data['bills'])
-        bill_list = []
-        for bill in bills:
-            w = Wrapper.objects.create(
-                organization=group.organization,
-                bill=bill,
-            )
-            bill_list.append(w.id)
-
-        return Response({"status_code": status.HTTP_200_OK,
-                         "message": "Bill(s) added", "bills": bill_list})
 
     @detail_route(methods=['GET'])
     def stats(self, request, pk=None):
@@ -241,16 +247,20 @@ class ReportViewSet(OwnerBasedViewSet):
 
 
 class FileFilter(OrganizationFilterSet):
+    group = filters.CharFilter(
+        name='group',
+        label='Group',
+        help_text='Id of group',
+        lookup_expr='exact'
+    )
     class Meta:
         model = File
-        ordering = ['name']
         fields = {
             'id': ['exact'],
             'created': ['lt', 'gt'],
             'modified': ['lt', 'gt'],
             'name': ['icontains'],
         }
-    search_fields = ('file', 'name', 'description')
 
 
 class FileViewSet(OwnerBasedViewSet):
@@ -260,3 +270,86 @@ class FileViewSet(OwnerBasedViewSet):
 
     filter_class = FileFilter
     serializer_class = FileSerializer
+    ordering = ['name']
+    ordering_fields = ['created', 'modified']
+    search_fields = ('file', 'name', 'description')
+
+
+
+class PageFilter(OrganizationFilterSet):
+    group = filters.CharFilter(
+        name='group',
+        label='Group',
+        help_text='Id of group',
+        lookup_expr='exact'
+    )
+
+    class Meta:
+        model = Page
+        fields = {
+            'group': ['exact'],
+            'author': ['exact'],
+            'visibility': ['exact'],
+            'published': ['exact']
+        }
+
+
+class PageViewSet(OwnerBasedViewSet):
+    filter_class = PageFilter
+    serializer_class = PageSerializer
+    queryset = Page.objects.all()
+    ordering = ['title']
+    search_fields = ('title', 'author__name', 'description')
+
+
+class UpdateFilterBackend(DRYPermissionFiltersBase):
+    def filter_list_queryset(self, request, queryset, view):
+        org = getattr(request, 'organization', None)
+        if org and org.is_admin(request.user):
+            return queryset.filter()
+        if getattr(request, 'page', False):
+            return queryset.filter(page=request.page)
+
+        return queryset
+
+class UpdateFilterSet(OrganizationFilterSet):
+
+    group_page = filters.CharFilter(
+        method='filter_page',
+        lookup_expr='exact',
+        name='page',
+    )
+
+    def filter_page(self, queryset, name, value):
+        return queryset.filter(page__id=value)
+
+    class Meta:
+        model = Update
+        fields = {
+            'user': ['exact'],
+            'published': ['exact'],
+            'group_page': ['exact']
+        }
+
+class UpdateViewSet(OwnerBasedViewSet):
+    serializer_class = UpdateSerializer
+    queryset = Update.objects.all()
+    ordering = ['-created']
+    search_fields = ('title', 'document')
+    filter_class = UpdateFilterSet
+    filter_backends = OwnerBasedViewSet.filter_backends + (UpdateFilterBackend, DjangoFilterBackend)
+
+
+class LinkFilterSet(OrganizationFilterSet):
+    class Meta:
+        model = Link
+        fields = {
+            'group': ['exact']
+        }
+
+
+class LinkViewSet(OwnerBasedViewSet):
+    queryset = Link.objects.all()
+    serializer_class = LinkSerializer
+    ordering = ['-created']
+    search_fields = ('url', 'scraped_data')

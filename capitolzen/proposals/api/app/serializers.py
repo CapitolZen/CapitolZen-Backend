@@ -242,10 +242,18 @@ class WrapperSerializer(BaseInternalModelSerializer):
         included_resources = ['bill', 'bill.sponsor', 'group']
 
     def create(self, validated_data):
+        """
+        This is sort of shitty and matt will likely mad, but we
+        have to use a custom `get_or_create` logic here because
+        the validated data isn't the same once you start munging
+        the data.
+        """
+        #
         bill = validated_data.get('bill')
         group = validated_data.get('group')
-        if bill:
-            queryset = Wrapper.objects.filter(bill_id=bill.id, group_id=group.id)
-            if queryset.exists():
-                raise ValidationError('Wrapper already exists for this data')
-        return Wrapper.objects.create(**validated_data)
+
+        queryset = Wrapper.objects.filter(bill=bill, group=group)
+        if queryset.count() > 0:
+            return queryset.first()
+        else:
+            return Wrapper.objects.create(**validated_data)

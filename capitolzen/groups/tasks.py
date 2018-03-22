@@ -9,7 +9,9 @@ from capitolzen.meta.notifications import email_user_report_link
 from capitolzen.proposals.models import Wrapper
 from capitolzen.proposals.utils import normalize_bill_data
 from capitolzen.users.models import User
-from capitolzen.groups.models import Report
+from capitolzen.groups.models import Report, Update
+from capitolzen.users.utils import token_encode
+from capitolzen.users.notifications import email_user_page_updates
 
 REPORT_FUNCTION = "capitolzen_search_reportify"
 
@@ -96,3 +98,22 @@ def update_report_docs(report, new_url):
     attachments['output_url'] = new_url
     setattr(report, 'attachments', attachments)
     report.save()
+
+
+@shared_task
+def notify_group_guests_of_update(update_id):
+    update = Update.objects.get(id=update_id)
+    context = {
+        'author_name': update.user.name,
+        'author_email': update.user.username,
+        'page_id': update.page.id,
+        'update_id': str(update.id),
+        'page_name': update.page.title,
+        'organization_name': update.organization.name,
+        'update_title': update.title,
+    }
+
+    for user in update.group.guest_users.filter(is_active=True):
+        token = token_encode(user, **{'organization_id': str(update.organization.id), 'page_id': str(update.page.id), 'update_id': str(update.id)})
+        context['token'] = token
+        email_user_page_updates(user.username, **context)

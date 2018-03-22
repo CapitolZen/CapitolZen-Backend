@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from capitolzen.groups.models import Group
 
 from django.contrib.auth import get_user_model
 
@@ -61,6 +61,9 @@ class UserSerializer(BaseInternalModelSerializer):
 
         if organization.is_admin(obj):
             return "Admin"
+
+        if organization.is_guest(obj):
+            return "Guest"
 
         if organization.organization_users.filter(user=obj):
             return "Member"
@@ -319,6 +322,7 @@ class ChangeUserStatusSerializer(serializers.Serializer):
 class ChangeUserOrganizationRoleSerializer(serializers.Serializer):
     """
     TODO: Can we merge this with the actual UserSerializer?
+    A: I dunno, but i doubled down in the next serializer
     """
     role = serializers.ChoiceField(
         choices=['Member', 'Admin']
@@ -348,6 +352,47 @@ class ChangeUserOrganizationRoleSerializer(serializers.Serializer):
 
     class Meta:
         model = User
+
+
+class GuestUserCreateSerializer(serializers.Serializer):
+    """
+    TODO: Matt rewrite with gin
+    """
+    organization = serializers.PrimaryKeyRelatedField(
+        queryset=Organization.objects.get_queryset(),
+        many=False
+    )
+
+    email = serializers.EmailField()
+    name = serializers.CharField()
+
+    # I don't know why, but setting this to be a pk related field errors...
+    group = serializers.CharField()
+
+    def save(self, **kwargs):
+        email = self.validated_data['email']
+        user, created = User.objects.get_or_create(username=email)
+        if created:
+            user.name = self.validated_data['name']
+
+        organization = self.validated_data['organization']
+        org_user, _ = organization.get_or_add_user(user)
+        org_user.is_guest = True
+        org_user.is_admin = False
+
+        user.save()
+        org_user.save()
+        group = Group.objects.get(id=self.validated_data['group'])
+        group.guest_users.add(user)
+        group.save()
+        return user
+
+    class Meta:
+        model = User
+        fields = (
+            'name',
+            'group'
+        )
 
 
 class ActionSerializer(BaseInternalModelSerializer):
