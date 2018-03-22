@@ -30,7 +30,10 @@ from capitolzen.proposals.api.app.serializers import (
     BillSerializer, WrapperSerializer, LegislatorSerializer,
     CommitteeSerializer, EventSerializer
 )
+
 from capitolzen.groups.models import Report
+from capitolzen.proposals.models import Bill
+from capitolzen.proposals.helpers import InputDataParser
 
 
 class BillFilter(BaseModelFilterSet):
@@ -114,6 +117,17 @@ class BillViewSet(mixins.RetrieveModelMixin,
         'current_committee__name'
     )
     ordering = ('state', 'state_id', )
+
+    @list_route(methods=['POST'])
+    def parse_text(self, request):
+        input = request.data.get('input')
+        parser = InputDataParser(input)
+        bills = parser.get()
+        response = {
+            'bills': bills
+        }
+        return Response(response)
+
 
     @detail_route(methods=['GET'])
     def votes(self, request, pk=None):
