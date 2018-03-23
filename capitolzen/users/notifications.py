@@ -62,9 +62,14 @@ def email_user_page_updates(to, **extra_context):
         **extra_context
     }
 
+    kwargs = {
+        "reply_to": extra_context["author_email"]
+    }
+
     send_templated_mail(
         template_name='simple_action',
         from_email=from_email,
         recipient_list=to,
-        context=context
+        context=context,
+        **kwargs
     )
