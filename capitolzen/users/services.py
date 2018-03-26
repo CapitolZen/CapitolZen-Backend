@@ -14,6 +14,7 @@ class IntercomUserSync(object):
     intercom = None
     user = None
     user_id = None
+    is_guest = False
 
     def __init__(self):
         self.intercom = get_intercom_client()
@@ -72,6 +73,12 @@ class IntercomUserSync(object):
             self.user = User.objects.get(id=user_id)
         else:
             self.user = None
+
+        # Let's not create an intercom account for guest _only_ accounts
+        organizations = self.user.organizations_organization.all()
+        for organization in organizations:
+            if organization.is_guest(self.user) and organizations.count() > 1:
+                return {"message": "user is guest"}
 
         if operation == "create_or_update":
             return self._create_or_update()
