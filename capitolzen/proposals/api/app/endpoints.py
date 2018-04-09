@@ -381,7 +381,7 @@ class WrapperViewSet(OwnerBasedViewSet):
     filter_class = WrapperFilter
     ordering = ('bill__state', 'bill__state_id')
     ordering_fields = ('bill__updated_at',)
-    filter_backends = (WrapperFilterBackend, ) + OwnerBasedViewSet.filter_backends
+    filter_backends = (WrapperFilterBackend, )
 
     search_fields = (
         'bill__state_id',
@@ -390,9 +390,23 @@ class WrapperViewSet(OwnerBasedViewSet):
     )
 
     def get_queryset(self):
-        return Wrapper.objects.filter(
-            organization__users=self.request.user
-        )
+        queryset = Wrapper.objects.all()
+        if self.request.user.is_anonymous:
+            page = getattr(self.request, 'page', False)
+            if not page:
+                raise Exception("invalid request")
+            else:
+                return queryset.filter(
+                    group=page.group
+                )
+        else:
+            org = getattr(self.request, 'organization', False)
+            if org:
+                return queryset.filter(organization=org)
+            else:
+                return queryset.filter(
+                    organization__users=self.request.user
+                )
 
     @list_route(methods=['POST'])
     def filter_wrappers(self, request):

@@ -337,7 +337,7 @@ class UpdateViewSet(OwnerBasedViewSet):
     ordering = ['-created']
     search_fields = ('title', 'document')
     filter_class = UpdateFilterSet
-    filter_backends = OwnerBasedViewSet.filter_backends + (UpdateFilterBackend, DjangoFilterBackend)
+    filter_backends = (UpdateFilterBackend, DjangoFilterBackend)
 
 
 class LinkFilterSet(OrganizationFilterSet):

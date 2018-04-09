@@ -3,6 +3,8 @@ from string import capwords
 from datetime import datetime
 from celery import shared_task
 
+from bs4 import BeautifulSoup
+from requests import get
 
 from django.conf import settings
 
@@ -199,3 +201,20 @@ def clean_missing_sponsors():
                     bill.save()
         else:
             create_asana_task("Bill Missing History", bill.id)
+
+
+@shared_task
+def process_bill_diffs(bill_id):
+    try:
+        bill = Bill.objects.get(id=bill_id)
+        for version in bill.bill_versions:
+            url = version.get('url', None)
+            if not url:
+                return False
+
+            page = get(url)
+            soup = BeautifulSoup(page, 'html.parser')
+
+
+    except Exception:
+        return False

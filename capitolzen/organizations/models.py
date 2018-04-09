@@ -120,7 +120,11 @@ class Organization(AbstractOrganization, AbstractBaseModel):
         return request.user.is_authenticated()
 
     def has_object_read_permission(self, request):
-        print('sup 2')
+        if request.user.is_anonymous:
+            page = getattr(request, 'page', False)
+            if not page:
+                return False
+            return page.allow_anon
 
         return self.is_member(request.user) or \
             request.user.is_staff or \
