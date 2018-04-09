@@ -363,6 +363,7 @@ AUTHENTICATION_BACKENDS = [
 
 CORS_ORIGIN_WHITELIST = (
     'app.capitolzen.com',
+    'edge.capitolzen.com',
     'capitolzen.com',
     'localhost:4200',
     'localhost:3000',
