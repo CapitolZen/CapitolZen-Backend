@@ -34,6 +34,34 @@ def email_user_password_reset_request(to, **extra_context):
     )
 
 
+def email_user_magic_link(to, **extra_context):
+    if to is not list:
+        to = [to]
+
+    message = "<p>You may now login by clicking the login button below.</p>"
+    url = "%s/r?p=%s&token=%s" % (settings.APP_FRONTEND, extra_context['page_id'],  extra_context['token'])
+
+    context = {
+        "message": message,
+        "subject": "Login to access %s" % extra_context['page_title'],
+        "action_cta": "Login",
+        "action_url": url,
+        **extra_context
+    }
+
+    kwargs = {
+        "reply_to": extra_context["reply_to"]
+    }
+    from_email = '%s <hello@capitolzen.com>' % extra_context['author_name']
+    send_templated_mail(
+        template_name='simple_action',
+        from_email=from_email,
+        recipient_list=to,
+        context=context,
+        **kwargs
+    )
+
+
 def email_user_page_updates(to, **extra_context):
     """
     This email is automatically triggered to alert a guest user of a new updated post

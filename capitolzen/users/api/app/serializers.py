@@ -9,12 +9,13 @@ from rest_framework.validators import UniqueValidator
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
 
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
-from capitolzen.proposals.models import Bill, Event, Committee, Wrapper
+from capitolzen.proposals.models import Bill, Event, Wrapper
 
 from capitolzen.users.utils import token_decode, token_encode
 from capitolzen.users.notifications import email_user_password_reset_request
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import Action
+from capitolzen.users.tasks import generate_user_magic_link
 from capitolzen.organizations.services import (
     IntercomOrganizationSync,
     StripeOrganizationSync)
@@ -386,6 +387,36 @@ class GuestUserCreateSerializer(serializers.Serializer):
         group.guest_users.add(user)
         group.save()
         return user
+
+    class Meta:
+        model = User
+        fields = (
+            'name',
+            'group'
+        )
+
+
+class GuestLoginRequestSerializer(serializers.Serializer):
+    from capitolzen.groups.models import Page
+    page = serializers.PrimaryKeyRelatedField(
+        queryset=Page.objects.all(),
+        many=False
+    )
+    email = serializers.EmailField()
+
+    def save(self, **kwargs):
+        email = self.validated_data['email']
+        page = self.validated_data['page']
+        group = page.group
+
+        try:
+            user = User.objects.get(username=email)
+            if group.is_guest(user):
+                generate_user_magic_link.apply_async(args=[str(user.id), str(page.id)])
+                return True
+        except Exception:
+            # ToDo: Probably add some sort of instrumentation here
+            return True
 
     class Meta:
         model = User

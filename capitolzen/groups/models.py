@@ -50,6 +50,12 @@ class Group(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedB
     assigned_to = models.ManyToManyField(get_user_model(), related_name='assigned_to_users')
     guest_users = models.ManyToManyField(get_user_model(), related_name='guest_users_users')
 
+    def is_guest(self, user):
+        if user in self.guest_users.objects.all():
+            return True
+        else:
+            return False
+
     class JSONAPIMeta:
         resource_name = "groups"
 
