@@ -39,18 +39,18 @@ def get_page_dependencies(request):
     page_id = request.META.get('HTTP_X_PAGE')
     if page_id is None:
         return None
-
     try:
         page = Page.objects.get(id=page_id)
+        output = {
+            "page": page,
+            "group": page.group
+        }
+        if page.allow_anon:
+            return output
         if str(page.organization.id) != request.META.get('HTTP_X_ORGANIZATION'):
             return None
-        if page.visibility == 'anyone':
-            return None
         else:
-            return {
-                "page": page,
-                "group": page.group
-            }
+            return output
 
     except Exception:
         return None

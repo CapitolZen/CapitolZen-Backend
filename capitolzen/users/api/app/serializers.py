@@ -9,12 +9,13 @@ from rest_framework.validators import UniqueValidator
 from config.serializers import BaseInternalModelSerializer, RemoteFileField
 
 from capitolzen.organizations.api.app.serializers import OrganizationSerializer
-from capitolzen.proposals.models import Bill, Event, Committee, Wrapper
+from capitolzen.proposals.models import Bill, Event, Wrapper
 
 from capitolzen.users.utils import token_decode, token_encode
 from capitolzen.users.notifications import email_user_password_reset_request
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import Action
+from capitolzen.users.tasks import generate_user_magic_link
 from capitolzen.organizations.services import (
     IntercomOrganizationSync,
     StripeOrganizationSync)
@@ -211,6 +212,20 @@ class ResetPasswordRequestSerializer(serializers.Serializer):
         if user.is_staff or user.is_superuser:
             return True
 
+        # Check to make sure the user isn't _only_ a guest and actually belongs to an org
+        orgs = Organization.objects.filter(organization_users=user)
+        org_count = orgs.count()
+        if org_count < 1:
+            return True
+
+        # This is pretty confusing. but if the user is only a guest user, we don't allow them to reset their password.
+        is_not_guest = False
+        for org in orgs:
+            if not org.is_guest(user):
+                is_not_guest = True
+
+        if not is_not_guest:
+            return True
         token = token_encode(user, action='reset_password')
         email_user_password_reset_request(user.username, token=token)
         return True
@@ -386,6 +401,36 @@ class GuestUserCreateSerializer(serializers.Serializer):
         group.guest_users.add(user)
         group.save()
         return user
+
+    class Meta:
+        model = User
+        fields = (
+            'name',
+            'group'
+        )
+
+
+class GuestLoginRequestSerializer(serializers.Serializer):
+    from capitolzen.groups.models import Page
+    page = serializers.PrimaryKeyRelatedField(
+        queryset=Page.objects.all(),
+        many=False
+    )
+    email = serializers.EmailField()
+
+    def save(self, **kwargs):
+        email = self.validated_data['email']
+        page = self.validated_data['page']
+        group = page.group
+
+        try:
+            user = User.objects.get(username=email)
+            if group.is_guest(user):
+                generate_user_magic_link.delay(user_id=str(user.id), page_id=str(page.id))
+            return True
+        except Exception:
+            # ToDo: Probably add some sort of instrumentation here
+            return True
 
     class Meta:
         model = User

@@ -24,7 +24,7 @@ from capitolzen.users.api.app.serializers import (
     RegistrationSerializer, ResetPasswordRequestSerializer,
     ResetPasswordSerializer,
     ChangeUserOrganizationRoleSerializer, ChangeUserStatusSerializer, GuestUserCreateSerializer,
-    ActionSerializer, UserSerializer
+    ActionSerializer, UserSerializer, GuestLoginRequestSerializer
 )
 
 from capitolzen.users.models import User, Action
@@ -263,6 +263,17 @@ class UserViewSet(mixins.RetrieveModelMixin,
             return Response(
                 {"status": status.HTTP_400_BAD_REQUEST},
                 status=status.HTTP_400_BAD_REQUEST)
+
+    @list_route(methods=['post'],
+                  serializer_class=GuestLoginRequestSerializer,
+                  permission_classes=(AllowAny,))
+    def guest_login(self, request, id=None):
+        data = request.data
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"status": status.HTTP_200_OK})
+
 
 class ActionFilter(BaseModelFilterSet):
     group = filters.UUIDFilter(

@@ -21,7 +21,7 @@ from django.contrib.auth import get_user_model
 from config.models import AbstractBaseModel
 
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
-from capitolzen.groups.mixins import MixinResourceOwnedByPage
+from capitolzen.groups.mixins import MixinResourceModifiedByPage
 
 
 def avatar_directory_path(instance, filename):
@@ -35,7 +35,7 @@ def avatar_directory_path(instance, filename):
     return '{0}/misc/{1}'.format(instance.organization.id, filename)
 
 
-class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+class Group(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedByOrganization):
     title = models.CharField(blank=False, max_length=225)
     description = models.TextField(blank=True, null=True)
     active = models.BooleanField(default=True)
@@ -49,6 +49,9 @@ class Group(AbstractBaseModel, MixinResourcedOwnedByOrganization):
 
     assigned_to = models.ManyToManyField(get_user_model(), related_name='assigned_to_users')
     guest_users = models.ManyToManyField(get_user_model(), related_name='guest_users_users')
+
+    def is_guest(self, user):
+        return user in self.guest_users.all()
 
     class JSONAPIMeta:
         resource_name = "groups"
@@ -89,7 +92,7 @@ def prepare_report_filters(data):
 
     return output
 
-class Report(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+class Report(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedByOrganization):
     user = models.ForeignKey('users.User', blank=True)
     organization = models.ForeignKey(
         'organizations.Organization',
@@ -149,7 +152,7 @@ def file_directory_path(instance, filename):
     return '{0}/files/{1}'.format(instance.id, filename)
 
 
-class File(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+class File(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedByOrganization):
     organization = models.ForeignKey(
         'organizations.Organization', on_delete=models.CASCADE
     )
@@ -193,7 +196,7 @@ def generate_preview():
     }
 
 
-class Link(AbstractBaseModel, MixinResourcedOwnedByOrganization, MixinResourceOwnedByPage):
+class Link(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedByOrganization):
     url = models.URLField()
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     scraped_data = JSONField(default=generate_preview)
@@ -206,7 +209,7 @@ class Link(AbstractBaseModel, MixinResourcedOwnedByOrganization, MixinResourceOw
         resource_name = "links"
 
 
-class Update(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+class Update(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedByOrganization):
     user = models.ForeignKey('users.User')
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='group')
     page = models.ForeignKey('groups.Page', on_delete=models.CASCADE, related_name='update')
@@ -229,7 +232,7 @@ class Update(AbstractBaseModel, MixinResourcedOwnedByOrganization):
         resource_name = "updates"
 
 
-class Page(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+class Page(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedByOrganization):
     id = HashidAutoField(primary_key=True)
 
     organization = models.ForeignKey(
@@ -248,6 +251,9 @@ class Page(AbstractBaseModel, MixinResourcedOwnedByOrganization):
     description = models.TextField(blank=True, null=True)
     published = models.BooleanField(default=False)
 
+    @property
+    def allow_anon(self):
+        return self.visibility == 'anyone'
 
     class Meta:
         verbose_name = _("page")

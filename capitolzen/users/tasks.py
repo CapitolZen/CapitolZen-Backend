@@ -1,15 +1,19 @@
 from celery import shared_task
-import inflect
 
 from datetime import datetime, timedelta
-from django.utils import timezone
 
 from capitolzen.users.models import User, Action
 from capitolzen.users.services import IntercomUserSync
+from capitolzen.users.notifications import email_user_magic_link
+from capitolzen.users.utils import token_encode
+
 from django.conf import settings
 from templated_email import send_templated_mail
 
 from capitolzen.proposals.models import Event, Bill, Wrapper
+from capitolzen.groups.models import Page
+
+
 from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
@@ -109,3 +113,22 @@ def create_daily_summary():
 def update_user_sync():
     for user in User.objects.filter(is_active=True):
         intercom_manage_user(user.id, 'update')
+
+@shared_task
+def generate_user_magic_link(user_id, page_id):
+    try:
+        user = User.objects.get(id=user_id)
+        page = Page.objects.get(id=page_id)
+
+        extra_context = {
+            "token": token_encode(user, **{'organization_id': str(page.organization.id), 'page_id': str(page.id)}),
+            "page_title": page.title,
+            "reply_to": page.author.username,
+            "author_name": page.author.name,
+            "page_id": page_id
+        }
+        email_user_magic_link(user.username, **extra_context)
+
+
+    except Exception as e:
+        return e

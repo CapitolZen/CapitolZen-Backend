@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'update',
                 'verbose_name_plural': 'updates',
             },
-            bases=(models.Model, capitolzen.organizations.mixins.MixinResourcedOwnedByOrganization, capitolzen.groups.mixins.MixinResourceOwnedByPage),
+            bases=(models.Model, capitolzen.organizations.mixins.MixinResourcedOwnedByOrganization, capitolzen.groups.mixins.MixinResourceModifiedByPage),
         ),
         migrations.RemoveField(
             model_name='comment',

@@ -2,8 +2,7 @@ from capitolzen.users.filters import ResourceOwnerFilterBackend
 from dry_rest_permissions.generics import DRYPermissions
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework import viewsets
-from rest_framework import mixins
+from rest_framework import viewsets, mixins
 
 
 class GenericBaseViewSet(viewsets.GenericViewSet):

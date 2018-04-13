@@ -1,4 +1,3 @@
-from json import loads
 from logging import getLogger
 
 from django.db.models import Count
@@ -9,6 +8,7 @@ from rest_framework import status, exceptions
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter
 
 from dry_rest_permissions.generics import (
    DRYPermissionFiltersBase
@@ -20,7 +20,7 @@ from common.utils.filters.filters import UUIDInFilter, IntInFilter
 
 from config.viewsets import OwnerBasedViewSet
 
-from capitolzen.proposals.models import Bill, Wrapper
+from capitolzen.proposals.models import Wrapper
 from capitolzen.proposals.api.app.serializers import BillSerializer
 
 from capitolzen.groups.models import Group, Report, File, Page, Link, Update
@@ -337,7 +337,7 @@ class UpdateViewSet(OwnerBasedViewSet):
     ordering = ['-created']
     search_fields = ('title', 'document')
     filter_class = UpdateFilterSet
-    filter_backends = OwnerBasedViewSet.filter_backends + (UpdateFilterBackend, DjangoFilterBackend)
+    filter_backends = (UpdateFilterBackend, DjangoFilterBackend, OrderingFilter)
 
 
 class LinkFilterSet(OrganizationFilterSet):

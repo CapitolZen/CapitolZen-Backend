@@ -178,6 +178,10 @@ class PageSerializer(BaseInternalModelSerializer):
         many=False, queryset=get_user_model().objects, required=False
     )
 
+    visibility = serializers.ChoiceField(
+        choices=['anyone', 'organization']
+    )
+
     included_serializers = {
         'author': 'users.api.app.serializers.UserSerializer',
         'organization': AnonOrganizationSerializer,
@@ -274,4 +278,4 @@ class UpdateSerializer(BaseInternalModelSerializer):
         )
 
     class JSONAPIMeta:
-        included_resources = ['user', 'page', 'group', 'files', 'wrappers', 'wrappers.bill', 'wrappers.bill.sponsor']
+        included_resources = ['user', 'page', 'page.organization', 'group', 'files', 'wrappers', 'wrappers.bill', 'wrappers.bill.sponsor']

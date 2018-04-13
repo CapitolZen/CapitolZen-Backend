@@ -7,14 +7,13 @@ from string import capwords
 
 from django.db import models
 from django.contrib.postgres.fields import ArrayField, JSONField
-from django.conf import settings
-from django.contrib.contenttypes.fields import GenericRelation
 
 from config.models import AbstractBaseModel
 
 from model_utils import Choices
 
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
+from capitolzen.groups.mixins import MixinResourceModifiedByPage
 from capitolzen.meta.notifications import create_asana_task
 from capitolzen.proposals.mixins import MixinExternalData
 
@@ -302,7 +301,7 @@ class Event(AbstractBaseModel, MixinExternalData):
         resource_name = "events"
 
 
-class Wrapper(AbstractBaseModel, MixinResourcedOwnedByOrganization):
+class Wrapper(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedByOrganization):
     organization = models.ForeignKey(
         'organizations.Organization',
         on_delete=models.CASCADE,
