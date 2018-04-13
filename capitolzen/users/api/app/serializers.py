@@ -212,6 +212,20 @@ class ResetPasswordRequestSerializer(serializers.Serializer):
         if user.is_staff or user.is_superuser:
             return True
 
+        # Check to make sure the user isn't _only_ a guest and actually belongs to an org
+        orgs = Organization.objects.filter(organization_users=user)
+        org_count = orgs.count()
+        if org_count < 1:
+            return True
+
+        # This is pretty confusing. but if the user is only a guest user, we don't allow them to reset their password.
+        is_not_guest = False
+        for org in orgs:
+            if not org.is_guest(user):
+                is_not_guest = True
+
+        if not is_not_guest:
+            return True
         token = token_encode(user, action='reset_password')
         email_user_password_reset_request(user.username, token=token)
         return True
@@ -412,8 +426,8 @@ class GuestLoginRequestSerializer(serializers.Serializer):
         try:
             user = User.objects.get(username=email)
             if group.is_guest(user):
-                generate_user_magic_link.apply_async(args=[str(user.id), str(page.id)])
-                return True
+                generate_user_magic_link.delay(user_id=str(user.id), page_id=str(page.id))
+            return True
         except Exception:
             # ToDo: Probably add some sort of instrumentation here
             return True

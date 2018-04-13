@@ -124,11 +124,11 @@ def generate_user_magic_link(user_id, page_id):
             "token": token_encode(user, **{'organization_id': str(page.organization.id), 'page_id': str(page.id)}),
             "page_title": page.title,
             "reply_to": page.author.username,
-            "author_name": page.author.name
+            "author_name": page.author.name,
+            "page_id": page_id
         }
+        email_user_magic_link(user.username, **extra_context)
 
-        email_user_magic_link([user.username], **extra_context)
 
-
-    except Exception:
-        return "No user found"
+    except Exception as e:
+        return e

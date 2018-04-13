@@ -6,7 +6,6 @@ class MixinResourceModifiedByPage(object):
     def has_object_read_permission(self, request):
         if request.user.is_anonymous():
             page = getattr(request, 'page', None)
-            print(page)
             if not page:
                 return False
 

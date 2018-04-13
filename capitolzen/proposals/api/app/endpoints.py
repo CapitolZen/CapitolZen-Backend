@@ -367,32 +367,8 @@ class WrapperFilter(OrganizationFilterSet):
 
 class WrapperFilterBackend(DRYPermissionFiltersBase):
     def filter_list_queryset(self, request, queryset, view):
-        org = getattr(request, 'organization', None)
-        if org and org.is_admin(request.user):
-            return queryset
-        if getattr(request, 'page', False):
-            return queryset.filter(group=request.page.group)
-
-        return queryset
-
-
-class WrapperViewSet(OwnerBasedViewSet):
-    serializer_class = WrapperSerializer
-    filter_class = WrapperFilter
-    ordering = ('bill__state', 'bill__state_id')
-    ordering_fields = ('bill__updated_at',)
-    filter_backends = (WrapperFilterBackend, )
-
-    search_fields = (
-        'bill__state_id',
-        'bill__title',
-        'summary'
-    )
-
-    def get_queryset(self):
-        queryset = Wrapper.objects.all()
-        if self.request.user.is_anonymous:
-            page = getattr(self.request, 'page', False)
+        if request.user.is_anonymous:
+            page = getattr(request, 'page', False)
             if not page:
                 raise Exception("invalid request")
             else:
@@ -400,13 +376,25 @@ class WrapperViewSet(OwnerBasedViewSet):
                     group=page.group
                 )
         else:
-            org = getattr(self.request, 'organization', False)
-            if org:
-                return queryset.filter(organization=org)
-            else:
-                return queryset.filter(
-                    organization__users=self.request.user
-                )
+            org = getattr(request, 'organization', None)
+            if org.is_guest(request.user):
+                return queryset.filter(group__guest_users=request.user)
+            if org.is_admin(request.user):
+                return queryset
+
+class WrapperViewSet(OwnerBasedViewSet):
+    serializer_class = WrapperSerializer
+    filter_class = WrapperFilter
+    ordering = ('bill__state', 'bill__state_id')
+    ordering_fields = ('bill__updated_at',)
+    filter_backends = (WrapperFilterBackend, DjangoFilterBackend)
+    queryset = Wrapper.objects.all()
+
+    search_fields = (
+        'bill__state_id',
+        'bill__title',
+        'summary'
+    )
 
     @list_route(methods=['POST'])
     def filter_wrappers(self, request):
