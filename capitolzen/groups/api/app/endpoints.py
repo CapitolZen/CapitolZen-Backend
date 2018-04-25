@@ -90,6 +90,7 @@ class GroupViewSet(OwnerBasedViewSet):
     queryset = Group.objects.all()
     ordering = ('title',)
     ordering_fields = ('title', 'created', 'modified', 'active')
+    search_fields = ('title', 'description')
 
     def get_serializer_class(self):
         user = self.request.user
