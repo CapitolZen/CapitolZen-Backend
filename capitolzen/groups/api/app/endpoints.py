@@ -300,7 +300,7 @@ class PageViewSet(OwnerBasedViewSet):
     serializer_class = PageSerializer
     queryset = Page.objects.all()
     ordering = ['title']
-    search_fields = ('title', 'author__name', 'description', 'group__name')
+    search_fields = ('title', 'author__name', 'description', 'group__title')
 
 
 class UpdateFilterBackend(DRYPermissionFiltersBase):
