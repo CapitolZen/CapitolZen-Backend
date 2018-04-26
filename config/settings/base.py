@@ -366,7 +366,11 @@ CORS_ORIGIN_WHITELIST = (
     'edge.capitolzen.com',
     'capitolzen.com',
     'localhost:4200',
-    'localhost:3000',
+    'localhost:3200',
+)
+
+CORS_ORIGIN_REGEX_WHITELIST = (
+    r'.*(.netlify.com)$',
 )
 
 # methods allowed within CORS
