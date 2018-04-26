@@ -15,7 +15,7 @@ from dry_rest_permissions.generics import (
 )
 
 
-from common.utils.filters.sets import OrganizationFilterSet
+from common.utils.filters.sets import OrganizationFilterSet, GroupFilterSet
 from common.utils.filters.filters import UUIDInFilter, IntInFilter
 
 from config.viewsets import OwnerBasedViewSet
@@ -90,6 +90,7 @@ class GroupViewSet(OwnerBasedViewSet):
     queryset = Group.objects.all()
     ordering = ('title',)
     ordering_fields = ('title', 'created', 'modified', 'active')
+    search_fields = ('title', 'description')
 
     def get_serializer_class(self):
         user = self.request.user
@@ -276,21 +277,15 @@ class FileViewSet(OwnerBasedViewSet):
 
 
 
-class PageFilter(OrganizationFilterSet):
-    group = filters.CharFilter(
-        name='group',
-        label='Group',
-        help_text='Id of group',
-        lookup_expr='exact'
-    )
-
+class PageFilter(GroupFilterSet):
     class Meta:
         model = Page
         fields = {
             'group': ['exact'],
             'author': ['exact'],
             'visibility': ['exact'],
-            'published': ['exact']
+            'published': ['exact'],
+            **GroupFilterSet.Meta.fields
         }
 
 
@@ -299,7 +294,7 @@ class PageViewSet(OwnerBasedViewSet):
     serializer_class = PageSerializer
     queryset = Page.objects.all()
     ordering = ['title']
-    search_fields = ('title', 'author__name', 'description')
+    search_fields = ('title', 'author__name', 'description', 'group__title')
 
 
 class UpdateFilterBackend(DRYPermissionFiltersBase):
@@ -312,7 +307,7 @@ class UpdateFilterBackend(DRYPermissionFiltersBase):
 
         return queryset
 
-class UpdateFilterSet(OrganizationFilterSet):
+class UpdateFilterSet(GroupFilterSet):
 
     group_page = filters.CharFilter(
         method='filter_page',
@@ -328,7 +323,8 @@ class UpdateFilterSet(OrganizationFilterSet):
         fields = {
             'user': ['exact'],
             'published': ['exact'],
-            'group_page': ['exact']
+            'group_page': ['exact'],
+            **GroupFilterSet.Meta.fields
         }
 
 class UpdateViewSet(OwnerBasedViewSet):
