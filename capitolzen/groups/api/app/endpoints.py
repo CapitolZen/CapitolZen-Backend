@@ -26,7 +26,8 @@ from capitolzen.proposals.api.app.serializers import BillSerializer
 from capitolzen.groups.models import Group, Report, File, Page, Link, Update
 from capitolzen.groups.tasks import generate_report, email_report
 from capitolzen.groups.api.app.serializers import (
-    GroupSerializer, ReportSerializer, FileSerializer, PageSerializer, LinkSerializer, UpdateSerializer, AnonGroupSerializer
+    GroupSerializer, ReportSerializer, FileSerializer, PageSerializer, LinkSerializer, UpdateSerializer,
+    AnonGroupSerializer, UpdateSerializerPageable
 )
 
 logger = getLogger('app')
@@ -328,13 +329,16 @@ class UpdateFilterSet(GroupFilterSet):
         }
 
 class UpdateViewSet(OwnerBasedViewSet):
-    serializer_class = UpdateSerializer
     queryset = Update.objects.all()
     ordering = ['-created']
     search_fields = ('title', 'document')
     filter_class = UpdateFilterSet
     filter_backends = (UpdateFilterBackend, DjangoFilterBackend, OrderingFilter)
 
+    def get_serializer_class(self, *args, **kwargs):
+        if self.request.GET.get('pageable', False) in ['True', 'true', 1, '1', 'yep', 'sure']:
+            return UpdateSerializerPageable
+        return UpdateSerializer
 
 class LinkFilterSet(OrganizationFilterSet):
     class Meta:
