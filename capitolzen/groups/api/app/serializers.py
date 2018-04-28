@@ -274,8 +274,36 @@ class UpdateSerializer(BaseInternalModelSerializer):
             'files',
             'links',
             'created',
-            'modified',
+            'modified'
         )
 
     class JSONAPIMeta:
-        included_resources = ['user', 'page', 'page.organization', 'group', 'files', 'wrappers', 'wrappers.bill', 'wrappers.bill.sponsor']
+        included_resources = ['user', 'page', 'page.organization', 'group', 'files', 'wrappers', 'wrappers.bill',
+                              'wrappers.bill.sponsor']
+
+
+class UpdateSerializerPageable(UpdateSerializer):
+    next = serializers.SerializerMethodField()
+    prev = serializers.SerializerMethodField()
+
+    # Note: these are backwards because there's not a way to apply the correct descending sorting here
+    def get_next(self, obj):
+        try:
+            return obj.get_previous_by_created(page=obj.page).id
+        except:
+            return None
+
+    def get_prev(self, obj):
+        try:
+            return str(obj.get_next_by_created(page=obj.page).id)
+        except:
+            return None
+
+    class Meta(UpdateSerializer):
+        model = Update
+        fields = (
+            'prev',
+            'next',
+        ) + UpdateSerializer.Meta.fields
+
+
