@@ -286,15 +286,16 @@ class UpdateSerializerPageable(UpdateSerializer):
     next = serializers.SerializerMethodField()
     prev = serializers.SerializerMethodField()
 
+    # Note: these are backwards because there's not a way to apply the correct descending sorting here
     def get_next(self, obj):
         try:
-            return str(obj.get_next_by_created().id)
+            return obj.get_previous_by_created(page=obj.page).id
         except:
             return None
 
     def get_prev(self, obj):
         try:
-            return obj.get_previous_by_created(page=obj.page).id
+            return str(obj.get_next_by_created(page=obj.page).id)
         except:
             return None
 
