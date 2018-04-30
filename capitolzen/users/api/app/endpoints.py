@@ -37,8 +37,8 @@ class UserFilter(filters.FilterSet):
         method="filter_current"
     )
 
-    guest = filters.CharFilter(
-        method="filter_guest"
+    viewer = filters.CharFilter(
+        method="filter_viewer"
     )
 
     def filter_current(self, queryset, name, value):
@@ -47,7 +47,7 @@ class UserFilter(filters.FilterSet):
         else:
             return queryset
 
-    def filter_guest(self, queryset, name, value):
+    def filter_viewer(self, queryset, name, value):
         return queryset.filter(page_viewer_users=value)
 
     class Meta:
