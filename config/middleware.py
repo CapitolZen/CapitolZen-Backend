@@ -49,6 +49,7 @@ def get_page_dependencies(request):
             return output
         if str(page.organization.id) != request.META.get('HTTP_X_ORGANIZATION'):
             return None
+        # TODO Add access check to make sure user is "viewer" of "page"
         else:
             return output
 

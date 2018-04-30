@@ -178,8 +178,18 @@ class PageSerializer(BaseInternalModelSerializer):
         many=False, queryset=get_user_model().objects, required=False
     )
 
+    bill_layout = serializers.ChoiceField(
+        choices=['table', 'slides', 'list']
+    )
+
     visibility = serializers.ChoiceField(
         choices=['anyone', 'organization']
+    )
+
+    viewers = ResourceRelatedField(
+        queryset=get_user_model().objects,
+        many=True,
+        required=False
     )
 
     included_serializers = {
@@ -201,7 +211,11 @@ class PageSerializer(BaseInternalModelSerializer):
             'published',
             'organization',
             'group',
-            'author'
+            'author',
+            'bill_layout',
+            'avatar',
+            'viewers',
+            'structured_page_info'
         )
         read_only_fields = ('id',)
 

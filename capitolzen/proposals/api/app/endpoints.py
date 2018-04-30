@@ -378,7 +378,7 @@ class WrapperFilterBackend(DRYPermissionFiltersBase):
         else:
             org = getattr(request, 'organization', None)
             if org.is_guest(request.user):
-                return queryset.filter(group__guest_users=request.user)
+                return queryset.filter(group__page__viewers=request.user)
             if org.is_admin(request.user):
                 return queryset
 

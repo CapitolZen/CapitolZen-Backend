@@ -62,7 +62,7 @@ def create_daily_summary():
     today = datetime.today()
     yesterday = today - timedelta(days=1)
 
-    for user in User.objects.filter(is_active=True):
+    for user in User.objects.filter(is_active=True, page_viewer_users=None):
 
         bill_count = Bill.objects.filter(created__gt=yesterday).count()
 

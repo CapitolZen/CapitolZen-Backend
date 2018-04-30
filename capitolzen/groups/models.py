@@ -232,6 +232,16 @@ class Update(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwned
         resource_name = "updates"
 
 
+def create_structured_page_info():
+    return {
+        "objectives": [],
+        "social_links": [],
+        "newsletter": {
+            "provider": None,
+            "id": None
+        }
+    }
+
 class Page(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedByOrganization):
     id = HashidAutoField(primary_key=True)
 
@@ -247,9 +257,28 @@ class Page(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedBy
     )
     visibility = models.CharField(choices=usage_choices, default='organization', db_index=True, max_length=255)
 
+    viewers = models.ManyToManyField(get_user_model(), related_name='page_viewer_users')
+
     title = models.CharField(max_length=255, default='My Group Page')
     description = models.TextField(blank=True, null=True)
     published = models.BooleanField(default=False)
+
+    bill_layout_choices = Choices(
+        ('table', 'Table'),
+        ('slides', 'slides'),
+        ('list', 'list')
+    )
+
+    bill_layout = models.CharField(choices=bill_layout_choices, default='table', max_length=255)
+
+    avatar = models.FileField(
+        blank=True, null=True, max_length=255, upload_to=avatar_directory_path
+    )
+
+    structured_page_info = JSONField(default=create_structured_page_info)
+
+    def is_viewer(self, user):
+        return user in self.viewers.all()
 
     @property
     def allow_anon(self):
