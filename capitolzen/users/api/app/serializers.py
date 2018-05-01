@@ -1,4 +1,4 @@
-from capitolzen.groups.models import Group
+from capitolzen.groups.models import Group, Page
 
 from django.contrib.auth import get_user_model
 
@@ -382,7 +382,10 @@ class GuestUserCreateSerializer(serializers.Serializer):
     name = serializers.CharField()
 
     # I don't know why, but setting this to be a pk related field errors...
-    group = serializers.CharField()
+    page = serializers.PrimaryKeyRelatedField(
+        queryset=Page.objects.all(),
+        many=False
+    )
 
     def save(self, **kwargs):
         email = self.validated_data['email']
@@ -397,9 +400,9 @@ class GuestUserCreateSerializer(serializers.Serializer):
 
         user.save()
         org_user.save()
-        group = Group.objects.get(id=self.validated_data['group'])
-        group.guest_users.add(user)
-        group.save()
+        page = self.validated_data['page']
+        page.viewers.add(user)
+        page.save()
         return user
 
     class Meta:
@@ -411,7 +414,6 @@ class GuestUserCreateSerializer(serializers.Serializer):
 
 
 class GuestLoginRequestSerializer(serializers.Serializer):
-    from capitolzen.groups.models import Page
     page = serializers.PrimaryKeyRelatedField(
         queryset=Page.objects.all(),
         many=False
