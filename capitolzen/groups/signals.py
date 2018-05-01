@@ -4,7 +4,7 @@ from .models import Group, Update
 from django.conf import settings
 from django.db import transaction
 from capitolzen.organizations.tasks import intercom_update_organization_attributes
-from capitolzen.groups.tasks import notify_group_guests_of_update
+from capitolzen.groups.tasks import notify_page_viewers_of_update
 
 @receiver(post_save, sender=Group)
 def update_group_count(sender, **kwargs):
@@ -24,5 +24,5 @@ def send_update_notifications(sender, **kwargs):
 
     if created:
         transaction.on_commit(
-            lambda: notify_group_guests_of_update.apply_async(args=[str(update.id)])
+            lambda: notify_page_viewers_of_update.apply_async(args=[str(update.id)])
         )
