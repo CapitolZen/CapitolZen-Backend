@@ -101,7 +101,7 @@ def update_report_docs(report, new_url):
 
 
 @shared_task
-def notify_group_guests_of_update(update_id):
+def notify_page_viewers_of_update(update_id):
     update = Update.objects.get(id=update_id)
     context = {
         'author_name': update.user.name,
@@ -113,7 +113,7 @@ def notify_group_guests_of_update(update_id):
         'update_title': update.title,
     }
 
-    for user in update.group.guest_users.filter(is_active=True):
+    for user in update.page.viewers.filter(is_active=True):
         token = token_encode(user, **{'organization_id': str(update.organization.id), 'page_id': str(update.page.id), 'update_id': str(update.id)})
         context['token'] = token
         email_user_page_updates(user.username, **context)

@@ -37,8 +37,8 @@ class UserFilter(filters.FilterSet):
         method="filter_current"
     )
 
-    guest = filters.CharFilter(
-        method="filter_guest"
+    viewer = filters.CharFilter(
+        method="filter_viewer"
     )
 
     def filter_current(self, queryset, name, value):
@@ -47,8 +47,8 @@ class UserFilter(filters.FilterSet):
         else:
             return queryset
 
-    def filter_guest(self, queryset, name, value):
-        return queryset.filter(guest_users_users=value)
+    def filter_viewer(self, queryset, name, value):
+        return queryset.filter(page_viewer_users=value)
 
     class Meta:
         model = User
@@ -68,7 +68,7 @@ class UserFilterBackend(DRYPermissionFiltersBase):
         if hasattr(request, 'organization') and request.organization:
             qs = queryset.filter(organizations_organization=request.organization)
             if not request.GET.get('guest', None) and not request.GET.get('current', False):
-                qs = qs.filter(guest_users_users=None)
+                qs = qs.filter(page_viewer_users=None)
             return qs
 
         if request.user.is_superuser or request.user.is_staff:

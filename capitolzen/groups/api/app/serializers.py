@@ -175,17 +175,29 @@ class PageSerializer(BaseInternalModelSerializer):
     )
 
     author = ResourceRelatedField(
-        many=False, queryset=get_user_model().objects, required=False
+        many=False, queryset=get_user_model().objects
+    )
+
+    bill_layout = serializers.ChoiceField(
+        choices=['table', 'slides', 'list'],
+        required=False
     )
 
     visibility = serializers.ChoiceField(
         choices=['anyone', 'organization']
     )
 
+    viewers = ResourceRelatedField(
+        queryset=get_user_model().objects,
+        many=True,
+        required=False
+    )
+
     included_serializers = {
         'author': 'users.api.app.serializers.UserSerializer',
         'organization': AnonOrganizationSerializer,
         'group': AnonGroupSerializer,
+        'viewers': 'users.api.app.serializers.UserSerializer'
     }
 
     class Meta:
@@ -201,12 +213,16 @@ class PageSerializer(BaseInternalModelSerializer):
             'published',
             'organization',
             'group',
-            'author'
+            'author',
+            'bill_layout',
+            'avatar',
+            'viewers',
+            'structured_page_info'
         )
         read_only_fields = ('id',)
 
     class JSONAPIMeta:
-       included_resources = ['author', 'organization', 'group']
+       included_resources = ['author', 'organization', 'group', 'viewers']
 
 
 class LinkSerializer(BaseInternalModelSerializer):
