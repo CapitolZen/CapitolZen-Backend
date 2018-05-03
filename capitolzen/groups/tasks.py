@@ -4,12 +4,12 @@ from celery import shared_task
 from django.conf import settings
 from django.utils.text import slugify
 
-from capitolzen.meta.clients import aws_client
+from capitolzen.meta.clients import aws_client, filepreviews_client
 from capitolzen.meta.notifications import email_user_report_link
 from capitolzen.proposals.models import Wrapper
 from capitolzen.proposals.utils import normalize_bill_data
 from capitolzen.users.models import User
-from capitolzen.groups.models import Report, Update
+from capitolzen.groups.models import Report, Update, File
 from capitolzen.users.utils import token_encode
 from capitolzen.users.notifications import email_user_page_updates
 
@@ -117,3 +117,12 @@ def notify_page_viewers_of_update(update_id):
         token = token_encode(user, **{'organization_id': str(update.organization.id), 'page_id': str(update.page.id), 'update_id': str(update.id)})
         context['token'] = token
         email_user_page_updates(user.username, **context)
+
+
+@shared_task
+def request_filepreview(file_id, url):
+    fp = filepreviews_client()
+    file = File.objects.get(id=file_id)
+    results = fp.generate(url)
+
+    file.set_preview(preview=results.__dict__)

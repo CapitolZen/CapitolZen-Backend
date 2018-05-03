@@ -1,7 +1,7 @@
 from boto3 import client
 from django.conf import settings
 from asana import Client
-
+from filepreviews import FilePreviews
 
 def aws_client(service='lambda'):
     bclient = client(
@@ -56,3 +56,7 @@ class DocManager:
             Conditions=conditions
         )
         return data
+
+
+def filepreviews_client():
+    return FilePreviews(api_key=settings.FILEPREVIEW_APIKEY, api_secret=settings.FILEPREVIEW_SECRET)

@@ -10,6 +10,7 @@ from capitolzen.organizations.api.app.serializers import OrganizationSerializer,
 from capitolzen.proposals.models import Wrapper
 
 from capitolzen.groups.models import Group, Report, File, Page, Link, Update
+from capitolzen.groups.tasks import request_filepreview
 
 
 class GroupSerializer(BaseInternalModelSerializer):
@@ -162,6 +163,9 @@ class FileSerializer(BaseInternalModelSerializer):
                   'group')
         read_only_fields = ('id',)
 
+    def save(self, **kwargs):
+        super().save()
+        request_filepreview.delay(file_id=str(self.instance.id), url=self.instance.file.url)
 
 class PageSerializer(BaseInternalModelSerializer):
     id = HashidSerializerCharField(source_field='groups.Page.id', required=False)
