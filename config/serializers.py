@@ -98,7 +98,6 @@ class RemoteFileField(serializers.Field):
 
         info = self._parse_incoming_file_data(data)
         instance = self.parent.instance
-        print(self)
 
         source = {
             'key': info['file'],

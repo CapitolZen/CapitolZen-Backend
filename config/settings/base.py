@@ -583,6 +583,11 @@ REST_PROXY = {
     'ACCEPT_MAPS': {'text/html': 'application/json'}
 }
 
+# FilePreviews.io
+FILEPREVIEW_APIKEY = env("FILEPREVIEW_APIKEY", default=None)
+FILEPREVIEW_SECRET = env("FILEPREVIEW_SECRET", default=None)
+
+
 # Summarizing & URL Blocking
 # -----------------------------------------------------------------------------
 DEFAULT_SENTENCE_COUNT = 7

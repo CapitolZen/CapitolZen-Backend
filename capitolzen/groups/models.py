@@ -179,6 +179,17 @@ class File(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedBy
         choices=visibility_choices, max_length=225, default='org', db_index=True
     )
 
+    def set_preview(self, preview):
+        if not preview.get("status", None):
+            preview["status"] = "pending"
+
+        metadata = getattr(self, "metadata")
+        if not metadata:
+            metadata = {}
+        metadata["preview"] = preview
+        self.metadata = metadata
+        self.save()
+
     class Meta:
         verbose_name = _("file")
         verbose_name_plural = _("files")
