@@ -40,6 +40,11 @@ class BillFilter(BaseModelFilterSet):
     sponsor_name = filters.CharFilter(
         name='sponsor__name', method='sponsor_full_name'
     )
+
+    sponsor_party = filters.CharFilter(
+        name='sponsor__party',
+        lookup_expr=['icontains']
+    )
     state = filters.CharFilter(
         name='state',
         lookup_expr=['exact', 'contains'],
@@ -72,7 +77,7 @@ class BillFilter(BaseModelFilterSet):
     )
 
     def sponsor_full_name(self, queryset, name, value):
-        return queryset.filter(Q(sponsor__first_name__contains=value) | Q(sponsor__last_name__contains=value))
+        return queryset.filter(Q(sponsor__first_name__icontains=value) | Q(sponsor__last_name__icontains=value))
 
     def action_date_filter(self, queryset, name, value):
         today = datetime.today()
