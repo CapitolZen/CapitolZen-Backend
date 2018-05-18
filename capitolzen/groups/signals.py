@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import Group, Update
+from .models import Group, Update, Link
 from django.conf import settings
 from django.db import transaction
 from capitolzen.organizations.tasks import intercom_update_organization_attributes
@@ -26,3 +26,8 @@ def send_update_notifications(sender, **kwargs):
         transaction.on_commit(
             lambda: notify_page_viewers_of_update.apply_async(args=[str(update.id)])
         )
+
+
+@receiver(post_save, sender=Link)
+def create_link_preview(sender, **kwargs):
+    link = kwargs.get('instance')

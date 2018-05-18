@@ -195,6 +195,7 @@ class WrapperSerializer(BaseInternalModelSerializer):
         'bill': BillSerializer,
         'bill.sponsor': LegislatorSerializer,
         'group': GroupSerializer,
+        'bill.current_committee': CommitteeSerializer
     }
 
     bill = ResourceRelatedField(
@@ -239,7 +240,7 @@ class WrapperSerializer(BaseInternalModelSerializer):
         )
 
     class JSONAPIMeta:
-        included_resources = ['bill', 'bill.sponsor', 'group']
+        included_resources = ['bill', 'bill.sponsor', 'group', 'bill.current_committee']
 
     def create(self, validated_data):
         """
