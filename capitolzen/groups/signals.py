@@ -26,8 +26,3 @@ def send_update_notifications(sender, **kwargs):
         transaction.on_commit(
             lambda: notify_page_viewers_of_update.apply_async(args=[str(update.id)])
         )
-
-
-@receiver(post_save, sender=Link)
-def create_link_preview(sender, **kwargs):
-    link = kwargs.get('instance')
