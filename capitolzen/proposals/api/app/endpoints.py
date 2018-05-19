@@ -398,7 +398,10 @@ class WrapperViewSet(OwnerBasedViewSet):
     search_fields = (
         'bill__state_id',
         'bill__title',
-        'summary'
+        'summary',
+        'bill__sponsor__last_name',
+        'bill__sponsor__first_name',
+        'bill__current_committee__name'
     )
 
     @list_route(methods=['POST'])

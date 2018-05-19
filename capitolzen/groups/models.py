@@ -200,18 +200,28 @@ class File(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedBy
 
 def generate_preview():
     return {
-        "preview": None,
+        "preview_img": None,
         "summary": None,
         "pubname": None,
-        "keywords": []
+        "keywords": None,
+        "text": None,
+        "title": None,
+        "publish_date": None
     }
 
 
 class Link(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedByOrganization):
     url = models.URLField()
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    organization = models.ForeignKey('organizations.Organization', null=True, blank=True, on_delete=models.CASCADE)
     scraped_data = JSONField(default=generate_preview)
     page = models.ForeignKey('groups.Page', on_delete=models.CASCADE)
+
+    def set_preview_by_prop(self, prop, value):
+        previews = self.scraped_data
+        previews[prop] = value
+        self.scraped_data = previews
+
     class Meta:
         verbose_name = _("link")
         verbose_name_plural = _("links")

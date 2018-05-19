@@ -3,13 +3,14 @@ from json import dumps, loads
 from celery import shared_task
 from django.conf import settings
 from django.utils.text import slugify
+from goose3 import Goose
 
 from capitolzen.meta.clients import aws_client, filepreviews_client
 from capitolzen.meta.notifications import email_user_report_link
 from capitolzen.proposals.models import Wrapper
 from capitolzen.proposals.utils import normalize_bill_data
 from capitolzen.users.models import User
-from capitolzen.groups.models import Report, Update, File
+from capitolzen.groups.models import Report, Update, File, Link
 from capitolzen.users.utils import token_encode
 from capitolzen.users.notifications import email_user_page_updates
 
@@ -126,3 +127,27 @@ def request_filepreview(file_id, url):
     results = fp.generate(url)
 
     file.set_preview(preview=results.__dict__)
+
+
+@shared_task
+def generate_link_previews(link_id):
+    try:
+        link = Link.objects.get(id=link_id)
+        g = Goose()
+        article = g.extract(link.url)
+
+        data = {
+            "preview_img": article.top_image.src,
+            "summary": article.meta_description,
+            "title": article.title,
+            "publish_date": article.publish_date,
+            "text": article.cleaned_text,
+            "pubname": article.opengraph.get('site_name'),
+            "keywords": article.keywords
+        }
+
+        link.scraped_data = data
+        link.save()
+
+    except Exception:
+        return False
