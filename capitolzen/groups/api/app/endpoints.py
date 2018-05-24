@@ -27,7 +27,7 @@ from capitolzen.groups.models import Group, Report, File, Page, Link, Update
 from capitolzen.groups.tasks import generate_report, email_report
 from capitolzen.groups.api.app.serializers import (
     GroupSerializer, ReportSerializer, FileSerializer, PageSerializer, LinkSerializer, UpdateSerializer,
-    AnonGroupSerializer, UpdateSerializerPageable
+    AnonGroupSerializer, UpdateSerializerPageable, GeneratedReportDownloadSerializer
 )
 
 logger = getLogger('app')
@@ -246,6 +246,27 @@ class ReportViewSet(OwnerBasedViewSet):
             "status_code": status.HTTP_200_OK,
             "message": "Report hopefully emailed"
         })
+
+    @list_route(methods=['POST'], serializer_class=GeneratedReportDownloadSerializer)
+    def generate(self, request):
+        self.check_permissions(request)
+        data = request.data
+        data['organization'] = str(request.organization.id)
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        url = serializer.save()
+        print(url)
+        if url:
+            return Response({
+                "message": "report generated",
+                "url": url,
+                "status_code": status.HTTP_200_OK
+            })
+        else:
+            return Response({
+                "message": "error generating report",
+                "status_code": status.HTTP_400_BAD_REQUEST
+            })
 
 
 class FileFilter(OrganizationFilterSet):

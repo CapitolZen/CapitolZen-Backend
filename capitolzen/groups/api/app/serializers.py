@@ -11,6 +11,7 @@ from capitolzen.proposals.models import Wrapper
 
 from capitolzen.groups.models import Group, Report, File, Page, Link, Update
 from capitolzen.groups.tasks import request_filepreview
+from capitolzen.proposals.service import GenerateReport
 
 
 class GroupSerializer(BaseInternalModelSerializer):
@@ -55,7 +56,7 @@ class GroupSerializer(BaseInternalModelSerializer):
         read_only_fields = ('id', 'created')
 
     class JSONAPIMeta:
-       included_resources = ['organization', 'assigned_to', 'guest_users']
+        included_resources = ['organization', 'assigned_to', 'guest_users']
 
 
 class AnonGroupSerializer(BaseInternalModelSerializer):
@@ -88,7 +89,7 @@ class AnonGroupSerializer(BaseInternalModelSerializer):
         read_only_fields = ('id', 'created')
 
     class JSONAPIMeta:
-       included_resources = ['organization', 'assigned_to']
+        included_resources = ['organization', 'assigned_to']
 
 
 class ReportSerializer(BaseInternalModelSerializer):
@@ -129,8 +130,31 @@ class ReportSerializer(BaseInternalModelSerializer):
         )
 
     class JSONAPIMeta:
-       included_resources = ['user', 'group']
+        included_resources = ['user', 'group']
 
+
+class GeneratedReportDownloadSerializer(serializers.Serializer):
+    """
+    Serializer to automatically generate a downloadable report for a list of
+    Saved bills
+    """
+    title = serializers.CharField()
+    organization = serializers.PrimaryKeyRelatedField(queryset=Organization.objects.get_queryset(), many=False)
+    group = serializers.PrimaryKeyRelatedField(queryset=Group.objects.all(), many=False)
+
+    def save(self, **kwargs):
+        org_id = str(self.validated_data['organization'].id)
+        title = self.validated_data['title']
+        url = GenerateReport(
+            org_id=org_id,
+            group_id=str(self.validated_data['group'].id)
+        ).from_group(
+            str(self.validated_data['group'].id),
+            title)
+        return url
+
+    class Meta:
+        model = Group
 
 
 class FileSerializer(BaseInternalModelSerializer):
@@ -166,6 +190,7 @@ class FileSerializer(BaseInternalModelSerializer):
     def save(self, **kwargs):
         super().save()
         request_filepreview.delay(file_id=str(self.instance.id), url=self.instance.file.url)
+
 
 class PageSerializer(BaseInternalModelSerializer):
     id = HashidSerializerCharField(source_field='groups.Page.id', required=False)
@@ -226,7 +251,7 @@ class PageSerializer(BaseInternalModelSerializer):
         read_only_fields = ('id',)
 
     class JSONAPIMeta:
-       included_resources = ['author', 'organization', 'group', 'viewers']
+        included_resources = ['author', 'organization', 'group', 'viewers']
 
 
 class LinkSerializer(BaseInternalModelSerializer):
@@ -253,7 +278,6 @@ class LinkSerializer(BaseInternalModelSerializer):
         included_resources = ['page', 'group']
 
 
-
 class UpdateSerializer(BaseInternalModelSerializer):
     user = ResourceRelatedField(
         many=False,
@@ -269,7 +293,8 @@ class UpdateSerializer(BaseInternalModelSerializer):
     }
 
     group = ResourceRelatedField(many=False, queryset=Group.objects)
-    page = ResourceRelatedField(pk_field=HashidSerializerCharField(source_field='groups.Page.id'), queryset=Page.objects.all(), many=False)
+    page = ResourceRelatedField(pk_field=HashidSerializerCharField(source_field='groups.Page.id'),
+                                queryset=Page.objects.all(), many=False)
     organization = ResourceRelatedField(many=False, queryset=Organization.objects)
     files = ResourceRelatedField(many=True, queryset=File.objects, required=False)
     links = ResourceRelatedField(many=True, queryset=Link.objects, required=False)
@@ -322,8 +347,6 @@ class UpdateSerializerPageable(UpdateSerializer):
     class Meta(UpdateSerializer):
         model = Update
         fields = (
-            'prev',
-            'next',
-        ) + UpdateSerializer.Meta.fields
-
-
+                     'prev',
+                     'next',
+                 ) + UpdateSerializer.Meta.fields
