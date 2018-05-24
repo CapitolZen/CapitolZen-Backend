@@ -48,7 +48,10 @@ class UserFilter(filters.FilterSet):
             return queryset
 
     def filter_viewer(self, queryset, name, value):
-        return queryset.filter(page_viewer_users=value)
+        if value:
+            return queryset.filter(page_viewer_users=value)
+        else:
+            return queryset.filter(page_viewer_users__isnull=True)
 
     class Meta:
         model = User
