@@ -11,9 +11,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 
 from dry_rest_permissions.generics import (
-   DRYPermissionFiltersBase
+    DRYPermissionFiltersBase
 )
-
 
 from common.utils.filters.sets import OrganizationFilterSet, GroupFilterSet
 from common.utils.filters.filters import UUIDInFilter, IntInFilter
@@ -34,7 +33,6 @@ logger = getLogger('app')
 
 
 class GroupFilter(OrganizationFilterSet):
-
     starred = filters.BooleanFilter(
         name='starred',
         label="Starred",
@@ -103,7 +101,6 @@ class GroupViewSet(OwnerBasedViewSet):
 
         return GroupSerializer
 
-
     @list_route(methods=['GET'], serializer_class=BillSerializer)
     def bills(self, request):
         # TODO do we want to grab bills for a single group or is this meant
@@ -135,11 +132,11 @@ class GroupViewSet(OwnerBasedViewSet):
         neutral = all_saved.filter(position='neutral').count()
         noposition = all_saved.filter(position='none').count()
 
-        committee_bill_query = Wrapper.objects.filter(group=group)\
-            .values('bill__current_committee__id', 'bill__current_committee__name', 'bill__current_committee__chamber')\
-            .annotate(num_vals=Count('id'))\
-            .order_by('-num_vals')[:5]
-
+        committee_bill_query = Wrapper.objects.filter(group=group) \
+                                   .values('bill__current_committee__id', 'bill__current_committee__name',
+                                           'bill__current_committee__chamber') \
+                                   .annotate(num_vals=Count('id')) \
+                                   .order_by('-num_vals')[:5]
 
         top_committees = []
         for cmte in committee_bill_query:
@@ -163,6 +160,7 @@ class GroupViewSet(OwnerBasedViewSet):
             'none_count': noposition
         }
         return Response({"status_code": status.HTTP_200_OK, "stats": data})
+
 
 class ReportFilter(OrganizationFilterSet):
     user = filters.CharFilter(
@@ -276,6 +274,7 @@ class FileFilter(OrganizationFilterSet):
         help_text='Id of group',
         lookup_expr='exact'
     )
+
     class Meta:
         model = File
         fields = {
@@ -296,7 +295,6 @@ class FileViewSet(OwnerBasedViewSet):
     ordering = ['name']
     ordering_fields = ['created', 'modified']
     search_fields = ('file', 'name', 'description')
-
 
 
 class PageFilter(GroupFilterSet):
@@ -329,8 +327,8 @@ class UpdateFilterBackend(DRYPermissionFiltersBase):
 
         return queryset
 
-class UpdateFilterSet(GroupFilterSet):
 
+class UpdateFilterSet(GroupFilterSet):
     group_page = filters.CharFilter(
         method='filter_page',
         lookup_expr='exact',
@@ -349,6 +347,7 @@ class UpdateFilterSet(GroupFilterSet):
             **GroupFilterSet.Meta.fields
         }
 
+
 class UpdateViewSet(OwnerBasedViewSet):
     queryset = Update.objects.all()
     ordering = ['-created']
@@ -360,6 +359,7 @@ class UpdateViewSet(OwnerBasedViewSet):
         if self.request.GET.get('pageable', False) in ['True', 'true', 1, '1', 'yep', 'sure']:
             return UpdateSerializerPageable
         return UpdateSerializer
+
 
 class LinkFilterSet(OrganizationFilterSet):
     class Meta:
