@@ -9,7 +9,7 @@ django-redis==4.8.0
 redis>=2.10.5
 requests==2.18.4
 psycopg2==2.7.3.2
-celery[redis]==4.1.0
+celery[redis]==4.1.1
 boto3==1.5.6
 ipython==6.2.1
 stripe==1.62.0
