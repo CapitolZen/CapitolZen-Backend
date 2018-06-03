@@ -184,8 +184,9 @@ class FileSerializer(BaseInternalModelSerializer):
                   'name',
                   'file',
                   'description',
-                  'group')
-        read_only_fields = ('id',)
+                  'group',
+                  'preview_url')
+        read_only_fields = ('id', 'preview_url')
 
     def save(self, **kwargs):
         super().save()

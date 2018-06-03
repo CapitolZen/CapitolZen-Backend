@@ -1,24 +1,24 @@
 from __future__ import unicode_literals
 from json import loads
 
-from base64 import b64decode
+from hashid_field import HashidAutoField
 
 from django.db import models
-from django.contrib.postgres.fields import JSONField, ArrayField
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.postgres.fields import JSONField
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 from django_fsm import FSMField, transition
 from model_utils import Choices
 
-from hashid_field import HashidAutoField
+
+from config.models import AbstractBaseModel
+from capitolzen.utils.s3 import generate_s3_url
 
 from capitolzen.organizations.models import Organization
 from capitolzen.users.models import User
 from django.contrib.auth import get_user_model
-
-from config.models import AbstractBaseModel
 
 from capitolzen.organizations.mixins import MixinResourcedOwnedByOrganization
 from capitolzen.groups.mixins import MixinResourceModifiedByPage
@@ -178,6 +178,23 @@ class File(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedBy
     visibility = models.CharField(
         choices=visibility_choices, max_length=225, default='org', db_index=True
     )
+
+    @property
+    def preview_url(self):
+        metadata = self.metadata.get("preview", False)
+        if metadata.get("preview"):
+            if metadata["status"] == "success":
+                path = metadata["preview"]["url"]
+                # One liner so we don't deal with staging vs non staging envs
+                if "io-filepreviews-sandbox-uploads" in path:
+                    return False
+                parts = path.split(settings.AWS_BUCKET_NAME)
+                key = parts[0]
+                return generate_s3_url(key)
+            else:
+                return False
+        else:
+            return False
 
     def set_preview(self, preview):
         if not preview.get("status", None):

@@ -54,3 +54,14 @@ def copy_s3_object(source,
         logger.info(json.dumps(e.__dict__))
         if raise_exceptions:
             raise ValueError('error occurred during copy_s3_object')
+
+
+def generate_s3_url(key, bucket=settings.AWS_BUCKET_NAME):
+    s3 = get_s3_client()
+    return s3.generate_presigned_url(
+        ClientMethod='get_object',
+        Params={
+            'Bucket': bucket,
+            'Key': key
+        }
+    )
