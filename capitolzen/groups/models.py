@@ -188,7 +188,7 @@ class File(AbstractBaseModel, MixinResourceModifiedByPage, MixinResourcedOwnedBy
                 # One liner so we don't deal with staging vs non staging envs
                 if "io-filepreviews-sandbox-uploads" in path:
                     return False
-                parts = path.split(settings.AWS_BUCKET_NAME)
+                parts = path.split(settings.AWS_BUCKET_NAME + "/")
                 key = parts[1]
                 return generate_s3_url(key)
             else:
