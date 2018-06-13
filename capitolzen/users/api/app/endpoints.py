@@ -41,6 +41,11 @@ class UserFilter(filters.FilterSet):
         method="filter_viewer"
     )
 
+    is_active = filters.BooleanFilter(
+        name="is_active",
+        label="is_active"
+    )
+
     def filter_current(self, queryset, name, value):
         if value:
             return queryset.filter(id=self.request.user.id)
@@ -51,7 +56,7 @@ class UserFilter(filters.FilterSet):
         if value:
             return queryset.filter(page_viewer_users=value)
         else:
-            return queryset.filter(page_viewer_users__isnull=True)
+            return queryset.filter(page_viewer_users=None)
 
     class Meta:
         model = User
