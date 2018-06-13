@@ -9,6 +9,7 @@ from django.dispatch import receiver
 from capitolzen.proposals.models import Bill, Event, Wrapper
 from capitolzen.users.models import User, Action
 from capitolzen.groups.models import Group
+from capitolzen.organizations. models import Organization
 
 
 
@@ -18,15 +19,18 @@ from capitolzen.groups.models import Group
 
 
 def _create_introduction_actions(bill):
-    for user in User.objects.filter(is_active=True, notification_preferences__bill_introduced=True):
-        a = Action.objects.create(
-            user=user,
-            bill=bill,
-            title='bill:introduced',
-            priority=0
-        )
+    for org in Organization.objects.filter(is_active=True):
+        for user in org.users.filter(is_active=True):
+            if not org.is_guest(user):
+                a = Action.objects.create(
+                    user=user,
+                    bill=bill,
+                    title='bill:introduced',
+                    priority=0
+                )
 
-        a.save()
+                a.save()
+
 
 def _create_bill_update_action(bill):
     yesterday = datetime.today() - timedelta(days=1)
